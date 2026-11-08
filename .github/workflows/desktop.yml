@@ -1,0 +1,102 @@
+name: Desktop
+
+on:
+  pull_request:
+    paths:
+      - packages/apps/desktop/**
+      - packages/apps/studio/**
+      - packages/infra/agent/**
+      - packages/shared/**
+      - pnpm-lock.yaml
+      - .github/workflows/desktop.yml
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'release' && 'release' || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    permissions:
+      contents: write
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/apps/desktop
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+          cache: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: install — frozen lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: typecheck
+        run: pnpm typecheck
+
+      - name: lint
+        run: pnpm lint
+
+      - name: package
+        if: github.event_name == 'pull_request'
+        run: pnpm dist --publish never
+
+      - uses: actions/upload-artifact@v7
+        if: github.event_name == 'pull_request'
+        with:
+          name: lammps-studio-${{ runner.os }}
+          path: |
+            packages/apps/desktop/release/*.dmg
+            packages/apps/desktop/release/*.exe
+            packages/apps/desktop/release/*.AppImage
+            packages/apps/desktop/release/*.deb
+          retention-days: 7
+
+      - name: read the release version
+        if: github.event_name == 'release'
+        run: echo "VERSION=${RELEASE_TAG#[vV]}" >> "$GITHUB_ENV"
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+
+      - name: package for release
+        if: github.event_name == 'release'
+        run: |
+          if [ "$RUNNER_OS" = macOS ] && [ -n "$MAC_CERTIFICATE" ]; then
+            export CSC_LINK="$MAC_CERTIFICATE" CSC_KEY_PASSWORD="$MAC_CERTIFICATE_PASSWORD"
+          fi
+          pnpm dist --publish never -c.extraMetadata.version="$VERSION"
+        env:
+          MAC_CERTIFICATE: ${{ secrets.MAC_CERTIFICATE }}
+          MAC_CERTIFICATE_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: attach the installers to the release
+        if: github.event_name == 'release'
+        run: |
+          shopt -s nullglob
+          installers=(release/*.dmg release/*.exe release/*.AppImage release/*.deb)
+          gh release upload "$RELEASE_TAG" "${installers[@]}" --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
