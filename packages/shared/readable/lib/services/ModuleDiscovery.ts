@@ -14,6 +14,10 @@ export interface Discovered{
     gateways: Array<new () => BaseGateway>;
 }
 
+interface DefaultExport<T>{
+    default?: T;
+}
+
 export default class ModuleDiscovery{
     constructor(private readonly modulesDir: string){}
 
@@ -53,7 +57,7 @@ export default class ModuleDiscovery{
         const loaded: T[] = [];
         for(const file of files.sort()){
             if(!file.endsWith('.ts') || file.endsWith('.d.ts')) continue;
-            const imported = await import(pathToFileURL(join(dir, file)).href) as { default?: T };
+            const imported = await import(pathToFileURL(join(dir, file)).href) as DefaultExport<T>;
             if(imported.default) loaded.push(imported.default);
         }
         return loaded;
