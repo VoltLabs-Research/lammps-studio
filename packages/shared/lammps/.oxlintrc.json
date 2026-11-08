@@ -1,0 +1,19 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "oxc", "unicorn"],
+    "rules": {
+        "unicorn/filename-case": ["error", {
+            "case": "kebabCase",
+            "ignore": ["^[A-Z]"]
+        }],
+        "no-restricted-imports": ["error", {
+            "patterns": [{
+                "regex": "^@/",
+                "message": "Shared packages are consumed from source; use relative imports."
+            }, {
+                "regex": "^node:",
+                "message": "@lammps-studio/lammps runs in the browser too; keep it free of Node APIs."
+            }]
+        }]
+    }
+}

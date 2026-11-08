@@ -1,0 +1,38 @@
+LAMMPS (22 Jul 2025 - Update 1)
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+Created orthogonal box = (0 0 0) to (13.43677 13.43677 13.43677)
+  2 by 2 by 2 MPI processor grid
+Created 288 atoms
+  using lattice units in orthogonal box = (0 0 0) to (13.43677 13.43677 13.43677)
+  create_atoms CPU = 0.001 seconds
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 56, page size: 5600
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 10 10 10
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 0.005
+Per MPI rank memory allocation (min/avg/max) = 2.578 | 2.612 | 2.725 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press          Volume    
+         0   0.5           -5.0906376      0             -4.3432418     -0.58413242     2425.9654    
+        50   0.37711972    -5.0010369      0             -4.4373215     -0.0032770057   2353.9118    
+ERROR on proc 5: Neighbor list overflow, boost neigh_modify one
+For more information see https://docs.lammps.org/err0036 (src/npair_bin.cpp:248)
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 5 in communicator MPI_COMM_WORLD
+with errorcode 1.
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
