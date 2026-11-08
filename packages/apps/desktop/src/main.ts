@@ -1,6 +1,8 @@
-import { app, BrowserWindow, nativeTheme, session } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeTheme, session } from 'electron';
+import { join } from 'node:path';
 import AgentSupervisor from './AgentSupervisor';
 import { config } from './config';
+import { listenForControls } from './controls';
 import { reserveEndpoint } from './endpoint';
 import { guardNavigation, isOwnFrame } from './navigation';
 import { readPlacement, rememberPlacement } from './placement';
@@ -30,6 +32,7 @@ const createWindow = (): BrowserWindow => {
         titleBarStyle: 'hidden',
         backgroundColor: canvasColor(),
         webPreferences: {
+            preload: join(app.getAppPath(), 'dist', 'preload.cjs'),
             contextIsolation: true,
             sandbox: true,
             nodeIntegration: false
@@ -40,6 +43,7 @@ const createWindow = (): BrowserWindow => {
     nativeTheme.on('updated', () => window.setBackgroundColor(canvasColor()));
     rememberPlacement(window);
     guardNavigation(window);
+    listenForControls(window);
     void window.loadURL(config.studioUrl);
     return window;
 };
@@ -59,9 +63,13 @@ const hideOnClose = (window: BrowserWindow) => {
 
 const start = async () => {
     await app.whenReady();
-    const agent = new AgentSupervisor(await reserveEndpoint());
+    const endpoint = await reserveEndpoint();
+    const agent = new AgentSupervisor(endpoint);
     agent.start();
     app.on('will-quit', () => agent.stop());
+    ipcMain.on('agent:endpoint', (event) => {
+        event.returnValue = endpoint;
+    });
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, grant, details) => {
         grant(isOwnFrame(details.requestingUrl));
     });
