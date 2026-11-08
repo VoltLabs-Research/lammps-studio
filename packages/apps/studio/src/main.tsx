@@ -11,6 +11,11 @@ import '@/shared/styles/tooltip.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from '@/app/App';
+import { startLiveData } from '@/shared/services/live-data';
+import { applyTheme, useThemeStore } from '@/shared/store/theme';
+
+applyTheme(useThemeStore.getState().choice);
+startLiveData();
 
 const root = document.getElementById('root');
 
