@@ -1,0 +1,12 @@
+packages:
+    - packages/apps/*
+    - packages/infra/*
+    - packages/shared/*
+
+linkWorkspacePackages: true
+
+onlyBuiltDependencies:
+    - cpu-features
+    - electron
+    - esbuild
+    - ssh2

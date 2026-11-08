@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Upstream checkouts used for reference only
+.reference/
+
+# Build output
+dist/
+build/
+release/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Caches
+.cache/
+.eslintcache
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
