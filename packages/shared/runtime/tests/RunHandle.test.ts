@@ -42,4 +42,15 @@ describe('RunHandle', () => {
 
         expect(await ended).toMatchObject({ id: 'cu/run-3', state: 'completed', exitCode: 0 });
     });
+
+    it('resolves waitForEnd for a run whose end event already went by, as after an awaited stop', async () => {
+        const bus = new EventEmitterBus<RuntimeEventMap>();
+        const run = runOf(4);
+        const handle = handleFor(run, bus);
+        run.requestStop();
+        run.markCancelled(143);
+        bus.emit('simulation:end', { runId: run.id, exitCode: 143, snapshot: run.snapshot() });
+
+        expect(await handle.waitForEnd()).toMatchObject({ state: 'cancelled', exitCode: 143 });
+    });
 });

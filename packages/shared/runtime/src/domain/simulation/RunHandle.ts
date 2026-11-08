@@ -1,7 +1,9 @@
-import type { RunID } from '../shared/types';
+import type { RunID, RunState } from '../shared/types';
 import type { RuntimeEvent, RuntimeEventMap } from '../observability/EventMap';
 import type { RunSnapshot } from './RunSnapshot';
 import type { EventBusPort } from '../../ports/EventBusPort';
+
+const FINAL_STATES = new Set<RunState>(['completed', 'failed', 'cancelled']);
 
 export default class RunHandle{
     constructor(
@@ -42,11 +44,18 @@ export default class RunHandle{
     }
 
     async waitForEnd(): Promise<RunSnapshot | null>{
-        return await new Promise<RunSnapshot | null>((resolve) => {
-            this.once('simulation:end', ({ snapshot }) => {
-                resolve(snapshot);
-            });
+        let unsubscribe = () => {};
+        const ended = new Promise<RunSnapshot>((resolve) => {
+            unsubscribe = this.once('simulation:end', ({ snapshot }) => resolve(snapshot));
         });
+
+        const current = await this.snapshot();
+        if(current && FINAL_STATES.has(current.state)){
+            unsubscribe();
+            return current;
+        }
+
+        return await ended;
     }
 
     private belongsToThisRun(payload: unknown): boolean{
