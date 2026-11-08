@@ -1,0 +1,5 @@
+.popover { position: absolute; z-index: 50; border-radius: 16px; padding: 6px; min-width: 220px; font-size: var(--text-base); }
+.popover.menu { position: fixed; z-index: 100; }
+.popover.menu:focus-visible { outline: none; }
+.menu-sep { height: 1px; margin: 5px 8px; background: var(--separator); }
+.menu-caption { padding: 6px 10px 4px; font-size: var(--text-2xs); color: var(--muted); }

@@ -1,0 +1,5 @@
+.popup { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; height: 28px; padding: 0 6px 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--fg); font-size: var(--text-sm); }
+.popup span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.popup .icon { color: var(--muted); }
+.popup:hover { background: var(--tint); }
+.popup[disabled] { opacity: 0.5; cursor: default; background: transparent; }

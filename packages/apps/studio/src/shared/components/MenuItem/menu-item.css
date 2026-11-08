@@ -1,0 +1,13 @@
+.menu-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; padding: 7px 10px; border-radius: 10px;
+    text-align: left; font-size: var(--text-sm); color: var(--fg);
+}
+.menu-item:hover { background: var(--tint); }
+.menu-item:focus-visible { outline: none; background: var(--tint); }
+.menu-item .kbd { margin-left: auto; }
+.menu-item.danger { color: var(--danger-ink); }
+.menu-item[disabled] { opacity: 0.45; cursor: default; }
+.menu-item[disabled]:hover { background: transparent; }
+.menu-check { width: 16px; height: 16px; display: grid; place-items: center; flex: none; margin-right: -2px; }
+.menu-item > span { white-space: nowrap; }
+.menu-hint { margin-left: auto; padding-left: 12px; color: var(--muted); font-size: var(--text-xs); white-space: nowrap; }
