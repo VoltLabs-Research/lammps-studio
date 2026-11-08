@@ -12,6 +12,7 @@ import ModalHead from '@/shared/components/ModalHead';
 import Popup from '@/shared/components/Popup';
 import { useMachines } from '@/shared/hooks/use-machines';
 import { useModal } from '@/shared/hooks/use-modal';
+import { useSubmission } from '@/shared/hooks/use-submission';
 import { useBuildsStore } from '@/shared/store/builds';
 import '@/modules/settings/components/NewBuildSheet/new-build-sheet.css';
 
@@ -22,24 +23,16 @@ const NewBuildSheet = () => {
     const machines = useMachines();
     const [pickedMachine, setMachineId] = useState<string | null>(null);
     const [packages, setPackages] = useState<string[]>([]);
-    const [pending, setPending] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const { pending, error, submit } = useSubmission(buildErrorCopy);
 
     const machine = machines.find((item) => item.id === pickedMachine) ?? machines.find((item) => item.status === 'online');
 
-    const build = async () => {
+    const build = () => submit(async () => {
         if(!machine) return;
 
-        setPending(true);
-        setError(null);
-        try{
-            useBuildsStore.getState().upsert(await buildApi.create({ machineId: machine.id, version: LAMMPS_VERSION, packages }));
-            close();
-        }catch(cause){
-            setError(buildErrorCopy(cause));
-            setPending(false);
-        }
-    };
+        useBuildsStore.getState().upsert(await buildApi.create({ machineId: machine.id, version: LAMMPS_VERSION, packages }));
+        close();
+    });
 
     return (
         <Modal label='New build' className='new-build'>

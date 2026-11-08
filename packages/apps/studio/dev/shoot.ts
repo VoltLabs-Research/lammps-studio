@@ -73,7 +73,7 @@ const stepScript = (step: string): string => {
     const arg = JSON.stringify(rest.join(':'));
     const target = `document.querySelector(${arg})`;
     if(kind === 'click') return `${target}.click()`;
-    if(kind === 'text') return `[...document.querySelectorAll('button')].find((el) => el.textContent.trim() === ${arg}).click()`;
+    if(kind === 'text') return `[...document.querySelectorAll('button')].find((el) => el.textContent.trim().startsWith(${arg})).click()`;
     if(kind === 'ctx') return `(() => { const el = ${target}; const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: r.left + 40, clientY: r.top + r.height / 2 })); })()`;
     if(kind === 'key') return `(document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent('keydown', { key: ${arg}, ctrlKey: ${arg} === 'k', bubbles: true }))`;
     if(kind === 'type') return `(() => { const el = document.activeElement; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, ${arg}); el.dispatchEvent(new Event('input', { bubbles: true })); })()`;

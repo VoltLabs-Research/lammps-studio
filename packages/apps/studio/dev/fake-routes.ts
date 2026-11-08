@@ -1,3 +1,4 @@
+import { Build } from '@lammps-studio/contracts/build/domain';
 import { buildRoutes } from '@lammps-studio/contracts/build/routes';
 import { BuildErrors } from '@lammps-studio/contracts/build/errors';
 import { CreateBuildInput } from '@lammps-studio/contracts/build/http';
@@ -68,14 +69,14 @@ const createBuild = (state: FakeState, input: CreateBuildInput) => {
     if(machine.status === 'offline') return fail(MachineErrors, 'Offline');
 
     const hash = randomHash();
-    const build = {
+    const build: Build = {
         hash,
         machineId: machine.id,
         version: input.version,
         packages: input.packages,
         image: `lammps/lammps-runtime:${hash}`,
         sizeBytes: null,
-        status: 'building' as const,
+        status: 'building',
         progress: 0,
         steps: [],
         output: null,

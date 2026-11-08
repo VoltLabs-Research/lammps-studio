@@ -1,9 +1,10 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import Button from '@/shared/components/Button';
 import InlineError from '@/shared/components/InlineError';
 import Modal from '@/shared/components/Modal';
 import ModalHead from '@/shared/components/ModalHead';
 import { useModal } from '@/shared/hooks/use-modal';
+import { useSubmission } from '@/shared/hooks/use-submission';
 import '@/shared/components/ConfirmDialog/confirm-dialog.css';
 
 interface ConfirmDialogProps{
@@ -16,20 +17,12 @@ interface ConfirmDialogProps{
 
 const ConfirmDialog = ({ title, confirmLabel, onConfirm, copy, children }: ConfirmDialogProps) => {
     const { close } = useModal();
-    const [pending, setPending] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const { pending, error, submit } = useSubmission(copy);
 
-    const confirm = async () => {
-        setPending(true);
-        setError(null);
-        try{
-            await onConfirm();
-            close();
-        }catch(cause){
-            setError(copy(cause));
-            setPending(false);
-        }
-    };
+    const confirm = () => submit(async () => {
+        await onConfirm();
+        close();
+    });
 
     return (
         <Modal label={title} className='confirm'>

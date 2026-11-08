@@ -1,8 +1,9 @@
-import { KeyboardEvent, MouseEvent, PointerEvent, ReactNode, useEffect, useRef } from 'react';
+import { KeyboardEvent, MouseEvent, PointerEvent, ReactNode, useRef } from 'react';
 import { ModalFocus, ModalPlacement } from '@/shared/contracts/ui';
+import { useInitialFocus } from '@/shared/hooks/use-initial-focus';
 import { useModal } from '@/shared/hooks/use-modal';
 import { classNames } from '@/shared/utils/class-names';
-import { focusablesIn, trapTab } from '@/shared/utils/focus-trap';
+import { trapTab } from '@/shared/utils/focus-trap';
 import '@/shared/components/Modal/modal.css';
 
 interface ModalProps{
@@ -13,21 +14,12 @@ interface ModalProps{
     children: ReactNode;
 }
 
-const CLOSE_BUTTON = '.modal__close';
-
 const Modal = ({ label, className, placement = 'center', initialFocus = 'first', children }: ModalProps) => {
     const { close } = useModal();
     const dialogRef = useRef<HTMLDivElement>(null);
     const pressedBackdrop = useRef(false);
 
-    useEffect(() => {
-        const dialog = dialogRef.current;
-        if(!dialog || dialog.contains(document.activeElement)) return;
-
-        const first = focusablesIn(dialog).find((element) => !element.matches(CLOSE_BUTTON));
-        const target = initialFocus === 'first' && first ? first : dialog;
-        target.focus({ preventScroll: true });
-    }, [initialFocus]);
+    useInitialFocus(dialogRef, initialFocus);
 
     const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
         pressedBackdrop.current = event.target === event.currentTarget;

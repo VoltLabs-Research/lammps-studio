@@ -1,8 +1,9 @@
-import { KeyboardEvent, useEffect, useLayoutEffect, useRef } from 'react';
+import { KeyboardEvent, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import MenuItem from '@/shared/components/MenuItem';
 import { MENU_SEPARATOR, MenuAction, MenuAlign, MenuEntry, MenuHandle } from '@/shared/contracts/menu';
-import { anchorRectOf, placeMenu } from '@/shared/utils/menu-position';
+import { useMenuLayer } from '@/shared/hooks/use-menu-layer';
+import { focusMenuItem } from '@/shared/utils/menu-keys';
 import '@/shared/components/Menu/menu.css';
 
 interface MenuProps{
@@ -13,16 +14,7 @@ interface MenuProps{
 }
 
 const DEFAULT_WIDTH = 240;
-const ITEM_SELECTOR = '[role^="menuitem"]:not([disabled])';
-
-const nextIndex = (key: string, current: number, count: number): number | null => {
-    if(key === 'Home') return 0;
-    if(key === 'End') return count - 1;
-    if(key === 'ArrowDown') return (current + 1) % count;
-    if(key === 'ArrowUp') return current < 0 ? count - 1 : (current - 1 + count) % count;
-
-    return null;
-};
+const DISMISS_KEYS = ['Escape', 'Tab'];
 
 const separatorKey = (entries: MenuEntry[], index: number): string => {
     const previous = entries[index - 1];
@@ -33,40 +25,7 @@ const separatorKey = (entries: MenuEntry[], index: number): string => {
 const Menu = ({ menu, entries, width = DEFAULT_WIDTH, align = 'right' }: MenuProps) => {
     const ref = useRef<HTMLDivElement>(null);
     const { anchor, close } = menu;
-
-    useLayoutEffect(() => {
-        const element = ref.current;
-        if(!element || !anchor) return;
-
-        const position = placeMenu(
-            anchorRectOf(anchor),
-            { width: element.offsetWidth, height: element.offsetHeight },
-            { width: window.innerWidth, height: window.innerHeight },
-            anchor instanceof HTMLElement ? align : 'left'
-        );
-        element.style.left = `${position.x}px`;
-        element.style.top = `${position.y}px`;
-        element.focus({ preventScroll: true });
-    }, [anchor, align]);
-
-    useEffect(() => {
-        if(!anchor) return;
-
-        const onPointerDown = (event: PointerEvent) => {
-            const target = event.target;
-            if(!(target instanceof Node) || ref.current?.contains(target)) return;
-            if(anchor instanceof HTMLElement && anchor.contains(target)) return;
-
-            close();
-        };
-        document.addEventListener('pointerdown', onPointerDown, true);
-        window.addEventListener('resize', close);
-
-        return () => {
-            document.removeEventListener('pointerdown', onPointerDown, true);
-            window.removeEventListener('resize', close);
-        };
-    }, [anchor, close]);
+    useMenuLayer(ref, anchor, align, close);
 
     if(!anchor) return null;
 
@@ -81,19 +40,14 @@ const Menu = ({ menu, entries, width = DEFAULT_WIDTH, align = 'right' }: MenuPro
     };
 
     const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-        if(event.key === 'Escape' || event.key === 'Tab'){
+        if(DISMISS_KEYS.includes(event.key)){
             event.preventDefault();
             event.stopPropagation();
             dismiss();
             return;
         }
 
-        const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>(ITEM_SELECTOR));
-        const index = nextIndex(event.key, items.findIndex((item) => item === document.activeElement), items.length);
-        if(index === null || items.length === 0) return;
-
-        event.preventDefault();
-        items[index].focus();
+        if(focusMenuItem(event.key, event.currentTarget)) event.preventDefault();
     };
 
     return createPortal(

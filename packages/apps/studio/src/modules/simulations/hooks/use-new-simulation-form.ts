@@ -1,11 +1,11 @@
 import { SimulationTemplate } from '@lammps-studio/contracts/simulation/domain';
-import { simulationApi } from '@/modules/simulations/api/api';
 import { simulationErrorCopy } from '@/modules/simulations/utils/error-messages';
+import { createSimulation } from '@/modules/simulations/utils/simulation-actions';
 import { ExampleName } from '@/modules/simulations/utils/templates';
 import { useMachines } from '@/shared/hooks/use-machines';
 import { useModal } from '@/shared/hooks/use-modal';
+import { useSubmission } from '@/shared/hooks/use-submission';
 import { useNavigationStore } from '@/shared/store/navigation';
-import { useSimulationsStore } from '@/shared/store/simulations';
 import { useState } from 'react';
 
 export interface NewSimulationForm{
@@ -47,27 +47,18 @@ export const useNewSimulationForm = (): NewSimulationForm => {
     const [example, setExample] = useState<ExampleName>('melt');
     const [folder, setFolder] = useState('');
     const [repository, setRepository] = useState('');
-    const [pending, setPending] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const { pending, error, submit } = useSubmission(simulationErrorCopy);
 
     const machineId = pickedMachine ?? machines.find((machine) => machine.status === 'online')?.id ?? null;
     const source = sourceOf(template, example, folder, repository);
 
-    const create = async () => {
+    const create = () => submit(async () => {
         if(machineId === null || source === '') return;
 
-        setPending(true);
-        setError(null);
-        try{
-            const simulation = await simulationApi.create({ name: name.trim() || UNTITLED, machineId, template, source });
-            useSimulationsStore.getState().upsert(simulation);
-            close();
-            openWorkspace(simulation.id);
-        }catch(cause){
-            setError(simulationErrorCopy(cause));
-            setPending(false);
-        }
-    };
+        const simulation = await createSimulation({ name: name.trim() || UNTITLED, machineId, template, source });
+        close();
+        openWorkspace(simulation.id);
+    });
 
     return {
         name,

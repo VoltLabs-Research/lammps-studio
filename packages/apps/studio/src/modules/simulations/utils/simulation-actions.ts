@@ -1,5 +1,6 @@
 import { Machine } from '@lammps-studio/contracts/machine/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
+import { CreateSimulationInput } from '@lammps-studio/contracts/simulation/http';
 import { simulationApi } from '@/modules/simulations/api/api';
 import { simulationErrorCopy } from '@/modules/simulations/utils/error-messages';
 import { copyText } from '@/shared/services/clipboard';
@@ -10,6 +11,13 @@ export const folderOf = (simulation: Simulation, machine: Machine | undefined): 
     if(!machine) return simulation.folder;
 
     return `${machine.root}/${simulation.folder}`;
+};
+
+export const createSimulation = async (input: CreateSimulationInput): Promise<Simulation> => {
+    const simulation = await simulationApi.create(input);
+    useSimulationsStore.getState().upsert(simulation);
+
+    return simulation;
 };
 
 export const duplicateSimulation = (simulation: Simulation) =>
