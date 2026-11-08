@@ -14,6 +14,8 @@ interface Echo{
     word: string;
 }
 
+const TOKEN = 'probe-token';
+const SAME_LENGTH_TOKEN = 'probe-tokeN';
 const STUDIO_ORIGIN = 'http://localhost:5180';
 const ELECTRON_ORIGIN = 'null';
 const FOREIGN_ORIGIN = 'https://example.com';
@@ -93,6 +95,7 @@ const discovered = (Controller: new () => BaseController): Discovered => ({
 const applicationOf = (Controller: new () => BaseController, onClose?: () => Promise<void>) => new Application({
     host: '127.0.0.1',
     port: 0,
+    token: TOKEN,
     corsOrigins: [STUDIO_ORIGIN, ELECTRON_ORIGIN],
     log: { level: 'silent' },
     discover: async () => discovered(Controller),
@@ -101,10 +104,33 @@ const applicationOf = (Controller: new () => BaseController, onClose?: () => Pro
 
 const application = applicationOf(ProbeController);
 const app = await application.build();
-const authorized = {};
+const authorized = { authorization: `Bearer ${TOKEN}` };
 
 describe('Application', () => {
     afterAll(() => application.stop());
+
+    it('refuses a request without the token', async () => {
+        const res = await app.inject({ method: 'GET', url: '/probes/hello' });
+
+        expect(res.statusCode).toBe(401);
+        expect(res.json()).toEqual({ error: 'Request::Unauthorized' });
+    });
+
+    it('refuses a request with another token of the same length', async () => {
+        const res = await app.inject({
+            method: 'GET',
+            url: '/probes/hello',
+            headers: { authorization: `Bearer ${SAME_LENGTH_TOKEN}` }
+        });
+
+        expect(res.statusCode).toBe(401);
+    });
+
+    it('refuses the token passed in the query string of a plain request', async () => {
+        const res = await app.inject({ method: 'GET', url: `/probes/hello?token=${TOKEN}` });
+
+        expect(res.statusCode).toBe(401);
+    });
 
     it('wraps what a handler returns in the data envelope', async () => {
         const res = await app.inject({ method: 'GET', url: '/probes/hello', headers: authorized });
@@ -174,6 +200,13 @@ describe('Application', () => {
         });
 
         expect(res.headers['access-control-allow-origin']).toBeUndefined();
+    });
+
+    it('lets studio read an unauthorized answer', async () => {
+        const res = await app.inject({ method: 'GET', url: '/probes/hello', headers: { origin: STUDIO_ORIGIN } });
+
+        expect(res.statusCode).toBe(401);
+        expect(res.headers['access-control-allow-origin']).toBe(STUDIO_ORIGIN);
     });
 
     it('fails the boot when a route lies outside its module prefix', async () => {

@@ -5,6 +5,7 @@ import ValidationError from '../errors/Validation';
 import BaseGateway from '../gateway/BaseGateway';
 import { ApiError } from '@lammps-studio/contracts/shared/http';
 import { HttpMethod } from '@lammps-studio/contracts/shared/routing';
+import { bearerToken } from '../auth/bearerToken';
 import { LogLevel } from '../contracts/logging';
 import { websocketOptions } from '../gateway/websocket-options';
 import { Discovered, MountedController } from '../services/ModuleDiscovery';
@@ -18,6 +19,7 @@ export interface ApplicationLog{
 export interface ApplicationOptions{
     host: string;
     port: number;
+    token: string;
     corsOrigins: string[];
     log: ApplicationLog;
     discover: () => Promise<Discovered>;
@@ -48,6 +50,7 @@ export default class Application{
             methods: CORS_METHODS
         });
         await app.register(websocket, websocketOptions);
+        app.addHook('onRequest', bearerToken(this.#options.token));
         if(this.#options.onClose) app.addHook('onClose', this.#options.onClose);
 
         await this.#options.beforeMount?.();
