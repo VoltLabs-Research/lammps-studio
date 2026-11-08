@@ -1,19 +1,27 @@
+import type { Matrix4, Vector3 } from 'three';
+
 export type ColorMode = 'structure' | 'energy' | 'type';
 
 export type ThemeName = 'light' | 'dark';
 
 export type Rgb = [number, number, number];
 
+export type ViewListener = (view: Matrix4) => void;
+
+export interface OrbitDrag{
+    x: number;
+    y: number;
+    pan: boolean;
+    theta: number;
+    phi: number;
+    target: Vector3;
+}
+
 export interface SceneTheme{
     name: ThemeName;
     viewport: Rgb;
     canvas: Rgb;
     muted: Rgb;
-}
-
-export interface BoxExtent{
-    center: [number, number, number];
-    size: [number, number, number];
 }
 
 export interface FitInput{
