@@ -1,0 +1,29 @@
+{
+  "name": "@lammps-studio/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite-node --watch src/server.ts",
+    "start": "vite-node src/server.ts",
+    "test": "vitest run",
+    "lint": "oxlint --deny-warnings",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@lammps-studio/contracts": "workspace:*",
+    "@lammps-studio/lammps": "workspace:*",
+    "@lammps-studio/readable": "workspace:*",
+    "@lammps-studio/runtime": "workspace:*",
+    "reflect-metadata": "^0.2.2",
+    "typia": "^12.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@typia/unplugin": "^12.1.1",
+    "oxlint": "^1.71.0",
+    "typescript": "~6.0.2",
+    "vite-node": "^6.0.0",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@lammps-studio/runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "lint": "oxlint --deny-warnings",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "dockerode": "^4.0.9",
+    "eventemitter3": "^5.0.1",
+    "pino": "^10.3.1"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^3.3.40",
+    "@types/node": "^26.1.1",
+    "oxlint": "^1.71.0",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.10"
+  }
+}

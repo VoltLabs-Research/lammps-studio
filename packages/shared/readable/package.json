@@ -1,0 +1,29 @@
+{
+  "name": "@lammps-studio/readable",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./lib/*.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "lint": "oxlint --deny-warnings",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@fastify/websocket": "11.3.0",
+    "@lammps-studio/contracts": "workspace:*",
+    "fastify": "^5.12.5",
+    "pino": "^10.3.1",
+    "typia": "^12.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "oxlint": "^1.71.0",
+    "reflect-metadata": "^0.2.2",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.10"
+  }
+}
