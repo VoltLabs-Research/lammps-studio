@@ -7,7 +7,8 @@ export const SimulationErrors = {
         NameTaken: 409,
         NoEntryScript: 422,
         EntryOutsideFolder: 400,
-        NoPreview: 404
+        NoPreview: 404,
+        CloneFailed: 422
     }
 } as const satisfies ErrorTable;
 
