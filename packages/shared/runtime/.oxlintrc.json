@@ -1,0 +1,12 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "oxc", "unicorn"],
+    "rules": {
+        "no-restricted-imports": ["error", {
+            "patterns": [{
+                "regex": "^@/",
+                "message": "Shared packages are consumed from source; use relative imports."
+            }]
+        }]
+    }
+}
