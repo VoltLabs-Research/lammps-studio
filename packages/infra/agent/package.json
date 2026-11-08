@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite-node --watch src/server.ts",
-    "start": "vite-node src/server.ts",
+    "dev": "vite-node scripts/modules.ts && vite-node --watch src/server.ts",
+    "start": "vite-node scripts/modules.ts && vite-node src/server.ts",
+    "modules": "vite-node scripts/modules.ts",
     "test": "vitest run",
     "lint": "oxlint --deny-warnings",
     "typecheck": "tsc --noEmit -p tsconfig.json"
