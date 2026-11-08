@@ -1,0 +1,6 @@
+.mach-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.opt-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+.mach-opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--border); background: transparent; text-align: left; font-size: var(--text-sm); }
+.mach-opt[aria-checked="true"] { border-color: var(--fg); box-shadow: 0 0 0 1px var(--fg); }
+.mach-opt[disabled] { opacity: 0.5; cursor: default; }
+.mach-opt small { display: block; color: var(--muted); font-size: var(--text-xs); }

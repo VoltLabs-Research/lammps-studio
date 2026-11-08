@@ -1,0 +1,8 @@
+.page { max-width: 1440px; margin: 0 auto; padding: 16px 24px 32px; display: flex; flex-direction: column; gap: 20px; }
+.page-title-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.page-title { margin: 0; font-size: 1.5rem; line-height: 2rem; font-weight: var(--w-semibold); letter-spacing: -0.01em; text-wrap: balance; }
+.filter-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 860px) {
+    .page { padding: 12px 14px 24px; }
+}

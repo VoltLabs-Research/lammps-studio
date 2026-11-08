@@ -1,0 +1,5 @@
+.traffic { display: flex; gap: 8px; align-items: center; flex: none; }
+.traffic button { width: 12px; height: 12px; padding: 0; border-radius: 50%; border: 0.5px solid rgba(0, 0, 0, 0.12); }
+.traffic button:nth-child(1) { background: #ff5f57; }
+.traffic button:nth-child(2) { background: #febc2e; }
+.traffic button:nth-child(3) { background: #28c840; }

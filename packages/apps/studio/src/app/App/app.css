@@ -1,0 +1,11 @@
+.window {
+    position: relative; flex: 1; min-height: 0; border-radius: 20px; overflow: hidden; background: var(--canvas); box-shadow: var(--window-shadow);
+    display: flex;
+}
+.view { flex: 1; min-width: 0; display: flex; }
+
+@media (max-width: 860px) {
+    body { overflow: auto; }
+    .window { flex: none; min-height: 0; }
+    .view { flex-direction: column; }
+}

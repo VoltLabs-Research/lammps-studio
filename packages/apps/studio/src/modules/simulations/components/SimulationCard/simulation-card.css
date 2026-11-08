@@ -1,0 +1,22 @@
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.card { position: relative; min-width: 0; }
+.card__frame {
+    position: relative; height: 256px; border-radius: 24px; border: 1px solid var(--border); overflow: hidden; cursor: pointer;
+    transition: border-color 200ms; background: transparent;
+    display: block; width: 100%; padding: 0; color: inherit; text-align: left;
+}
+.card__frame:hover { border-color: var(--border-2); }
+.card__frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--ease); }
+.card__frame:hover img { transform: scale(1.05); }
+.card__empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
+.card__menu { position: absolute; top: 12px; right: 12px; z-index: 2; opacity: 0; transition: opacity 200ms; }
+.card:hover .card__menu, .card:focus-within .card__menu, .card__menu:has([aria-expanded="true"]) { opacity: 1; }
+.card__menu .icon-btn { background: var(--overlay); -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass); }
+.card__foot { position: absolute; inset: auto 0 0; z-index: 1; padding: 36px 16px 14px; display: flex; flex-direction: column; gap: 4px; background: linear-gradient(to top, var(--canvas) 0%, color-mix(in oklab, var(--canvas) 88%, transparent) 52%, transparent 100%); }
+.card__title { font-weight: var(--w-medium); font-size: var(--text-base); line-height: 1.3; }
+.card__caption { font-size: var(--text-sm); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card__progress { height: 2px; border-radius: 2px; background: var(--tint-2); overflow: hidden; margin-top: 6px; }
+.card__progress i { display: block; height: 100%; background: var(--fg); border-radius: 2px; }
+.card__state { color: var(--fg); font-weight: var(--w-medium); }
+.card.is-idle .card__frame img { filter: grayscale(1); opacity: 0.5; transition: filter 300ms var(--ease), opacity 300ms var(--ease), transform 500ms var(--ease); }
+.card.is-idle .card__frame:hover img { filter: grayscale(0.4); opacity: 0.85; }
