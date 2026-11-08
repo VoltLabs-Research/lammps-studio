@@ -1,4 +1,6 @@
-import type { Matrix4, Vector3 } from 'three';
+import type { Matrix4, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three';
+import type { AtomBuffers } from '@/modules/viewport/scene/AtomBuffers';
+import type { AtomUniforms } from '@/modules/viewport/scene/atom-material';
 
 export type ColorMode = 'structure' | 'energy' | 'type';
 
@@ -52,4 +54,18 @@ export interface CellGrid{
     dims: number[];
     starts: Int32Array;
     order: Int32Array;
+}
+
+export interface AlignedPositions{
+    positions: Float32Array;
+    half: number;
+}
+
+export interface PreviewRig{
+    canvas: HTMLCanvasElement;
+    renderer: WebGLRenderer;
+    scene: Scene;
+    camera: PerspectiveCamera;
+    uniforms: AtomUniforms;
+    atoms: AtomBuffers;
 }
