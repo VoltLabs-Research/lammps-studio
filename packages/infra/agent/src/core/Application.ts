@@ -1,6 +1,7 @@
 import Application from '@lammps-studio/readable/http/Application';
 import ModuleDiscovery from '@lammps-studio/readable/services/ModuleDiscovery';
 import { config } from '@/config';
+import { codeServer } from '@/modules/editor/services/CodeServer';
 import { mkdir } from 'node:fs/promises';
 import { fileURLToPath, URL } from 'node:url';
 
@@ -15,7 +16,8 @@ const createApp = () => new Application({
     discover: () => new ModuleDiscovery(MODULES_DIR).discover(),
     beforeMount: async () => {
         await mkdir(config.simulationsDir, { recursive: true });
-    }
+    },
+    onClose: () => codeServer.closeAll()
 });
 
 export default createApp;
