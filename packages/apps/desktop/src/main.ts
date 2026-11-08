@@ -1,9 +1,12 @@
 import { app, BrowserWindow, nativeTheme, session } from 'electron';
 import { config } from './config';
 import { guardNavigation, isOwnFrame } from './navigation';
+import { readPlacement, rememberPlacement } from './placement';
 
-const WIDTH = 1280;
-const HEIGHT = 840;
+const DEFAULT_SIZE = {
+    width: 1280,
+    height: 840
+};
 const MIN_WIDTH = 960;
 const MIN_HEIGHT = 640;
 const LIGHT_CANVAS = '#f5f5f5';
@@ -16,9 +19,9 @@ const canvasColor = (): string => {
 };
 
 const createWindow = (): BrowserWindow => {
+    const placement = readPlacement();
     const window = new BrowserWindow({
-        width: WIDTH,
-        height: HEIGHT,
+        ...placement?.bounds ?? DEFAULT_SIZE,
         minWidth: MIN_WIDTH,
         minHeight: MIN_HEIGHT,
         frame: false,
@@ -31,7 +34,9 @@ const createWindow = (): BrowserWindow => {
         }
     });
     if(process.platform === 'darwin') window.setWindowButtonVisibility(false);
+    if(placement?.maximized) window.maximize();
     nativeTheme.on('updated', () => window.setBackgroundColor(canvasColor()));
+    rememberPlacement(window);
     guardNavigation(window);
     void window.loadURL(config.studioUrl);
     return window;
