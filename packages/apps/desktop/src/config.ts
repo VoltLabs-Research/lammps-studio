@@ -2,8 +2,8 @@ import { app } from 'electron';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { DEV_STUDIO_URL } from './studio';
 
-const DEV_STUDIO_URL = 'http://localhost:5180';
 const DEV_AGENT_ENTRY = 'src/server.ts';
 
 export const LOOPBACK = '127.0.0.1';

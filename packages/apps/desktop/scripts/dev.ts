@@ -1,8 +1,8 @@
 import { ChildProcess, spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { DEV_STUDIO_URL } from '../src/studio.ts';
 
-const STUDIO_URL = 'http://localhost:5180';
 const STUDIO_POLL_MS = 100;
 
 const desktopDir = join(import.meta.dirname, '..');
@@ -23,7 +23,7 @@ const runNode = (cwd: string, script: string, args: string[]) => {
 };
 
 const isServing = async (): Promise<boolean> => {
-    const response = await fetch(STUDIO_URL).catch(() => undefined);
+    const response = await fetch(DEV_STUDIO_URL).catch(() => undefined);
     return response?.ok === true;
 };
 
