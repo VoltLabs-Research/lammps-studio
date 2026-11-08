@@ -1,0 +1,19 @@
+.gsec { margin-top: 18px; }
+.group-title { margin: 0 0 6px 14px; font-size: var(--text-xs); font-weight: var(--w-medium); color: var(--muted); }
+.group { background: var(--tile); border-radius: 14px; overflow: hidden; }
+.group-foot { margin: 6px 14px 0; font-size: var(--text-xs); color: var(--muted); }
+.grow { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 6px 10px 6px 14px; border: 0; background: transparent; text-align: left; font-size: var(--text-sm); color: var(--fg); }
+.grow + .grow::before { content: ""; position: absolute; top: 0; left: 14px; right: 0; height: 1px; background: var(--separator); }
+button.grow:hover { background: var(--tint); }
+button.grow[disabled] { opacity: 0.5; cursor: default; background: transparent; }
+.grow__title { white-space: nowrap; flex: none; }
+.grow__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding-block: 3px; }
+.grow__sub { font-size: var(--text-xs); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grow__sub.mono { font-size: 11px; }
+.grow__value { display: inline-flex; align-items: center; gap: 7px; flex: none; color: var(--muted); white-space: nowrap; }
+.grow__chev { display: inline-flex; color: var(--muted); opacity: 0.55; margin-left: -4px; }
+.grow__ctl { margin-left: auto; min-width: 0; display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px; color: var(--muted); }
+.grow__path { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-xs); }
+.grow__path.mono { font-size: var(--text-xs); }
+.grow__icon { display: inline-flex; flex: none; color: var(--muted); }
+.grow--action.danger-ink { color: var(--danger-ink); }

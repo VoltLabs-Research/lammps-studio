@@ -22,8 +22,15 @@ const lookup = <C extends string>(messages: Partial<Record<C, string>>, code: st
     return messages[code];
 };
 
-export const errorCopy = <C extends StudioErrorCode>(messages: ErrorMessages<C>) => (error: Error): string => {
-    const code = baseCodeOf(error instanceof ClientError ? error.code : error.message);
+const codeOf = (error: unknown): string => {
+    if(error instanceof ClientError) return error.code;
+    if(error instanceof Error) return error.message;
+
+    return String(error);
+};
+
+export const errorCopy = <C extends StudioErrorCode>(messages: ErrorMessages<C>) => (error: unknown): string => {
+    const code = baseCodeOf(codeOf(error));
 
     return lookup(messages, code) ?? lookup(SHARED, code) ?? code;
 };

@@ -1,0 +1,3 @@
+.ring { width: 16px; height: 16px; fill: none; stroke-width: 2; flex: none; }
+.ring circle { stroke: var(--tint-2); }
+.ring .ring__v { stroke: var(--fg); stroke-linecap: round; }

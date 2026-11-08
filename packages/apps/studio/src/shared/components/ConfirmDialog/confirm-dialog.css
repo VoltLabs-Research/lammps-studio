@@ -1,0 +1,2 @@
+.modal.confirm { width: min(460px, 100%); }
+.confirm__error { margin: 0; font-size: var(--text-sm); }

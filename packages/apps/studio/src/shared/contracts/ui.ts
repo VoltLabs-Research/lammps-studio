@@ -8,6 +8,10 @@ export type TipSide = 'bottom' | 'top' | 'left' | 'right';
 
 export type ChipTone = 'neutral' | 'info' | 'warn' | 'danger' | 'ok';
 
+export type ModalFocus = 'first' | 'dialog';
+
+export type ModalPlacement = 'center' | 'top';
+
 export interface SegOption<V extends string>{
     value: V;
     label: string;

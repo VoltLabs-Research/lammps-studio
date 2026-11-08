@@ -8,10 +8,9 @@ interface TextFieldProps{
     onChange: (value: string) => void;
     placeholder?: string;
     mono?: boolean;
-    autoFocus?: boolean;
 }
 
-const TextField = ({ label, value, onChange, placeholder, mono = false, autoFocus = false }: TextFieldProps) => {
+const TextField = ({ label, value, onChange, placeholder, mono = false }: TextFieldProps) => {
     const id = useId();
 
     return (
@@ -24,7 +23,6 @@ const TextField = ({ label, value, onChange, placeholder, mono = false, autoFocu
                 placeholder={placeholder}
                 autoComplete='off'
                 spellCheck={!mono}
-                autoFocus={autoFocus}
                 onChange={(event) => onChange(event.target.value)}
             />
         </div>

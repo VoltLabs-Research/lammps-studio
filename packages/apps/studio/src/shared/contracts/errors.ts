@@ -17,6 +17,15 @@ export const AgentErrors = {
 
 export type AgentErrorCode = ErrorCode<typeof AgentErrors>;
 
+export const UiErrors = {
+    domain: 'Ui',
+    causes: {
+        OutsideModalRoot: 0
+    }
+} as const satisfies ErrorTable;
+
+export type UiErrorCode = ErrorCode<typeof UiErrors>;
+
 export type StudioErrorCode =
     | AgentErrorCode
     | BuildErrorCode
@@ -25,6 +34,7 @@ export type StudioErrorCode =
     | MachineErrorCode
     | RequestErrorCode
     | RunErrorCode
-    | SimulationErrorCode;
+    | SimulationErrorCode
+    | UiErrorCode;
 
 export type ErrorMessages<C extends StudioErrorCode> = Partial<Record<C, string>>;
