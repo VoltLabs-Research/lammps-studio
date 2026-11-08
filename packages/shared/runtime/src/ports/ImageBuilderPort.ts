@@ -13,5 +13,5 @@ export interface BuildObserver{
 
 export interface ImageBuilderPort{
     inspect(tag: string): Promise<ImageInfo | null>;
-    build(build: Build, observer: BuildObserver): Promise<ImageInfo>;
+    build(build: Build, observer: BuildObserver, signal: AbortSignal): Promise<ImageInfo>;
 }

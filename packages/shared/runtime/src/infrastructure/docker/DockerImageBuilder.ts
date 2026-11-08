@@ -33,7 +33,7 @@ export default class DockerImageBuilder implements ImageBuilderPort{
         }
     }
 
-    async build(build: Build, observer: BuildObserver): Promise<ImageInfo>{
+    async build(build: Build, observer: BuildObserver, signal: AbortSignal): Promise<ImageInfo>{
         const tag = build.tag();
         const dockerfile = renderDockerfile(build);
         const progress = new DockerBuildProgress(dockerfile.stages, build.version);
@@ -43,7 +43,7 @@ export default class DockerImageBuilder implements ImageBuilderPort{
 
         try{
             await writeFile(path.join(contextDir, 'Dockerfile'), dockerfile.text, 'utf8');
-            const stream = await this.docker.buildImage({ context: contextDir, src: ['Dockerfile'] }, { t: tag });
+            const stream = await this.docker.buildImage({ context: contextDir, src: ['Dockerfile'] }, { t: tag, abortSignal: signal });
             await this.follow(stream, (line) => {
                 progress.push(line);
                 observer.line(line);

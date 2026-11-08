@@ -1,6 +1,7 @@
 import Docker from 'dockerode';
 import type { Logger as PinoBaseLogger } from 'pino';
-import { BuildResult, BuildSpec } from '../domain/build/BuildSpec';
+import Build from '../domain/build/Build';
+import { BuildIdentity, BuildResult, BuildSpec } from '../domain/build/BuildSpec';
 import { RuntimeEvent, RuntimeEventMap } from '../domain/observability/EventMap';
 import RunHandle from '../domain/simulation/RunHandle';
 import { RunSnapshot } from '../domain/simulation/RunSnapshot';
@@ -70,8 +71,12 @@ export default class LammpsRuntime{
         );
     }
 
-    async build(spec: BuildSpec): Promise<BuildResult>{
-        return await this.ensureImage.execute(spec);
+    describeBuild(spec: BuildSpec): BuildIdentity{
+        return new Build(spec).identity();
+    }
+
+    async build(spec: BuildSpec, signal?: AbortSignal): Promise<BuildResult>{
+        return await this.ensureImage.execute(spec, signal);
     }
 
     async run(spec: SimulationSpec): Promise<RunHandle>{
