@@ -71,3 +71,7 @@ export const thermoQuantity = (column: string, units: UnitStyle): ThermoQuantity
         unit: keyword.dimension === 'none' ? '' : UNITS[units][keyword.dimension]
     };
 };
+
+export const energyUnit = (units: UnitStyle): string => {
+    return UNITS[units].energy;
+};
