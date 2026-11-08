@@ -1,4 +1,5 @@
 import { config } from '@/config';
+import { ApiResponse } from '@lammps-studio/contracts/shared/http';
 import { Endpoint } from '@lammps-studio/contracts/shared/routing';
 import { expect } from 'vitest';
 import { AgentApp } from './harness';
@@ -58,7 +59,7 @@ export const request = async <I, O>(
         raw: res.rawPayload,
         contentType: res.headers['content-type'],
         json: <T>() => res.json() as T,
-        data: () => (res.json() as { data: O }).data
+        data: () => (res.json() as ApiResponse<O>).data
     };
 };
 
