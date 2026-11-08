@@ -1,0 +1,9 @@
+[data-tip] { position: relative; }
+[data-tip]:hover::after, [data-tip]:focus-visible::after {
+    content: attr(data-tip); position: absolute; z-index: 60; white-space: nowrap; pointer-events: none;
+    padding: 5px 9px; border-radius: 8px; background: var(--fg); color: var(--canvas); font-size: var(--text-xs); line-height: 1rem; font-weight: 400;
+    left: 50%; top: calc(100% + 8px); transform: translateX(-50%);
+}
+[data-tip-side="right"]:hover::after, [data-tip-side="right"]:focus-visible::after { left: calc(100% + 10px); top: 50%; transform: translateY(-50%); }
+[data-tip-side="left"]:hover::after, [data-tip-side="left"]:focus-visible::after { left: auto; right: calc(100% + 10px); top: 50%; transform: translateY(-50%); }
+[data-tip-side="top"]:hover::after, [data-tip-side="top"]:focus-visible::after { top: auto; bottom: calc(100% + 8px); }

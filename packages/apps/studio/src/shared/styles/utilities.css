@@ -1,0 +1,3 @@
+.glass { background: var(--overlay); -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass); box-shadow: var(--shadow-overlay); }
+.danger-ink { color: var(--danger-ink); }
+.warn-ink { color: var(--warning-ink); }
