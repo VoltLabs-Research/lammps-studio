@@ -16,6 +16,9 @@ importers:
       '@types/node':
         specifier: ^26.1.1
         version: 26.6.6
+      '@typia/unplugin':
+        specifier: ^12.1.1
+        version: 12.1.1(typia@12.2.1(@types/node@26.6.6)(typescript@6.0.3))(vite@8.3.6(@types/node@26.6.6)(esbuild@0.28.1)(jiti@2.7.0))
       electron:
         specifier: 44.7.1
         version: 44.7.1
