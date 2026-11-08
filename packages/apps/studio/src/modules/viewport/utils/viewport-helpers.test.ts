@@ -79,8 +79,8 @@ describe('fitDistance', () => {
         expect(fitDistance({ ...base, bottomInset: 90 })).toBeCloseTo(30 / 0.45);
     });
 
-    it('fits the width when that is the tighter side', () => {
-        expect(fitDistance({ ...base, size: [20, 400, 60] })).toBeCloseTo(200 / (100 / 148));
+    it('leaves the mockup room either side when the width is the tighter side', () => {
+        expect(fitDistance({ ...base, size: [20, 400, 60] })).toBeCloseTo(200 * 1.68);
     });
 });
 
