@@ -1,5 +1,5 @@
 import type { Frame } from '@lammps-studio/contracts/run/frame';
-import type { UnitStyle } from '@/modules/charts/domain/chart';
+import type { UnitStyle } from '@lammps-studio/contracts/script/domain';
 import type { Legend, LegendSwatch } from '@/modules/viewport/domain/legend';
 import type { ColorMode, ThemeName } from '@/modules/viewport/domain/scene';
 import { energyUnit } from '@/modules/charts/utils/thermo-quantity';

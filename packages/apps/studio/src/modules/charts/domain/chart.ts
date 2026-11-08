@@ -1,7 +1,5 @@
 export type PlotMode = 'raw' | 'smooth' | 'both';
 
-export type UnitStyle = 'metal' | 'real' | 'lj' | 'si' | 'cgs' | 'electron' | 'micro' | 'nano';
-
 export type SeriesAxis = 'step' | 'strain';
 
 export interface ChartDomain{

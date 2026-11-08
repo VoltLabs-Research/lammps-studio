@@ -1,5 +1,6 @@
 import type { ThermoSection } from '@lammps-studio/contracts/run/domain';
-import type { BentoSeries, PlotMode, UnitStyle } from '@/modules/charts/domain/chart';
+import type { UnitStyle } from '@lammps-studio/contracts/script/domain';
+import type { BentoSeries, PlotMode } from '@/modules/charts/domain/chart';
 
 export interface ChartsBentoProps{
     sections: ThermoSection[];

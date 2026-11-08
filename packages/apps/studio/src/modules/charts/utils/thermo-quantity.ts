@@ -1,4 +1,5 @@
-import type { ThermoQuantity, UnitStyle } from '@/modules/charts/domain/chart';
+import type { UnitStyle } from '@lammps-studio/contracts/script/domain';
+import type { ThermoQuantity } from '@/modules/charts/domain/chart';
 
 type Dimension = 'temperature' | 'energy' | 'pressure' | 'length' | 'volume' | 'density' | 'time' | 'none';
 

@@ -1,5 +1,6 @@
 import type { ThermoSection } from '@lammps-studio/contracts/run/domain';
-import type { BentoSeries, StressStrainColumns, UnitStyle } from '@/modules/charts/domain/chart';
+import type { UnitStyle } from '@lammps-studio/contracts/script/domain';
+import type { BentoSeries, StressStrainColumns } from '@/modules/charts/domain/chart';
 import { thermoQuantity } from '@/modules/charts/utils/thermo-quantity';
 
 export const STRESS_STRAIN_KEY = 'stress-strain';
