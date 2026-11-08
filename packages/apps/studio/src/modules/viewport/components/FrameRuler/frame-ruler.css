@@ -1,0 +1,2 @@
+.ruler { position: relative; flex: 1; min-width: 60px; height: 26px; margin: 0 10px; cursor: pointer; touch-action: none; }
+.ruler canvas { position: absolute; inset: 0; width: 100%; height: 100%; }

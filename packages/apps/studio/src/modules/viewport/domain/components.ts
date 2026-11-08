@@ -66,3 +66,13 @@ export interface RulerModel{
     endStep: number;
     marker: number | null;
 }
+
+export type StepScale = (step: number) => number;
+
+export interface RulerPaint{
+    context: CanvasRenderingContext2D;
+    x: StepScale;
+    fg: string;
+    muted: string;
+    height: number;
+}
