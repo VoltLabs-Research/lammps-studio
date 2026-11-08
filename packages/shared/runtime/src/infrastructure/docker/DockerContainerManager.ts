@@ -3,11 +3,14 @@ import {
     ContainerCreateRequest,
     ContainerHandle,
     ContainerManagerPort,
-    ContainerWaitResult
+    ContainerWaitResult,
+    RunContainer
 } from '../../ports/ContainerManagerPort';
 import type { Logger } from '../../ports/Logger';
-import { isDockerNotFound } from '../../domain/shared/toError';
+import { RUN_LABEL } from '../../domain/simulation/RunSpec';
+import { isDockerGone } from '../../domain/shared/toError';
 import DockerContainerResolver from './DockerContainerResolver';
+import { toRunContainer } from './toRunContainer';
 
 const gpuRequests = (gpus: number): Docker.DeviceRequest[] => {
     if(gpus <= 0){
@@ -70,11 +73,21 @@ export default class DockerContainerManager implements ContainerManagerPort{
         try{
             await this.containerResolver.resolve(container).remove({ force: true });
         }catch(error){
-            if(!isDockerNotFound(error)){
+            if(!isDockerGone(error)){
                 throw error;
             }
 
             this.logger.debug(`Container already removed: ${container.id}`);
         }
+    }
+
+    async inspect(containerId: string): Promise<RunContainer>{
+        const info = await this.docker.getContainer(containerId).inspect();
+        return toRunContainer(info);
+    }
+
+    async list(): Promise<RunContainer[]>{
+        const containers = await this.docker.listContainers({ all: true, filters: { label: [RUN_LABEL] } });
+        return await Promise.all(containers.map(async (container) => await this.inspect(container.Id)));
     }
 }

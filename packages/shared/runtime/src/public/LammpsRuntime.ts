@@ -8,6 +8,7 @@ import RunHandle from '../domain/simulation/RunHandle';
 import { RunSnapshot } from '../domain/simulation/RunSnapshot';
 import { PreparedRun, RunSpec } from '../domain/simulation/RunSpec';
 import EnsureImage from '../application/images/EnsureImage';
+import AttachSimulation from '../application/simulations/AttachSimulation';
 import LammpsCommandBuilder from '../application/simulations/LammpsCommandBuilder';
 import RunMonitor from '../application/simulations/RunMonitor';
 import SimulationEventPublisher from '../application/simulations/SimulationEventPublisher';
@@ -17,6 +18,7 @@ import StopSimulation from '../application/simulations/StopSimulation';
 import { EventBusPort, EventHandler } from '../ports/EventBusPort';
 import { Logger } from '../ports/Logger';
 import { RunDirectoryPort } from '../ports/RunDirectoryPort';
+import { RunContainer } from '../ports/ContainerManagerPort';
 import InMemoryRunStore from '../infrastructure/fs/InMemoryRunStore';
 import NodeRunDirectoryPreparer from '../infrastructure/fs/NodeRunDirectoryPreparer';
 import PinoLogger from '../infrastructure/logging/PinoLogger';
@@ -51,6 +53,7 @@ export default class LammpsRuntime{
     private readonly ensureImage: EnsureImage;
     private readonly startSimulation: StartSimulation;
     private readonly stopSimulation: StopSimulation;
+    private readonly attachSimulation: AttachSimulation;
 
     constructor(options: LammpsRuntimeOptions = {}){
         const docker = options.docker ?? new Docker();
@@ -77,6 +80,14 @@ export default class LammpsRuntime{
             (run) => this.handleFor(run),
             hostUser()
         );
+        this.attachSimulation = new AttachSimulation(
+            containerManager,
+            this.runStore,
+            lifecycleManager,
+            monitor,
+            (run) => this.handleFor(run),
+            scoped('attach-simulation')
+        );
     }
 
     describeBuild(spec: BuildSpec): BuildIdentity{
@@ -93,6 +104,14 @@ export default class LammpsRuntime{
 
     async run(spec: RunSpec): Promise<RunHandle>{
         return await this.startSimulation.execute(spec);
+    }
+
+    async listRunning(): Promise<RunContainer[]>{
+        return await this.attachSimulation.listRunning();
+    }
+
+    async attach(containerId: string): Promise<RunHandle>{
+        return await this.attachSimulation.execute(containerId);
     }
 
     async stop(runId: string): Promise<RunSnapshot>{
