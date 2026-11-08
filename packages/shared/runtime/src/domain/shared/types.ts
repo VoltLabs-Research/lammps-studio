@@ -8,6 +8,8 @@ export type RunState =
     | 'failed'
     | 'cancelled';
 
+export type Accelerator = 'none' | 'omp' | 'kokkos' | 'gpu' | 'intel' | 'opt';
+
 export type RunID = string;
 export type ImageTag = string;
 export type ISODateString = string;

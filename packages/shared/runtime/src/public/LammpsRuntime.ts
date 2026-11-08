@@ -1,7 +1,6 @@
 import Docker from 'dockerode';
 import type { Logger as PinoBaseLogger } from 'pino';
-import { BuildResult } from '../domain/build/Build';
-import { BuildSpec } from '../domain/build/BuildSpec';
+import { BuildResult, BuildSpec } from '../domain/build/BuildSpec';
 import { RuntimeEvent, RuntimeEventMap } from '../domain/observability/EventMap';
 import RunHandle from '../domain/simulation/RunHandle';
 import { RunSnapshot } from '../domain/simulation/RunSnapshot';
@@ -14,7 +13,6 @@ import StartSimulation from '../application/simulations/StartSimulation';
 import StopSimulation from '../application/simulations/StopSimulation';
 import { EventBusPort, EventHandler } from '../ports/EventBusPort';
 import { Logger } from '../ports/Logger';
-import InMemoryImageStore from '../infrastructure/persistence/InMemoryStore';
 import InMemoryRunStore from '../infrastructure/fs/InMemoryRunStore';
 import PinoLogger from '../infrastructure/logging/PinoLogger';
 import EventEmitterBus from '../infrastructure/events/EventEmitterBus';
@@ -33,7 +31,6 @@ export interface LammpsRuntimeOptions{
 export default class LammpsRuntime{
     private readonly eventBus: EventBusPort<RuntimeEventMap>;
     private readonly logger: Logger;
-    private readonly imageStore = new InMemoryImageStore();
     private readonly runStore = new InMemoryRunStore();
 
     private readonly ensureImage: EnsureImage;
@@ -55,7 +52,7 @@ export default class LammpsRuntime{
         const eventPublisher = new SimulationEventPublisher(this.eventBus);
         const lifecycleManager = new SimulationLifecycleManager(this.runStore, eventPublisher);
 
-        this.ensureImage = new EnsureImage(imageBuilder, this.imageStore, this.eventBus, this.logger.child({ scope: 'ensure-image' }));
+        this.ensureImage = new EnsureImage(imageBuilder, this.eventBus, this.logger.child({ scope: 'ensure-image' }));
         this.stopSimulation = new StopSimulation(this.runStore, containerManager, lifecycleManager, this.logger.child({ scope: 'stop-simulation' }));
         this.startSimulation = new StartSimulation(
             this.ensureImage,

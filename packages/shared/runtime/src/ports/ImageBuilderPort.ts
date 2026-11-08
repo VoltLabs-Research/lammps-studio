@@ -1,7 +1,11 @@
 import Build from '../domain/build/Build';
-import type { BuildResult } from '../domain/build/Build';
+
+export interface ImageInfo{
+    imageId: string;
+    sizeBytes: number;
+}
 
 export interface ImageBuilderPort{
-    exists(tag: string): Promise<boolean>;
-    build(build: Build, onProgress: (message: string) => void): Promise<BuildResult>;
+    inspect(tag: string): Promise<ImageInfo | null>;
+    build(build: Build, onLine: (line: string) => void): Promise<ImageInfo>;
 }

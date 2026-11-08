@@ -1,18 +1,15 @@
-import { BuildResult } from '../build/Build';
-import { ResolvedBuildSpec } from '../build/BuildSpec';
+import { BuildIdentity, BuildResult, BuildSpec } from '../build/BuildSpec';
 import { ScalarValue } from '../shared/types';
 import { RunSnapshot } from '../simulation/RunSnapshot';
 
-export interface BuildStartEvent{
-    tag: string;
-    hash: string;
-    spec: ResolvedBuildSpec;
+export interface BuildStartEvent extends BuildIdentity{
+    spec: BuildSpec;
 }
 
 export interface BuildLogEvent{
     tag: string;
     hash: string;
-    message: string;
+    line: string;
 }
 
 export interface BuildEndEvent{
