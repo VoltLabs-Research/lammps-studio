@@ -1,4 +1,4 @@
-# 2d indenter simulation
+export const indentScript = `# 2d indenter simulation
 
 dimension       2
 boundary        p s p
@@ -57,3 +57,4 @@ run             30000
 
 unfix           4
 run             30000
+`;

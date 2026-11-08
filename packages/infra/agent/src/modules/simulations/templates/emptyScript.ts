@@ -1,4 +1,4 @@
-# 3d Lennard-Jones melt
+export const emptyScript = `# 3d Lennard-Jones melt
 
 units           lj
 atom_style      atomic
@@ -19,7 +19,6 @@ neigh_modify    every 20 delay 0 check no
 
 fix             1 all nve
 
-dump            1 all custom 50 melt.lammpstrj id type x y z
-
 thermo          50
 run             250
+`;

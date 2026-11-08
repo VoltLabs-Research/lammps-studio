@@ -1,4 +1,4 @@
-# 2d LJ crack simulation
+export const crackScript = `# 2d LJ crack simulation
 
 dimension       2
 boundary        s s p
@@ -67,3 +67,4 @@ neigh_modify    exclude type 2 3
 dump            1 all custom 500 crack.lammpstrj id type x y z
 
 run             5000
+`;

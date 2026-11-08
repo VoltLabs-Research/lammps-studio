@@ -1,17 +1,23 @@
 import ValidationError from '@lammps-studio/readable/errors/Validation';
 import { SimulationError } from '../contracts/domain/errors';
-import { config } from '@/config';
+import { crackScript } from '../templates/crackScript';
+import { emptyScript } from '../templates/emptyScript';
+import { indentScript } from '../templates/indentScript';
+import { meltScript } from '../templates/meltScript';
 import { statIfExists } from '@/shared/utils/fsErrors';
 import { CreateSimulationInput } from '@lammps-studio/contracts/simulation/http';
 import { logger } from '@lammps-studio/readable/utils/Logger';
 import { execFile } from 'node:child_process';
-import { cp } from 'node:fs/promises';
+import { cp, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 
-const EMPTY_TEMPLATE = 'empty';
-const EXAMPLES_DIR = 'examples';
-const EXAMPLES = ['melt', 'crack', 'indent'];
+const ENTRY_SCRIPT = 'main.in';
+const EXAMPLES = new Map([
+    ['melt', meltScript],
+    ['crack', crackScript],
+    ['indent', indentScript]
+]);
 
 const execFileAsync = promisify(execFile);
 
@@ -19,9 +25,9 @@ export default class SimulationTemplateService{
     async fill(path: string, input: CreateSimulationInput){
         switch(input.template){
             case 'empty':
-                return this.#copyAsset(path, EMPTY_TEMPLATE);
+                return this.#writeEntry(path, emptyScript);
             case 'example':
-                return this.#copyExample(path, this.#source(input));
+                return this.#writeExample(path, this.#source(input));
             case 'folder':
                 return this.#copyFolder(path, this.#source(input));
             case 'git':
@@ -36,14 +42,15 @@ export default class SimulationTemplateService{
         return source;
     }
 
-    async #copyAsset(path: string, asset: string){
-        await cp(join(config.assetsDir, asset), path, { recursive: true });
+    async #writeEntry(path: string, script: string){
+        await writeFile(join(path, ENTRY_SCRIPT), script);
     }
 
-    async #copyExample(path: string, example: string){
-        if(!EXAMPLES.includes(example)) throw new ValidationError({ source: 'Unknown example' });
+    async #writeExample(path: string, example: string){
+        const script = EXAMPLES.get(example);
+        if(script === undefined) throw new ValidationError({ source: 'Unknown example' });
 
-        await this.#copyAsset(path, join(EXAMPLES_DIR, example));
+        await this.#writeEntry(path, script);
     }
 
     async #copyFolder(path: string, source: string){

@@ -1,4 +1,8 @@
 import { config } from '@/config';
+import { crackScript } from '@/modules/simulations/templates/crackScript';
+import { emptyScript } from '@/modules/simulations/templates/emptyScript';
+import { indentScript } from '@/modules/simulations/templates/indentScript';
+import { meltScript } from '@/modules/simulations/templates/meltScript';
 import { simulationRoutes } from '@lammps-studio/contracts/simulation/routes';
 import { listenToEvents } from '@tests/events';
 import { writeTree } from '@tests/files';
@@ -13,7 +17,11 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 const app = await startAgent();
 
-const asset = (path: string): Promise<string> => readFile(join(config.assetsDir, path), 'utf8');
+const EXAMPLES = [
+    ['melt', meltScript],
+    ['crack', crackScript],
+    ['indent', indentScript]
+];
 
 describe('SimulationController', () => {
     it('creates an empty simulation as a folder with a runnable LJ melt', async () => {
@@ -28,7 +36,8 @@ describe('SimulationController', () => {
             hasPreview: false
         });
         expect(simulation.createdAt).toMatch(ISO_DATE);
-        expect(await readFile(join(folderOf(simulation), 'main.in'), 'utf8')).toBe(await asset('empty/main.in'));
+        expect(emptyScript).toMatch(/^run\s+250$/m);
+        expect(await readFile(join(folderOf(simulation), 'main.in'), 'utf8')).toBe(emptyScript);
         const record = JSON.parse(await readFile(join(folderOf(simulation), '.studio', 'simulation.json'), 'utf8'));
         expect(record).toEqual({
             id: simulation.id,
@@ -40,11 +49,11 @@ describe('SimulationController', () => {
     });
 
     it('creates a simulation from each bundled example', async () => {
-        for(const example of ['melt', 'crack', 'indent']){
+        for(const [example, script] of EXAMPLES){
             const simulation = await createSimulation(app, { name: `Example ${example}`, template: 'example', source: example });
 
             expect(simulation.entry).toBe('main.in');
-            expect(await readFile(join(folderOf(simulation), 'main.in'), 'utf8')).toBe(await asset(`examples/${example}/main.in`));
+            expect(await readFile(join(folderOf(simulation), 'main.in'), 'utf8')).toBe(script);
         }
     });
 

@@ -3,7 +3,6 @@ import { optionalEnv } from '@lammps-studio/readable/utils/env';
 import { randomBytes } from 'node:crypto';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath, URL } from 'node:url';
 
 const TOKEN_BYTES = 32;
 const LOOPBACK = '127.0.0.1';
@@ -23,7 +22,6 @@ export const config = {
     },
     root,
     simulationsDir: join(root, 'simulations'),
-    assetsDir: fileURLToPath(new URL('../assets', import.meta.url)),
     codeServer: {
         command: optionalEnv('LAMMPS_CODE_SERVER') ?? join(homedir(), '.local', 'bin', 'code-server'),
         userDataDir: join(root, '.code-server')
