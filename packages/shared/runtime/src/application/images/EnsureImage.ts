@@ -49,8 +49,9 @@ export default class EnsureImage{
         }
 
         const startedAt = Date.now();
-        const image = await this.imageBuilder.build(build, (line) => {
-            this.eventBus.emit('build:log', { hash: identity.hash, tag: identity.tag, line });
+        const image = await this.imageBuilder.build(build, {
+            line: (line) => this.eventBus.emit('build:log', { hash: identity.hash, tag: identity.tag, line }),
+            progress: (progress) => this.eventBus.emit('build:progress', { hash: identity.hash, ...progress })
         });
 
         return {

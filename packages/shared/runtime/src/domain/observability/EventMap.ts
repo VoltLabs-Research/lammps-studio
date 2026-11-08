@@ -1,4 +1,5 @@
 import { BuildIdentity, BuildResult, BuildSpec } from '../build/BuildSpec';
+import { BuildProgress } from '../build/BuildStage';
 import { ScalarValue } from '../shared/types';
 import { RunSnapshot } from '../simulation/RunSnapshot';
 
@@ -10,6 +11,10 @@ export interface BuildLogEvent{
     tag: string;
     hash: string;
     line: string;
+}
+
+export interface BuildProgressEvent extends BuildProgress{
+    hash: string;
 }
 
 export interface BuildEndEvent{
@@ -92,6 +97,7 @@ export interface DumpFrameEvent{
 export interface RuntimeEventMap{
     'build:start': BuildStartEvent;
     'build:log': BuildLogEvent;
+    'build:progress': BuildProgressEvent;
     'build:end': BuildEndEvent;
     'build:error': BuildErrorEvent;
     'simulation:created': SimulationCreatedEvent;

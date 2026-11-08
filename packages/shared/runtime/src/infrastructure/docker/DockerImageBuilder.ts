@@ -6,8 +6,9 @@ import Build from '../../domain/build/Build';
 import { BuildErrors } from '../../domain/shared/errors';
 import { isDockerNotFound } from '../../domain/shared/toError';
 import type { Logger } from '../../ports/Logger';
-import { ImageBuilderPort, ImageInfo } from '../../ports/ImageBuilderPort';
+import { BuildObserver, ImageBuilderPort, ImageInfo } from '../../ports/ImageBuilderPort';
 import { renderDockerfile } from './renderDockerfile';
+import DockerBuildProgress from './DockerBuildProgress';
 import DockerBuildStream from './DockerBuildStream';
 
 export default class DockerImageBuilder implements ImageBuilderPort{
@@ -32,14 +33,22 @@ export default class DockerImageBuilder implements ImageBuilderPort{
         }
     }
 
-    async build(build: Build, onLine: (line: string) => void): Promise<ImageInfo>{
+    async build(build: Build, observer: BuildObserver): Promise<ImageInfo>{
         const tag = build.tag();
+        const dockerfile = renderDockerfile(build);
+        const progress = new DockerBuildProgress(dockerfile.stages, build.version);
         const contextDir = await mkdtemp(path.join(os.tmpdir(), 'lammps-runtime-build-'));
 
+        observer.progress(progress.snapshot());
+
         try{
-            await writeFile(path.join(contextDir, 'Dockerfile'), renderDockerfile(build).text, 'utf8');
+            await writeFile(path.join(contextDir, 'Dockerfile'), dockerfile.text, 'utf8');
             const stream = await this.docker.buildImage({ context: contextDir, src: ['Dockerfile'] }, { t: tag });
-            await this.follow(stream, onLine);
+            await this.follow(stream, (line) => {
+                progress.push(line);
+                observer.line(line);
+                observer.progress(progress.snapshot());
+            });
         }finally{
             await rm(contextDir, { recursive: true, force: true });
         }
@@ -49,7 +58,10 @@ export default class DockerImageBuilder implements ImageBuilderPort{
             throw BuildErrors.Failed(`image ${tag} missing after build`);
         }
 
+        progress.complete();
+        observer.progress(progress.snapshot());
         this.logger.info(`Docker image built: ${tag}`, { imageId: image.imageId });
+
         return image;
     }
 
