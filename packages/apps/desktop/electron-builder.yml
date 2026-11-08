@@ -1,0 +1,32 @@
+appId: com.voltlabs.lammps-studio
+extraMetadata:
+  name: lammps-studio
+  desktopName: lammps-studio.desktop
+directories:
+  buildResources: resources
+  output: release
+files:
+  - dist/main.cjs
+  - dist/preload.cjs
+extraResources:
+  - from: dist/agent.cjs
+    to: agent.cjs
+  - from: ../studio/dist
+    to: studio
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  hardenedRuntime: true
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+win:
+  target: nsis
+nsis:
+  artifactName: ${productName}-Setup-${version}.${ext}
+linux:
+  category: Science
+  maintainer: VoltLabs Research <voltlabs-research@users.noreply.github.com>
+  syncDesktopName: true
+  target: [AppImage, deb]
