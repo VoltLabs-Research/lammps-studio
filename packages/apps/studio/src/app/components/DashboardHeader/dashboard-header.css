@@ -1,5 +1,5 @@
 .dash-header { height: 56px; flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px) minmax(0, 1fr); align-items: center; gap: 8px; padding: 0 16px; -webkit-app-region: drag; }
-.dash-header button { -webkit-app-region: no-drag; }
+.dash-header :is(button, input, select, textarea, a, [role="button"], [tabindex]) { -webkit-app-region: no-drag; }
 .search {
     flex: 0 1 420px; height: 34px; border-radius: 999px; background: var(--tint); display: flex; align-items: center; gap: 8px; padding: 0 12px;
     color: var(--muted); font-size: var(--text-sm); border: 0; text-align: left; margin-inline: auto; min-width: 0;

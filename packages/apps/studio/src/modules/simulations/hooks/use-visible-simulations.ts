@@ -4,7 +4,7 @@ import { useFiltersStore } from '@/modules/simulations/store/filters';
 import { phaseOf } from '@/modules/simulations/utils/simulation-phase';
 import { matchesStatus, STATUS_FILTERS, StatusFilter } from '@/modules/simulations/utils/status-filters';
 import { SegOption } from '@/shared/contracts/ui';
-import { useMachinesStore } from '@/shared/store/machines';
+import { useMachines } from '@/shared/hooks/use-machines';
 import { useSimulationsStore } from '@/shared/store/simulations';
 
 export interface VisibleSimulations{
@@ -17,7 +17,8 @@ export interface VisibleSimulations{
 
 export const useVisibleSimulations = (): VisibleSimulations => {
     const all = useSimulationsStore((state) => state.items);
-    const machines = useMachinesStore((state) => state.items);
+    const loaded = useSimulationsStore((state) => state.status === 'ready');
+    const machines = useMachines();
     const status = useFiltersStore((state) => state.status);
     const machineId = useFiltersStore((state) => state.machineId);
 
@@ -31,7 +32,7 @@ export const useVisibleSimulations = (): VisibleSimulations => {
         filters: STATUS_FILTERS.map(({ value, label, matches }) => ({
             value,
             label,
-            count: phased.filter(({ phase }) => matches(phase)).length
+            count: loaded ? phased.filter(({ phase }) => matches(phase)).length : undefined
         })),
         simulations: phased.filter(({ phase }) => matchesStatus(status, phase)).map(({ simulation }) => simulation),
         onMachine: base.length

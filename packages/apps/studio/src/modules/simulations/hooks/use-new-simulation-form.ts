@@ -2,8 +2,8 @@ import { SimulationTemplate } from '@lammps-studio/contracts/simulation/domain';
 import { simulationApi } from '@/modules/simulations/api/api';
 import { simulationErrorCopy } from '@/modules/simulations/utils/error-messages';
 import { ExampleName } from '@/modules/simulations/utils/templates';
+import { useMachines } from '@/shared/hooks/use-machines';
 import { useModal } from '@/shared/hooks/use-modal';
-import { useMachinesStore } from '@/shared/store/machines';
 import { useNavigationStore } from '@/shared/store/navigation';
 import { useSimulationsStore } from '@/shared/store/simulations';
 import { useState } from 'react';
@@ -39,7 +39,7 @@ const sourceOf = (template: SimulationTemplate, example: ExampleName, folder: st
 
 export const useNewSimulationForm = (): NewSimulationForm => {
     const { close } = useModal();
-    const machines = useMachinesStore((state) => state.items);
+    const machines = useMachines();
     const openWorkspace = useNavigationStore((state) => state.openWorkspace);
     const [name, setName] = useState('');
     const [pickedMachine, setMachineId] = useState<string | null>(null);

@@ -1,17 +1,19 @@
 import { EVENTS_CHANNEL, StudioEvent, StudioEventOf, StudioEventType } from '@lammps-studio/contracts/events/gateway';
 import { agentEndpoint } from '@/shared/config/agent';
+import { useConnectionStore } from '@/shared/store/connection';
 
 type Listener = (frame: StudioEvent) => void;
 
 const INITIAL_BACKOFF_MS = 500;
 const MAX_BACKOFF_MS = 10_000;
+const OFFLINE_GRACE_MS = 4000;
 
 const listeners = new Set<Listener>();
-const reconnectHandlers = new Set<() => void>();
+const connectHandlers = new Set<() => void>();
 
 let socket: WebSocket | null = null;
 let attempts = 0;
-let hasOpened = false;
+let graceTimer: ReturnType<typeof setTimeout> | null = null;
 
 const isOfType = <T extends StudioEventType>(frame: StudioEvent, type: T): frame is StudioEventOf<T> => frame.type === type;
 
@@ -24,10 +26,25 @@ const backoffDelay = (): number => {
 const channelUrl = (url: string, token: string): string =>
     `${url.replace(/^http/, 'ws').replace(/\/+$/, '')}${EVENTS_CHANNEL}?token=${encodeURIComponent(token)}`;
 
+const startGrace = () => {
+    if(graceTimer !== null) return;
+
+    graceTimer = setTimeout(() => {
+        graceTimer = null;
+        useConnectionStore.getState().setStatus('offline');
+    }, OFFLINE_GRACE_MS);
+};
+
+const endGrace = () => {
+    if(graceTimer !== null) clearTimeout(graceTimer);
+    graceTimer = null;
+};
+
 const onOpen = () => {
     attempts = 0;
-    if(hasOpened) reconnectHandlers.forEach((handler) => handler());
-    hasOpened = true;
+    endGrace();
+    useConnectionStore.getState().setStatus('online');
+    connectHandlers.forEach((handler) => handler());
 };
 
 const onMessage = (event: MessageEvent<string>) => {
@@ -46,6 +63,7 @@ const connect = () => {
     const agent = agentEndpoint();
     if(socket || !agent) return;
 
+    startGrace();
     socket = new WebSocket(channelUrl(agent.url, agent.token));
     socket.addEventListener('open', onOpen);
     socket.addEventListener('message', onMessage);
@@ -64,10 +82,10 @@ export const subscribe = <T extends StudioEventType>(type: T, handler: (frame: S
     };
 };
 
-export const onReconnect = (handler: () => void): (() => void) => {
-    reconnectHandlers.add(handler);
+export const onConnect = (handler: () => void): (() => void) => {
+    connectHandlers.add(handler);
 
     return () => {
-        reconnectHandlers.delete(handler);
+        connectHandlers.delete(handler);
     };
 };

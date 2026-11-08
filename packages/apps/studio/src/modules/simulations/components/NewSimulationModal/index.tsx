@@ -9,13 +9,13 @@ import InlineError from '@/shared/components/InlineError';
 import Modal from '@/shared/components/Modal';
 import ModalHead from '@/shared/components/ModalHead';
 import TextField from '@/shared/components/TextField';
+import { useMachines } from '@/shared/hooks/use-machines';
 import { useModal } from '@/shared/hooks/use-modal';
-import { useMachinesStore } from '@/shared/store/machines';
 import '@/modules/simulations/components/NewSimulationModal/new-simulation-modal.css';
 
 const NewSimulationModal = () => {
     const { close } = useModal();
-    const machines = useMachinesStore((state) => state.items);
+    const machines = useMachines();
     const form = useNewSimulationForm();
 
     const submit = (event: FormEvent<HTMLFormElement>) => {

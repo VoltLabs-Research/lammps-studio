@@ -10,16 +10,16 @@ import InlineError from '@/shared/components/InlineError';
 import Modal from '@/shared/components/Modal';
 import ModalHead from '@/shared/components/ModalHead';
 import Popup from '@/shared/components/Popup';
+import { useMachines } from '@/shared/hooks/use-machines';
 import { useModal } from '@/shared/hooks/use-modal';
 import { useBuildsStore } from '@/shared/store/builds';
-import { useMachinesStore } from '@/shared/store/machines';
 import '@/modules/settings/components/NewBuildSheet/new-build-sheet.css';
 
 const PACKAGES_WIDTH = 300;
 
 const NewBuildSheet = () => {
     const { close } = useModal();
-    const machines = useMachinesStore((state) => state.items);
+    const machines = useMachines();
     const [pickedMachine, setMachineId] = useState<string | null>(null);
     const [packages, setPackages] = useState<string[]>([]);
     const [pending, setPending] = useState(false);

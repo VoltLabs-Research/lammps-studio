@@ -4,7 +4,7 @@ import { Command } from '@/modules/palette/contracts/command';
 import { openSettings } from '@/modules/settings/utils/open-settings';
 import { useFiltersStore } from '@/modules/simulations/store/filters';
 import { openNewSimulation } from '@/modules/simulations/utils/open-new-simulation';
-import { useMachinesStore } from '@/shared/store/machines';
+import { useMachines } from '@/shared/hooks/use-machines';
 import { useNavigationStore } from '@/shared/store/navigation';
 import { isDark, useThemeStore } from '@/shared/store/theme';
 
@@ -24,7 +24,7 @@ const switchTheme = () => {
 };
 
 export const useDashboardCommands = (): Command[] => {
-    const machines = useMachinesStore((state) => state.items);
+    const machines = useMachines();
 
     return [
         { id: 'new-simulation', label: 'New simulation', icon: Plus, run: openNewSimulation },

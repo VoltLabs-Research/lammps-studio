@@ -3,11 +3,11 @@ import BuildRow from '@/modules/settings/components/BuildRow';
 import { openNewBuild } from '@/modules/settings/utils/open-new-build';
 import Group from '@/shared/components/Group';
 import GroupItem from '@/shared/components/GroupItem';
+import { useMachines } from '@/shared/hooks/use-machines';
 import { useBuildsStore } from '@/shared/store/builds';
-import { useMachinesStore } from '@/shared/store/machines';
 
 const BuildsTab = () => {
-    const machines = useMachinesStore((state) => state.items);
+    const machines = useMachines();
     const builds = useBuildsStore((state) => state.items);
 
     return (

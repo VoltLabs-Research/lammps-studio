@@ -1,9 +1,11 @@
 import { Machine } from '@lammps-studio/contracts/machine/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
-import { Atom, CircleAlert } from 'lucide-react';
+import { Atom, CircleAlert, Monitor } from 'lucide-react';
 import SimulationCard from '@/modules/simulations/components/SimulationCard';
 import Button from '@/shared/components/Button';
 import Empty from '@/shared/components/Empty';
+import { hasCode } from '@/shared/errors/has-code';
+import { useConnectionStore } from '@/shared/store/connection';
 import { useSimulationsStore } from '@/shared/store/simulations';
 import { sharedErrorCopy } from '@/shared/utils/error-copy';
 import '@/modules/simulations/components/SimulationsBody/simulations-body.css';
@@ -25,13 +27,23 @@ const SimulationsBody = ({ simulations, machine, onMachine }: SimulationsBodyPro
     const status = useSimulationsStore((state) => state.status);
     const error = useSimulationsStore((state) => state.error);
     const load = useSimulationsStore((state) => state.load);
+    const offline = useConnectionStore((state) => state.status === 'offline');
 
-    if(status === 'loading') return null;
-    if(status === 'failed'){
+    if(status === 'failed' && !hasCode(error, 'Agent::Unreachable')){
         return (
             <Empty icon={CircleAlert} title='Simulations didn’t load' className='simulations__empty'>
                 <p>{sharedErrorCopy(error)}</p>
                 <Button size='sm' onClick={load}>Try again</Button>
+            </Empty>
+        );
+    }
+
+    if(status !== 'ready'){
+        if(!offline) return null;
+
+        return (
+            <Empty icon={Monitor} title='This computer is offline' className='simulations__empty'>
+                <p>Studio connects again as soon as it’s back.</p>
             </Empty>
         );
     }
