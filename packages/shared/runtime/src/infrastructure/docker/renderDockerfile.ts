@@ -10,7 +10,7 @@ const INSTALL_PREFIX = '/usr/local';
 
 export const CONTAINER_SIMULATION_DIR = '/simulation';
 
-const TOOLCHAIN_PACKAGES = ['build-essential', 'ca-certificates', 'cmake', 'git', 'libopenmpi-dev', 'openmpi-bin'];
+const TOOLCHAIN_PACKAGES = ['build-essential', 'ca-certificates', 'cmake', 'git', 'libopenmpi-dev', 'openmpi-bin', 'python3'];
 
 const THREADED_PACKAGES = ['OPENMP', 'KOKKOS'];
 

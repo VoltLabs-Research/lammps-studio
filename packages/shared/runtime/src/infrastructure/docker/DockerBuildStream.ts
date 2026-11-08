@@ -1,4 +1,6 @@
-const LINE_BREAK = /\r?\n/;
+const LINE_BREAK = /\r\n|\r|\n/;
+const ESCAPE = String.fromCharCode(0x1b);
+const ANSI_ESCAPE = new RegExp(`${ESCAPE}\\[[0-9;]*[A-Za-z]`, 'g');
 
 export interface DockerBuildEvent{
     stream?: string;
@@ -49,7 +51,7 @@ export default class DockerBuildStream{
     }
 
     private pushText(text: string){
-        const parts = `${this.#pending}${text}`.split(LINE_BREAK);
+        const parts = `${this.#pending}${text.replace(ANSI_ESCAPE, '')}`.split(LINE_BREAK);
         this.#pending = parts.pop() ?? '';
 
         for(const line of parts){
