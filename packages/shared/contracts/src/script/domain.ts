@@ -1,3 +1,5 @@
+export type UnitStyle = 'lj' | 'real' | 'metal' | 'si' | 'cgs' | 'electron' | 'micro' | 'nano';
+
 export interface ScriptVariable{
     name: string;
     style: string;
@@ -45,6 +47,7 @@ export interface ScriptInfo{
     runs: ScriptRun[];
     requiredPackages: RequiredPackage[];
     thermoEvery: number | null;
+    units: UnitStyle;
 }
 
 export interface EntryCandidate{

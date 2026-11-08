@@ -1,4 +1,4 @@
-import type { RequiredPackage, ScriptCommand, ScriptDump, ScriptInfo, ScriptRun } from '@lammps-studio/contracts/script/domain';
+import type { RequiredPackage, ScriptCommand, ScriptDump, ScriptInfo, ScriptRun, UnitStyle } from '@lammps-studio/contracts/script/domain';
 import { isNumeric, splitLines } from '../shared/text';
 import { normalizePath } from '../shared/paths';
 import { ScriptFile } from './domain';
@@ -26,6 +26,7 @@ const IMPLIED_DUMP_COLUMNS: Record<string, string[]> = {
 const LISTED_DUMP_STYLES = new Set(['custom', 'cfg', 'local', 'netcdf', 'h5md']);
 const DUMP_STYLE_VARIANT = /\/(?:gz|zstd|mpiio|adios)$/;
 const INTEGER = /^\d+$/;
+const UNIT_STYLES: readonly UnitStyle[] = ['lj', 'real', 'metal', 'si', 'cgs', 'electron', 'micro', 'nano'];
 
 interface ScriptState{
     files: Map<string, string>;
@@ -37,6 +38,7 @@ interface ScriptState{
     runs: ScriptRun[];
     packages: Map<string, RequiredPackage>;
     thermoEvery: number | null;
+    units: UnitStyle;
 }
 
 type CommandHandler = (state: ScriptState, args: string[], line: number) => void;
@@ -126,6 +128,10 @@ const handleThermo: CommandHandler = (state, args) => {
     state.thermoEvery = integerOf(args[0]) ?? state.thermoEvery;
 };
 
+const handleUnits: CommandHandler = (state, args) => {
+    state.units = UNIT_STYLES.find((style) => style === args[0]) ?? state.units;
+};
+
 const handleAccelerator: CommandHandler = (state, args, line) => {
     const name = SUFFIX_PACKAGES[args[0] ?? ''];
     if(name !== undefined && !state.packages.has(name)){
@@ -140,6 +146,7 @@ const HANDLERS: Record<string, CommandHandler> = {
     dump: handleDump,
     run: handleRun,
     thermo: handleThermo,
+    units: handleUnits,
     package: handleAccelerator,
     suffix: handleAccelerator,
     include: (state, args, line) => walk(state, normalizePath(args[0] ?? ''), line)
@@ -190,7 +197,8 @@ export const analyseScript = (entry: string, files: ScriptFile[]): ScriptInfo =>
         dumps: [],
         runs: [],
         packages: new Map(),
-        thermoEvery: null
+        thermoEvery: null,
+        units: 'lj'
     };
 
     walk(state, path, null);
@@ -204,6 +212,7 @@ export const analyseScript = (entry: string, files: ScriptFile[]): ScriptInfo =>
         dumps: state.dumps,
         runs: state.runs,
         requiredPackages: [...state.packages.values()],
-        thermoEvery: state.thermoEvery
+        thermoEvery: state.thermoEvery,
+        units: state.units
     };
 };

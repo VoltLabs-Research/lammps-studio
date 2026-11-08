@@ -81,6 +81,22 @@ describe('analyseScript on a real nanowire script', () => {
         expect(info.entry).toBe('main.in');
         expect(info.lines).toBe(mainScript.split('\n').length - 1);
     });
+
+    it('takes the unit style from the included setup file', () => {
+        expect(info.units).toBe('metal');
+    });
+});
+
+describe('units', () => {
+    it('reads real units from the water box', () => {
+        const water = analyseScript('water.lmp', [{ path: 'water.lmp', text: waterScript }, { path: 'setup.lammps', text: waterSetup }]);
+
+        expect(water.units).toBe('real');
+    });
+
+    it('falls back to lj, the LAMMPS default, without a units command', () => {
+        expect(analyseScript('in.melt', [{ path: 'in.melt', text: 'run 100\n' }]).units).toBe('lj');
+    });
 });
 
 describe('requiredPackages', () => {
