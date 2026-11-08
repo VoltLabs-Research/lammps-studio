@@ -67,11 +67,21 @@ A run survives a Studio restart: `run.json` is written on every state change, co
 labels `lammps-studio.simulation` and `lammps-studio.run`, and the agent reattaches to running
 containers at boot.
 
+## Launching the agent
+
+`vite-node src/server.ts` (dev) or the bundled `agent.cjs` (packaged desktop). Environment:
+`LAMMPS_STUDIO_ROOT` (default `~/lammps-studio`), `LAMMPS_AGENT_TOKEN` (generated when unset),
+`LAMMPS_AGENT_PORT` (default `0`, a free port). It binds `127.0.0.1` only. Once listening it
+prints one line to stdout, `AGENT_READY_PREFIX` followed by an `AgentReadyMessage` as JSON
+(`contracts/desktop/bridge.ts`); the desktop shell reads that line and hands the endpoint to
+studio through the preload as `window.studio: StudioBridge`. Studio in a plain browser (vite dev
+without Electron) reads `VITE_AGENT_URL` and `VITE_AGENT_TOKEN` instead.
+
 ## The wire
 
 - HTTP: `call(endpoint, { path, query, body })` on both sides, typed by the route tables. The
   envelope is `{ data }` / `{ error: 'Domain::Cause' }`. Every request carries
-  `Authorization: Bearer <token>`; the token comes from the agent's launch.
+  `Authorization: Bearer <token>`; the WebSocket passes it as `?token=`.
 - Live state goes through one WebSocket, `EVENTS_CHANNEL` (`/events`), never polling. Frames are
   `StudioEvent` from `contracts/events/gateway.ts`. Log lines and thermo rows are batched every
   100 ms. A new dump frame sends `run:frame` with its index; studio fetches the bytes.
