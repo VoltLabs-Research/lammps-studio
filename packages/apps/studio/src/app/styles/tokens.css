@@ -1,0 +1,169 @@
+:root {
+    --page: #e4e4e7;
+    --canvas: #f5f5f5;
+    --background: rgba(245, 245, 245, 0.9);
+    --fg: #28282b;
+    --dashboard-surface: rgba(238, 238, 240, 0.75);
+    --surface: rgba(255, 255, 255, 0.75);
+    --surface-2: rgba(232, 232, 234, 0.8);
+    --surface-3: rgba(224, 224, 227, 0.85);
+    --overlay: rgba(255, 255, 255, 0.78);
+    --field: rgba(255, 255, 255, 0.55);
+    --default: oklch(91.5% 0.002 286.375);
+    --default-hover: oklch(88.5% 0.003 286.375);
+    --muted: #5e5e61;
+    --border: oklch(90% 0.004 286.32);
+    --separator: oklch(92% 0.004 286.32);
+    --border-2: oklch(87% 0.004 286.32);
+    --success: #34c759;
+    --warning: #c99a00;
+    --danger: #ff3b30;
+    --info: #007aff;
+    --viewport: #ffffff;
+    --tile: rgba(255, 255, 255, 0.82);
+    --tile-hover: #ffffff;
+    --tile-solid: #ffffff;
+    --tint: rgba(40, 40, 43, 0.06);
+    --tint-2: rgba(40, 40, 43, 0.1);
+    --shadow-overlay: 0 12px 32px -8px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    --window-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+    /* The editor iframe paints VS Code's own Light/Dark Modern theme. */
+    --code-bg: #ffffff;
+    --code-side: #f8f8f8;
+    --code-line: #f3f3f3;
+    --code-gutter: #6e7681;
+    --code-fg: #3b3b3b;
+    --code-border: #e5e5e5;
+    --code-tab: #f8f8f8;
+    --code-status: #f8f8f8;
+    --code-sel: #e8e8e8;
+    --tok-cmd: #0000ff;
+    --tok-style: #267f99;
+    --tok-num: #098658;
+    --tok-str: #a31515;
+    --tok-var: #001080;
+    --tok-com: #008000;
+    --tok-lens: #919191;
+
+    --font-sans: 'Geist', 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Geist Mono', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+    --text-2xs: 0.6875rem;
+    --text-xs: 0.75rem;
+    --text-sm: 0.8125rem;
+    --text-base: 0.875rem;
+    --w-medium: 480;
+    --w-semibold: 550;
+    --w-bold: 620;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --glass: blur(16px) saturate(1.2);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --page: #000000;
+        --canvas: #090909;
+        --background: rgba(9, 9, 9, 0.85);
+        --fg: #e9e9ec;
+        --dashboard-surface: rgba(20, 20, 22, 0.75);
+        --surface: rgba(28, 28, 32, 0.75);
+        --surface-2: rgba(42, 42, 46, 0.8);
+        --surface-3: rgba(52, 52, 56, 0.85);
+        --overlay: rgba(24, 24, 27, 0.72);
+        --field: rgba(23, 23, 25, 0.55);
+        --default: #2b2b2e;
+        --default-hover: #353539;
+        --muted: #9294a1;
+        --border: #1d1d20;
+        --separator: #1d1d20;
+        --border-2: #2b2b2e;
+        --success: #2dcc70;
+        --warning: #ffd60a;
+        --danger: #ff453a;
+        --info: #0a84ff;
+        --viewport: #070708;
+        --tile: rgba(255, 255, 255, 0.045);
+        --tile-hover: rgba(255, 255, 255, 0.07);
+        --tile-solid: #141416;
+        --tint: rgba(233, 233, 236, 0.06);
+        --tint-2: rgba(233, 233, 236, 0.1);
+        --shadow-overlay: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+        --window-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.07);
+        --code-bg: #1f1f1f;
+        --code-side: #181818;
+        --code-line: #282828;
+        --code-gutter: #6e7681;
+        --code-fg: #cccccc;
+        --code-border: #2b2b2b;
+        --code-tab: #181818;
+        --code-status: #181818;
+        --code-sel: #2a2d2e;
+        --tok-cmd: #569cd6;
+        --tok-style: #4ec9b0;
+        --tok-num: #b5cea8;
+        --tok-str: #ce9178;
+        --tok-var: #9cdcfe;
+        --tok-com: #6a9955;
+        --tok-lens: #999999;
+        color-scheme: dark;
+    }
+}
+
+:root[data-theme="dark"] {
+    --page: #000000;
+    --canvas: #090909;
+    --background: rgba(9, 9, 9, 0.85);
+    --fg: #e9e9ec;
+    --dashboard-surface: rgba(20, 20, 22, 0.75);
+    --surface: rgba(28, 28, 32, 0.75);
+    --surface-2: rgba(42, 42, 46, 0.8);
+    --surface-3: rgba(52, 52, 56, 0.85);
+    --overlay: rgba(24, 24, 27, 0.72);
+    --field: rgba(23, 23, 25, 0.55);
+    --default: #2b2b2e;
+    --default-hover: #353539;
+    --muted: #9294a1;
+    --border: #1d1d20;
+    --separator: #1d1d20;
+    --border-2: #2b2b2e;
+    --success: #2dcc70;
+    --warning: #ffd60a;
+    --danger: #ff453a;
+    --info: #0a84ff;
+    --viewport: #070708;
+    --tile: rgba(255, 255, 255, 0.045);
+    --tile-hover: rgba(255, 255, 255, 0.07);
+    --tile-solid: #141416;
+    --tint: rgba(233, 233, 236, 0.06);
+    --tint-2: rgba(233, 233, 236, 0.1);
+    --shadow-overlay: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --window-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.07);
+    --code-bg: #1f1f1f;
+    --code-side: #181818;
+    --code-line: #282828;
+    --code-gutter: #6e7681;
+    --code-fg: #cccccc;
+    --code-border: #2b2b2b;
+    --code-tab: #181818;
+    --code-status: #181818;
+    --code-sel: #2a2d2e;
+    --tok-cmd: #569cd6;
+    --tok-style: #4ec9b0;
+    --tok-num: #b5cea8;
+    --tok-str: #ce9178;
+    --tok-var: #9cdcfe;
+    --tok-com: #6a9955;
+    --tok-lens: #999999;
+    color-scheme: dark;
+}
+
+:root {
+    --warning-soft: color-mix(in oklab, var(--warning) 14%, transparent);
+    --danger-soft: color-mix(in oklab, var(--danger) 13%, transparent);
+    --success-soft: color-mix(in oklab, var(--success) 14%, transparent);
+    --info-soft: color-mix(in oklab, var(--info) 14%, transparent);
+    --warning-ink: color-mix(in oklab, var(--warning) 62%, var(--fg) 38%);
+    --danger-ink: color-mix(in oklab, var(--danger) 72%, var(--fg) 28%);
+    --success-ink: color-mix(in oklab, var(--success) 66%, var(--fg) 34%);
+    --info-ink: color-mix(in oklab, var(--info) 72%, var(--fg) 28%);
+}
