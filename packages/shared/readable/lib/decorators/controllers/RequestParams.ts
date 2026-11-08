@@ -2,8 +2,8 @@ import { BodyValidator } from '../../contracts/params';
 import { parseBody } from '../../utils/controllers/parse-body';
 import { createParamDecorator } from './Params';
 
-export const Body = <T>(validate?: BodyValidator<T>): ParameterDecorator =>
-    createParamDecorator((req) => validate ? parseBody(validate, req.body) : req.body);
+export const Body = <T>(validate: BodyValidator<T>): ParameterDecorator =>
+    createParamDecorator((req) => parseBody(validate, req.body));
 
 export const Param = (name: string): ParameterDecorator =>
     createParamDecorator((req) => (req.params as Record<string, string>)[name]);

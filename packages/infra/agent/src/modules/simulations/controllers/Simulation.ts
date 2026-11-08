@@ -1,3 +1,4 @@
+import typia from 'typia';
 import SimulationService from '../services/Simulation';
 import BaseController from '@lammps-studio/readable/controllers/BaseController';
 import RawResponse from '@lammps-studio/readable/controllers/responses/Raw';
@@ -18,7 +19,7 @@ export default class SimulationController extends BaseController{
 
     @Route(simulationRoutes.create)
     @Status(201)
-    create(@Body() body: CreateSimulationInput){
+    create(@Body(typia.misc.createValidatePrune<CreateSimulationInput>()) body: CreateSimulationInput){
         return this.#service.create(body);
     }
 
@@ -28,7 +29,10 @@ export default class SimulationController extends BaseController{
     }
 
     @Route(simulationRoutes.update)
-    update(@Param('simulationId') simulationId: string, @Body() body: UpdateSimulationInput){
+    update(
+        @Param('simulationId') simulationId: string,
+        @Body(typia.misc.createValidatePrune<UpdateSimulationInput>()) body: UpdateSimulationInput
+    ){
         return this.#service.update(simulationId, body);
     }
 

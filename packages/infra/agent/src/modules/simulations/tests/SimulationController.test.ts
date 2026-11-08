@@ -68,6 +68,16 @@ describe('SimulationController', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.json()).toMatchObject({ error: 'Request::ValidationFailed', errors: { template: expect.any(String) } });
+
+        const simulation = await createSimulation(app, { name: 'Valid' });
+        const rename = await app.inject({
+            method: simulationRoutes.update.method,
+            url: simulationRoutes.update.path.replace(':simulationId', simulation.id),
+            headers: authorized,
+            payload: { name: 7 }
+        });
+        expect(rename.statusCode).toBe(400);
+        expect(rename.json()).toMatchObject({ error: 'Request::ValidationFailed', errors: { name: expect.any(String) } });
     });
 
     it('refuses a simulation on a machine it does not know', async () => {
