@@ -1,0 +1,7 @@
+.modal.palette { width: min(560px, 100%); gap: 12px; padding: 14px 16px; }
+.palette__search { display: flex; align-items: center; gap: 10px; }
+.palette__input.field { border: 0; background: transparent; padding: 0; height: 28px; }
+.palette .menu-sep { margin: 0 -6px; }
+.palette__list { display: flex; flex-direction: column; max-height: 50vh; overflow: auto; margin: -8px -10px; }
+.palette__list .menu-item[aria-selected="true"] { background: var(--tint); }
+.palette__none { padding: 10px 14px; }
