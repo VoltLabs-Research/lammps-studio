@@ -1,5 +1,6 @@
 import { RuntimeEventMap } from '../../domain/observability/EventMap';
 import Run from '../../domain/simulation/Run';
+import { DumpFrame } from '../../domain/dump/DumpFrame';
 import { EventBusPort } from '../../ports/EventBusPort';
 
 export default class SimulationEventPublisher{
@@ -38,6 +39,10 @@ export default class SimulationEventPublisher{
 
     error(run: Run, error: string){
         this.eventBus.emit('simulation:error', { runId: run.id, error, snapshot: run.snapshot() });
+    }
+
+    dumpFrame(run: Run, frame: DumpFrame){
+        this.eventBus.emit('dump:frame', { runId: run.id, ...frame });
     }
 
     end(run: Run){

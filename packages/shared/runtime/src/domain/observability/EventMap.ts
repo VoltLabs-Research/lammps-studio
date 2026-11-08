@@ -1,5 +1,6 @@
 import { BuildIdentity, BuildResult, BuildSpec } from '../build/BuildSpec';
 import { BuildProgress } from '../build/BuildStage';
+import { DumpFrame } from '../dump/DumpFrame';
 import { RunSnapshot } from '../simulation/RunSnapshot';
 
 export interface BuildStartEvent extends BuildIdentity{
@@ -64,6 +65,10 @@ export interface SimulationErrorEvent{
     snapshot: RunSnapshot;
 }
 
+export interface DumpFrameEvent extends DumpFrame{
+    runId: string;
+}
+
 export interface RuntimeEventMap{
     'build:start': BuildStartEvent;
     'build:log': BuildLogEvent;
@@ -77,6 +82,7 @@ export interface RuntimeEventMap{
     'simulation:state': SimulationStateEvent;
     'simulation:end': SimulationEndEvent;
     'simulation:error': SimulationErrorEvent;
+    'dump:frame': DumpFrameEvent;
 }
 
 export type RuntimeEvent = keyof RuntimeEventMap & string;

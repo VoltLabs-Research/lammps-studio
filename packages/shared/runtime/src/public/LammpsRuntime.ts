@@ -19,8 +19,10 @@ import { EventBusPort, EventHandler } from '../ports/EventBusPort';
 import { Logger } from '../ports/Logger';
 import { RunDirectoryPort } from '../ports/RunDirectoryPort';
 import { RunContainer } from '../ports/ContainerManagerPort';
+import { DumpWatcherPort } from '../ports/DumpWatcherPort';
 import InMemoryRunStore from '../infrastructure/fs/InMemoryRunStore';
 import NodeRunDirectoryPreparer from '../infrastructure/fs/NodeRunDirectoryPreparer';
+import ChokidarDumpWatcher from '../infrastructure/fs/ChokidarDumpWatcher';
 import PinoLogger from '../infrastructure/logging/PinoLogger';
 import EventEmitterBus from '../infrastructure/events/EventEmitterBus';
 import DockerImageBuilder from '../infrastructure/docker/DockerImageBuilder';
@@ -50,6 +52,7 @@ export default class LammpsRuntime{
     private readonly logger: Logger;
     private readonly runStore = new InMemoryRunStore();
     private readonly runDirectories: RunDirectoryPort;
+    private readonly dumpWatcher: DumpWatcherPort;
     private readonly ensureImage: EnsureImage;
     private readonly startSimulation: StartSimulation;
     private readonly stopSimulation: StopSimulation;
@@ -67,7 +70,8 @@ export default class LammpsRuntime{
         const logStreamer = new DockerLogStreamer(docker, containerResolver, scoped('log-streamer'));
         const eventPublisher = new SimulationEventPublisher(this.eventBus);
         const lifecycleManager = new SimulationLifecycleManager(this.runStore, eventPublisher);
-        const monitor = new RunMonitor(containerManager, logStreamer, eventPublisher, lifecycleManager, scoped('run-monitor'));
+        this.dumpWatcher = new ChokidarDumpWatcher(scoped('dump-watcher'));
+        const monitor = new RunMonitor(containerManager, logStreamer, this.dumpWatcher, eventPublisher, lifecycleManager, scoped('run-monitor'));
 
         this.runDirectories = new NodeRunDirectoryPreparer(scoped('run-directories'));
         this.ensureImage = new EnsureImage(new DockerImageBuilder(docker, scoped('image-builder')), this.eventBus, scoped('ensure-image'));
@@ -120,6 +124,10 @@ export default class LammpsRuntime{
 
     async kill(runId: string): Promise<RunSnapshot>{
         return await this.stopSimulation.kill(runId);
+    }
+
+    async readFrame(dumpPath: string, byteOffset: number): Promise<string>{
+        return await this.dumpWatcher.read(dumpPath, byteOffset);
     }
 
     async getRun(runId: string): Promise<RunSnapshot | null>{
