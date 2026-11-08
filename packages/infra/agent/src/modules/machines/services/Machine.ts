@@ -10,8 +10,12 @@ export default class MachineService{
     }
 
     async get(machineId: string): Promise<Machine>{
-        if(machineId !== LOCAL_MACHINE_ID) throw MachineError.NotFound();
+        this.assertKnown(machineId);
 
         return this.#local.describe();
+    }
+
+    assertKnown(machineId: string){
+        if(machineId !== LOCAL_MACHINE_ID) throw MachineError.NotFound();
     }
 }

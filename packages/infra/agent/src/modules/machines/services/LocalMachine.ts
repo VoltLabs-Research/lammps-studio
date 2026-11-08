@@ -1,6 +1,6 @@
 import { config } from '@/config';
 import { formatBytes } from '@/shared/utils/formatBytes';
-import { isMissing } from '@/shared/utils/isMissing';
+import { isMissing } from '@/shared/utils/fsErrors';
 import { Machine } from '@lammps-studio/contracts/machine/domain';
 import { execFile } from 'node:child_process';
 import { readFile, statfs } from 'node:fs/promises';
