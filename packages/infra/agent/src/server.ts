@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import createApp from '@/core/Application';
 import { config } from '@/config';
 import { AGENT_READY_PREFIX, AgentReadyMessage } from '@lammps-studio/contracts/desktop/bridge';

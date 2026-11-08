@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import BaseGateway from '../lib/gateway/BaseGateway';
 import { MAX_FRAME_BYTES, websocketOptions } from '../lib/gateway/websocket-options';
 import { Channel } from '../lib/decorators/gateway/Channel';
