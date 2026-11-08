@@ -16,7 +16,7 @@
     }]
   },
   "overrides": [{
-    "files": ["vite.config.ts"],
+    "files": ["vite.config.ts", "dev/**"],
     "rules": {
       "no-restricted-imports": "off"
     }
