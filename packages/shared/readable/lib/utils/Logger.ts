@@ -1,17 +1,19 @@
-import { LogContext, LoggerOptions, LogMethod } from '../contracts/logging';
+import { LogContext, LoggerOptions, LogLevel, LogMethod } from '../contracts/logging';
 import pino, { Logger as PinoLogger } from 'pino';
 
-const STDERR = 2;
+const STDOUT = 1;
+
+const toStdout = (level: LogLevel): PinoLogger => pino({ level }, pino.destination({ dest: STDOUT, sync: true }));
 
 export class Logger{
     #pino: PinoLogger;
 
     constructor(instance?: PinoLogger){
-        this.#pino = instance ?? pino({ level: 'info' }, pino.destination(STDERR));
+        this.#pino = instance ?? toStdout('info');
     }
 
     configure(options: LoggerOptions){
-        this.#pino = pino({ level: options.level }, pino.destination(STDERR));
+        this.#pino = toStdout(options.level);
     }
 
     child(bindings: LogContext): Logger{
