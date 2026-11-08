@@ -11,6 +11,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import DevWorkspace from '@dev/DevWorkspace';
 import PerfProbe from '@dev/PerfProbe';
+import PreviewProbe from '@dev/PreviewProbe';
 
 const params = new URLSearchParams(location.search);
 const theme = params.get('theme');
@@ -22,7 +23,9 @@ if(theme){
 if(root){
     createRoot(root).render(
         <StrictMode>
-            {params.has('perf') ? <PerfProbe /> : <DevWorkspace />}
+            {params.has('perf') && <PerfProbe />}
+            {params.has('preview') && <PreviewProbe />}
+            {!params.has('perf') && !params.has('preview') && <DevWorkspace />}
         </StrictMode>
     );
 }
