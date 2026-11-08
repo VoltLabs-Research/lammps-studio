@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ThermoSection } from '@lammps-studio/contracts/run/domain';
-import { bentoColumns, bentoInnerWidth, featuredSpan, tileSpan, tileWidth } from '@/modules/charts/utils/bento-layout';
+import { bentoColumns, bentoInnerWidth, bentoSpans, featuredSpan, tileWidth } from '@/modules/charts/utils/bento-layout';
 import { bentoSeries, findStressStrain, STRESS_STRAIN_KEY } from '@/modules/charts/utils/bento-series';
 import { formatValue } from '@/modules/charts/utils/format-value';
 import { peakIndex } from '@/modules/charts/utils/peak-index';
@@ -74,10 +74,17 @@ describe('bento layout', () => {
         expect([4, 2, 1].map(featuredSpan)).toEqual([3, 2, 1]);
     });
 
-    it('follows the span pattern per column count', () => {
-        expect([0, 1, 2, 3, 4, 5, 6, 7].map((index) => tileSpan(index, 4))).toEqual([1, 1, 1, 2, 1, 2, 2, 1]);
-        expect(tileSpan(4, 2)).toBe(2);
-        expect(tileSpan(4, 1)).toBe(1);
+    it('spans the mockup tiles exactly per column count', () => {
+        expect(bentoSpans(7, 4)).toEqual([1, 1, 1, 2, 1, 2, 2]);
+        expect(bentoSpans(7, 2)).toEqual([1, 1, 1, 1, 2, 1, 1]);
+        expect(bentoSpans(7, 1)).toEqual([1, 1, 1, 1, 1, 1, 1]);
+    });
+
+    it('repeats the row pattern and fills the last row', () => {
+        expect(bentoSpans(9, 4)).toEqual([1, 1, 1, 2, 1, 2, 2, 2, 2]);
+        expect(bentoSpans(8, 4)).toEqual([1, 1, 1, 2, 1, 2, 2, 4]);
+        expect(bentoSpans(4, 4)).toEqual([1, 1, 2, 2]);
+        expect(bentoSpans(3, 2)).toEqual([1, 1, 2]);
     });
 
     it('adds the gaps a span crosses', () => {

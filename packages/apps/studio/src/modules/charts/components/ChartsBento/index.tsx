@@ -4,7 +4,7 @@ import type { BentoSeries } from '@/modules/charts/domain/chart';
 import ChartTile from '@/modules/charts/components/ChartTile';
 import FeaturedTile from '@/modules/charts/components/FeaturedTile';
 import StatTile from '@/modules/charts/components/StatTile';
-import { BENTO_GAP, BENTO_ROW, bentoColumns, bentoInnerWidth, featuredSpan, tileSpan, tileWidth } from '@/modules/charts/utils/bento-layout';
+import { BENTO_GAP, BENTO_ROW, bentoColumns, bentoInnerWidth, bentoSpans, featuredSpan, tileWidth } from '@/modules/charts/utils/bento-layout';
 import { bentoSeries, sectionSteps } from '@/modules/charts/utils/bento-series';
 import { seriesPeak } from '@/modules/charts/utils/series-chart';
 import '@/modules/charts/components/ChartsBento/charts-bento.css';
@@ -58,6 +58,8 @@ const ChartsBento = ({ sections, units, plotMode, totalSteps, featured, onFeatur
     const inner = bentoInnerWidth(width);
     const columns = bentoColumns(inner);
     const leadSpan = featuredSpan(columns);
+    const items = bentoItems(series, lead);
+    const spans = bentoSpans(items.length, columns);
     const sizing = (span: number, big: boolean): ChartSizing => ({
         width: tileWidth(inner, columns, span) - TILE_PADDING_X,
         height: big ? BENTO_ROW * 2 + BENTO_GAP - TILE_PADDING_Y - FEATURED_HEAD - TILE_GAP : BENTO_ROW - TILE_PADDING_Y - TILE_HEAD - TILE_GAP,
@@ -69,8 +71,8 @@ const ChartsBento = ({ sections, units, plotMode, totalSteps, featured, onFeatur
     return (
         <div ref={ref} className='bento' style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
             <FeaturedTile series={lead} steps={steps} span={leadSpan} sizing={sizing(leadSpan, true)} />
-            {bentoItems(series, lead).map((item, index) => {
-                const span = tileSpan(index, columns);
+            {items.map((item, index) => {
+                const span = spans[index];
 
                 if(item.kind === 'stat'){
                     return <StatTile key={STAT_KEY} peak={seriesPeak(item.series)} span={span} />;
