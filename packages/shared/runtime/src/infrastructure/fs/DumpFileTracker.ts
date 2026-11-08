@@ -39,7 +39,7 @@ export default class DumpFileTracker{
 
     constructor(private readonly handlers: DumpWatchHandlers){}
 
-    update(filePath: string): Promise<void>{
+    update(filePath: string){
         const tracked = this.#files.get(filePath) ?? untracked();
         this.#files.set(filePath, tracked);
         tracked.queue = this.#after(tracked.queue, filePath, tracked);
