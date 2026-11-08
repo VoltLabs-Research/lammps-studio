@@ -11,3 +11,9 @@ export interface FrameHeader{
     box: FrameBox;
     columns: string[];
 }
+
+export interface Frame{
+    header: FrameHeader;
+    positions: Float32Array;
+    columns: Record<string, Float32Array>;
+}
