@@ -1,12 +1,13 @@
 import type { ContainerHandle } from './ContainerManagerPort';
 
 export interface LogStreamHandlers{
-    onStdout(line: string): void | Promise<void>;
-    onStderr(line: string): void | Promise<void>;
-    onError(error: Error): void | Promise<void>;
+    onStdout(line: string): void;
+    onStderr(line: string): void;
+    onError(error: Error): void;
 }
 
 export interface LogStreamHandle{
+    ended: Promise<void>;
     close(): Promise<void>;
 }
 

@@ -1,5 +1,6 @@
 import Build from '../../domain/build/Build';
 import type { BuildStage } from '../../domain/build/BuildStage';
+import { CONTAINER_SIMULATION_DIR } from '../../domain/simulation/RunSpec';
 
 const LAMMPS_REPOSITORY = 'https://github.com/lammps/lammps.git';
 const UBUNTU_IMAGE = 'ubuntu:24.04';
@@ -7,8 +8,6 @@ const CUDA_IMAGE = 'nvidia/cuda:12.8.1-devel-ubuntu24.04';
 const SOURCE_DIR = '/opt/lammps';
 const BUILD_DIR = '/opt/lammps/build';
 const INSTALL_PREFIX = '/usr/local';
-
-export const CONTAINER_SIMULATION_DIR = '/simulation';
 
 const TOOLCHAIN_PACKAGES = ['build-essential', 'ca-certificates', 'cmake', 'git', 'libopenmpi-dev', 'openmpi-bin', 'python3'];
 

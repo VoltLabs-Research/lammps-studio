@@ -2,14 +2,15 @@ import type { ImageTag, ISODateString, RunID, RunState } from '../shared/types';
 
 export interface RunSnapshot{
     id: RunID;
+    simulationId: string;
+    runNumber: number;
     imageTag: ImageTag;
     state: RunState;
-    outputDir: string;
+    runDir: string;
     createdAt: ISODateString;
-    startedAt?: ISODateString;
-    endedAt?: ISODateString;
-    containerId?: string;
-    exitCode?: number | null;
-    errorMessage?: string;
-    lastStep?: number;
+    startedAt: ISODateString | null;
+    endedAt: ISODateString | null;
+    containerId: string | null;
+    exitCode: number | null;
+    errorMessage: string | null;
 }

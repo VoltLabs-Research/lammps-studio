@@ -1,6 +1,5 @@
 import { RuntimeEventMap } from '../../domain/observability/EventMap';
 import Run from '../../domain/simulation/Run';
-import { ScalarValue } from '../../domain/shared/types';
 import { EventBusPort } from '../../ports/EventBusPort';
 
 export default class SimulationEventPublisher{
@@ -10,7 +9,7 @@ export default class SimulationEventPublisher{
         this.eventBus.emit('simulation:created', {
             runId: run.id,
             imageTag: run.imageTag,
-            outputDir: run.outputDir,
+            runDir: run.runDir,
             snapshot: run.snapshot()
         });
     }
@@ -20,7 +19,7 @@ export default class SimulationEventPublisher{
             runId: run.id,
             imageTag: run.imageTag,
             containerId,
-            outputDir: run.outputDir,
+            runDir: run.runDir,
             snapshot: run.snapshot()
         });
     }
@@ -30,34 +29,18 @@ export default class SimulationEventPublisher{
     }
 
     stdout(run: Run, line: string){
-        this.eventBus.emit('simulation:stdout', { runId: run.id, line, snapshot: run.snapshot() });
+        this.eventBus.emit('simulation:stdout', { runId: run.id, line });
     }
 
     stderr(run: Run, line: string){
-        this.eventBus.emit('simulation:stderr', { runId: run.id, line, snapshot: run.snapshot() });
+        this.eventBus.emit('simulation:stderr', { runId: run.id, line });
     }
 
     error(run: Run, error: string){
         this.eventBus.emit('simulation:error', { runId: run.id, error, snapshot: run.snapshot() });
     }
 
-    end(run: Run, exitCode: number | null){
-        this.eventBus.emit('simulation:end', { runId: run.id, exitCode, snapshot: run.snapshot() });
-    }
-
-    thermo(run: Run, step: number | null, values: Record<string, ScalarValue>, raw: string){
-        this.eventBus.emit('thermo', { runId: run.id, step, values, raw, snapshot: run.snapshot() });
-    }
-
-    timestep(run: Run, step: number, source: 'thermo' | 'dump'){
-        this.eventBus.emit('timestep', { runId: run.id, step, source, snapshot: run.snapshot() });
-    }
-
-    dumpDetected(run: Run, path: string){
-        this.eventBus.emit('dump:detected', { runId: run.id, path, snapshot: run.snapshot() });
-    }
-
-    dumpFrame(run: Run, path: string, step: number){
-        this.eventBus.emit('dump:frame', { runId: run.id, path, step, snapshot: run.snapshot() });
+    end(run: Run){
+        this.eventBus.emit('simulation:end', { runId: run.id, exitCode: run.exitCode, snapshot: run.snapshot() });
     }
 }

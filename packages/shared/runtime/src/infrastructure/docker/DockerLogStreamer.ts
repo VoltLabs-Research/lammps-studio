@@ -1,4 +1,5 @@
 import { PassThrough, Readable } from 'node:stream';
+import { finished } from 'node:stream/promises';
 import Docker from 'dockerode';
 import { ContainerHandle } from '../../ports/ContainerManagerPort';
 import type { Logger } from '../../ports/Logger';
@@ -8,32 +9,19 @@ import DockerContainerResolver from './DockerContainerResolver';
 
 const LINE_BREAK = /\r?\n/;
 
-const pipeLines = (
-    stream: NodeJS.ReadableStream,
-    handler: (line: string) => void | Promise<void>,
-    onError: (error: Error) => void | Promise<void>
-) => {
-    let buffer = '';
-    const deliver = (line: string) => {
-        void Promise.resolve(handler(line)).catch((error: unknown) => onError(toError(error)));
-    };
+const splitLines = (stream: PassThrough, onLine: (line: string) => void) => {
+    let pending = '';
 
-    stream.on('data', (chunk: Buffer) => {
-        buffer += chunk.toString();
-        const parts = buffer.split(LINE_BREAK);
-        buffer = parts.pop() ?? '';
-
-        for(const line of parts){
-            if(line.length > 0) deliver(line);
-        }
+    stream.setEncoding('utf8');
+    stream.on('data', (chunk: string) => {
+        const parts = `${pending}${chunk}`.split(LINE_BREAK);
+        pending = parts.pop() ?? '';
+        parts.forEach(onLine);
     });
-
     stream.on('end', () => {
-        if(buffer.length > 0) deliver(buffer);
-    });
-
-    stream.on('error', (error: unknown) => {
-        void onError(toError(error));
+        if(pending.length > 0){
+            onLine(pending);
+        }
     });
 };
 
@@ -54,24 +42,35 @@ export default class DockerLogStreamer implements LogStreamerPort{
 
         const stdout = new PassThrough();
         const stderr = new PassThrough();
-
+        splitLines(stdout, handlers.onStdout);
+        splitLines(stderr, handlers.onStderr);
         this.docker.modem.demuxStream(attached, stdout, stderr);
-        pipeLines(stdout, handlers.onStdout, handlers.onError);
-        pipeLines(stderr, handlers.onStderr, handlers.onError);
 
         attached.on('error', (error: unknown) => {
             this.logger.error(`Log stream error for container ${container.id}`, { error: String(error) });
-            void handlers.onError(toError(error));
+            handlers.onError(toError(error));
         });
 
+        const sourceEnded = new Promise<void>((resolve) => {
+            attached.once('end', resolve);
+            attached.once('close', resolve);
+        });
+
+        const ended = (async () => {
+            await sourceEnded;
+            stdout.end();
+            stderr.end();
+            await Promise.all([finished(stdout), finished(stderr)]);
+        })();
+
         return {
+            ended,
             close: async () => {
                 if(attached instanceof Readable){
                     attached.destroy();
                 }
 
-                stdout.destroy();
-                stderr.destroy();
+                await ended;
             }
         };
     }

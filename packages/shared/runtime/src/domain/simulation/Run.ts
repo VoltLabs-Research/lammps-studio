@@ -1,24 +1,37 @@
 import type { ImageTag, ISODateString, RunID, RunState } from '../shared/types';
 import type { RunSnapshot } from './RunSnapshot';
+import { runIdOf } from './RunSpec';
 
 const now = (): ISODateString => new Date().toISOString();
 
+export interface RunIdentity{
+    simulationId: string;
+    runNumber: number;
+    imageTag: ImageTag;
+    runDir: string;
+}
+
 export default class Run{
-    state: RunState = 'created';
-    startedAt?: ISODateString;
-    endedAt?: ISODateString;
-    containerId?: string;
-    exitCode?: number | null;
-    errorMessage?: string;
-    lastStep?: number;
-
+    readonly id: RunID;
+    readonly simulationId: string;
+    readonly runNumber: number;
+    readonly imageTag: ImageTag;
+    readonly runDir: string;
     readonly createdAt: ISODateString = now();
+    state: RunState = 'created';
+    startedAt: ISODateString | null = null;
+    endedAt: ISODateString | null = null;
+    containerId: string | null = null;
+    exitCode: number | null = null;
+    errorMessage: string | null = null;
 
-    constructor(
-        public readonly id: RunID,
-        public readonly imageTag: ImageTag,
-        public readonly outputDir: string
-    ){}
+    constructor(identity: RunIdentity){
+        this.id = runIdOf(identity.simulationId, identity.runNumber);
+        this.simulationId = identity.simulationId;
+        this.runNumber = identity.runNumber;
+        this.imageTag = identity.imageTag;
+        this.runDir = identity.runDir;
+    }
 
     markPreparing(){
         this.state = 'preparing';
@@ -32,9 +45,9 @@ export default class Run{
         this.state = 'starting';
     }
 
-    markRunning(){
+    markRunning(startedAt: ISODateString | null){
         this.state = 'running';
-        this.startedAt ??= now();
+        this.startedAt = startedAt ?? this.startedAt ?? now();
     }
 
     requestStop(){
@@ -54,15 +67,10 @@ export default class Run{
         this.endedAt = now();
     }
 
-    markCancelled(){
+    markCancelled(exitCode: number | null){
         this.state = 'cancelled';
+        this.exitCode = exitCode;
         this.endedAt = now();
-    }
-
-    recordStep(step: number){
-        if(this.lastStep === undefined || step > this.lastStep){
-            this.lastStep = step;
-        }
     }
 
     isStopping(): boolean{
@@ -72,16 +80,17 @@ export default class Run{
     snapshot(): RunSnapshot{
         return {
             id: this.id,
+            simulationId: this.simulationId,
+            runNumber: this.runNumber,
             imageTag: this.imageTag,
             state: this.state,
-            outputDir: this.outputDir,
+            runDir: this.runDir,
             createdAt: this.createdAt,
             startedAt: this.startedAt,
             endedAt: this.endedAt,
             containerId: this.containerId,
             exitCode: this.exitCode,
-            errorMessage: this.errorMessage,
-            lastStep: this.lastStep
+            errorMessage: this.errorMessage
         };
     }
 }

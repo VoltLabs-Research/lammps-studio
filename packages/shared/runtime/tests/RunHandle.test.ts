@@ -4,10 +4,11 @@ import Run from '../src/domain/simulation/Run';
 import EventEmitterBus from '../src/infrastructure/events/EventEmitterBus';
 import { RuntimeEventMap } from '../src/domain/observability/EventMap';
 
-const handleFor = (runId: string, bus: EventEmitterBus<RuntimeEventMap>): RunHandle => {
-    const run = new Run(runId, 'image', '/tmp');
+const runOf = (runNumber: number): Run => new Run({ simulationId: 'cu', runNumber, imageTag: 'image', runDir: `/sim/runs/run-${runNumber}` });
+
+const handleFor = (run: Run, bus: EventEmitterBus<RuntimeEventMap>): RunHandle => {
     return new RunHandle(
-        runId,
+        run.id,
         bus,
         async () => run.snapshot(),
         async () => run.snapshot(),
@@ -18,27 +19,27 @@ const handleFor = (runId: string, bus: EventEmitterBus<RuntimeEventMap>): RunHan
 describe('RunHandle', () => {
     it('delivers only the events of its own run', () => {
         const bus = new EventEmitterBus<RuntimeEventMap>();
-        const handle = handleFor('run-a', bus);
-        const other = new Run('run-b', 'image', '/tmp');
-        const own = new Run('run-a', 'image', '/tmp');
+        const own = runOf(1);
+        const other = runOf(2);
+        const handle = handleFor(own, bus);
         const lines: string[] = [];
 
         handle.on('simulation:stdout', ({ line }) => lines.push(line));
-        bus.emit('simulation:stdout', { runId: 'run-b', line: 'not mine', snapshot: other.snapshot() });
-        bus.emit('simulation:stdout', { runId: 'run-a', line: 'mine', snapshot: own.snapshot() });
+        bus.emit('simulation:stdout', { runId: other.id, line: 'not mine' });
+        bus.emit('simulation:stdout', { runId: own.id, line: 'mine' });
 
         expect(lines).toEqual(['mine']);
     });
 
     it('resolves waitForEnd with the snapshot of the end event', async () => {
         const bus = new EventEmitterBus<RuntimeEventMap>();
-        const handle = handleFor('run-a', bus);
-        const run = new Run('run-a', 'image', '/tmp');
+        const run = runOf(3);
+        const handle = handleFor(run, bus);
         run.markCompleted(0);
 
         const ended = handle.waitForEnd();
-        bus.emit('simulation:end', { runId: 'run-a', exitCode: 0, snapshot: run.snapshot() });
+        bus.emit('simulation:end', { runId: run.id, exitCode: 0, snapshot: run.snapshot() });
 
-        expect(await ended).toMatchObject({ state: 'completed', exitCode: 0 });
+        expect(await ended).toMatchObject({ id: 'cu/run-3', state: 'completed', exitCode: 0 });
     });
 });
