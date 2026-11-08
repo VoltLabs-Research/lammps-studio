@@ -1,0 +1,3 @@
+.vp-axes { position: absolute; right: 14px; bottom: calc(var(--bar-h, 0px) + 10px); z-index: 4; width: 64px; height: 64px; pointer-events: none; }
+.vp-axes text { font-size: 10px; fill: var(--muted); }
+@media (max-width: 860px) { .vp-axes { display: none; } }
