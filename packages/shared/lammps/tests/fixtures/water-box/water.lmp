@@ -1,0 +1,21 @@
+# TIP4P/2005 water, 4096 molecules, NPT at 300 K
+# Entry point for this folder. Studio did not pick it up because
+# it is not called main.in.
+
+units           real
+atom_style      full
+boundary        p p p
+
+include         setup.lammps
+read_data       box.data
+
+pair_style      lj/cut/tip4p/long 1 2 1 1 0.1546 8.5
+kspace_style    pppm/tip4p 1.0e-5
+bond_style      zero
+angle_style     zero
+
+fix             rigid all shake 1e-4 100 0 b 1 a 1
+fix             npt all npt temp 300 300 100 iso 1 1 1000
+
+thermo          500
+run             200000

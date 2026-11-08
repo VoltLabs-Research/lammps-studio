@@ -1,0 +1,8 @@
+# Settings shared by every nanowire run
+
+units           metal
+boundary        s s p
+atom_style      atomic
+timestep        0.002
+
+variable        thermo_every equal 50

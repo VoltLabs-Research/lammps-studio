@@ -1,0 +1,7 @@
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+special_bonds   lj/coul 0.0 0.0 0.5
+
+variable        T equal 300
+variable        P equal 1.0
+timestep        2.0
