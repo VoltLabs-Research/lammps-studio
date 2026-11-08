@@ -1,0 +1,30 @@
+import { BuildErrorCode } from '@lammps-studio/contracts/build/errors';
+import { FileErrorCode } from '@lammps-studio/contracts/file/errors';
+import { MachineErrorCode } from '@lammps-studio/contracts/machine/errors';
+import { RunErrorCode } from '@lammps-studio/contracts/run/errors';
+import { ErrorCode, ErrorTable, GatewayErrorCode, RequestErrorCode } from '@lammps-studio/contracts/shared/errors';
+import { SimulationErrorCode } from '@lammps-studio/contracts/simulation/errors';
+
+export const AgentErrors = {
+    domain: 'Agent',
+    causes: {
+        NotConfigured: 0,
+        Unreachable: 0,
+        UnexpectedResponse: 502,
+        MissingPathParam: 0
+    }
+} as const satisfies ErrorTable;
+
+export type AgentErrorCode = ErrorCode<typeof AgentErrors>;
+
+export type StudioErrorCode =
+    | AgentErrorCode
+    | BuildErrorCode
+    | FileErrorCode
+    | GatewayErrorCode
+    | MachineErrorCode
+    | RequestErrorCode
+    | RunErrorCode
+    | SimulationErrorCode;
+
+export type ErrorMessages<C extends StudioErrorCode> = Partial<Record<C, string>>;
