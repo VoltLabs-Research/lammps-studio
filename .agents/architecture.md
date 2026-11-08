@@ -21,7 +21,7 @@ desktop (Electron main) ── spawns ──► agent (127.0.0.1:<port>, token)
 | `@lammps-studio/contracts` | `packages/shared/contracts` | Every type that crosses the wire, the route tables (`<name>/routes.ts`), error tables (`<name>/errors.ts`) and the `/events` frames (`events/gateway.ts`). Zero dependencies. |
 | `@lammps-studio/readable` | `packages/shared/readable` | The subset of Pollium's readable framework this repo uses: `Application`, `BaseController`, `@Route`, parameter decorators, `BaseGateway` + `@Channel`, `defineErrors`, `RuntimeError`, the logger, module discovery. Nothing for auth, Postgres, Redis, queues or S3. |
 | `@lammps-studio/runtime` | `packages/shared/runtime` | LAMMPS in Docker, adopted from `VoltLabs-Research/lammps-runtime` (the npm 1.0.0 release ships no code). Builds an image per package set, runs `lmp` with MPI, streams stdout, watches dump files, emits typed events. Relative imports only, so it can be consumed from source. |
-| `@lammps-studio/lammps` | `packages/shared/lammps` | Pure LAMMPS knowledge, no I/O: log line classification and thermo parsing, input script analysis (variables, computes, fixes, dumps, runs, the packages a style needs), entry script resolution, text dump parsing, the package catalog, build hashing, the run command preview. Used by the agent and by studio. |
+| `@lammps-studio/lammps` | `packages/shared/lammps` | Pure LAMMPS knowledge, no I/O: log line classification and thermo parsing, input script analysis (variables, computes, fixes, dumps, runs, the packages a style needs), entry script resolution, text dump parsing, the package catalog, the run command preview. Used by the agent and by studio. |
 | `@lammps-studio/agent` | `packages/infra/agent` | The lammps-agent: a readable `Application` with modules `machines`, `simulations`, `runs`, `builds`, `files`, `editor` and the `/events` gateway. Persists to JSON files on disk, never to a database. |
 | `studio` | `packages/apps/studio` | The UI. React 19 + Vite + zustand. A 1:1 implementation of `design/mockup`. |
 | `desktop` | `packages/apps/desktop` | The Electron shell: frameless window, the traffic lights drawn by studio, spawning and supervising the local agent, handing its URL and token to the renderer through the preload. |
@@ -60,8 +60,10 @@ simulation is a folder the user owns and can open in any editor:
 ```
 
 Builds live in `~/lammps-studio/builds.json` on the machine (hash → image tag, packages, size,
-timings). The hash is computed from the sorted package list, the version and the accelerator
-options, so package order never changes it.
+timings). The hash is computed from the LAMMPS version and the sorted package list, so package
+order never changes it. The accelerator is not part of it: OPENMP, KOKKOS and GPU are packages in the
+list, and `-sf omp`, `-k on` and friends are run arguments, so one image serves every accelerator its
+packages support. The runtime computes the hash; `lammps` only formats it in the command preview.
 
 A run survives a Studio restart: `run.json` is written on every state change, containers carry the
 labels `lammps-studio.simulation` and `lammps-studio.run`, and the agent reattaches to running

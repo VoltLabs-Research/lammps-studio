@@ -7,7 +7,7 @@ import { renderDockerfile } from '../src/infrastructure/docker/renderDockerfile'
 import Build from '../src/domain/build/Build';
 
 const VERSION = 'stable_22Jul2025_update1';
-const BUILD = new Build({ version: VERSION, packages: ['MANYBODY'], accelerator: 'none' });
+const BUILD = new Build({ version: VERSION, packages: ['MANYBODY'] });
 
 const events: DockerBuildEvent[] = readFileSync(new URL('./fixtures/build-manybody.jsonl', import.meta.url), 'utf8')
     .split('\n')

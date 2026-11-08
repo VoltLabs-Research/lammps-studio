@@ -9,8 +9,7 @@ import { Logger } from '../src/ports/Logger';
 
 const SPEC: BuildSpec = {
     version: 'stable_22Jul2025_update1',
-    packages: ['MANYBODY', 'OPENMP'],
-    accelerator: 'omp'
+    packages: ['MANYBODY', 'OPENMP']
 };
 
 const IMAGE: ImageInfo = {
@@ -77,7 +76,7 @@ describe('concurrent builds', () => {
     it('starts a separate build for a different hash', async () => {
         const { builder, ensureImage } = setup();
         void ensureImage.execute(SPEC);
-        void ensureImage.execute({ ...SPEC, accelerator: 'kokkos', packages: ['KOKKOS', 'MANYBODY'] });
+        void ensureImage.execute({ ...SPEC, packages: ['KOKKOS', 'MANYBODY'] });
 
         await settle();
 

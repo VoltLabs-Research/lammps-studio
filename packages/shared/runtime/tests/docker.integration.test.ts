@@ -23,7 +23,7 @@ const BUILD_TIMEOUT_MS = 30 * 60 * 1000;
 const RUN_TIMEOUT_MS = 2 * 60 * 1000;
 const MPIRUN_TERMINATED_EXIT = 1;
 const KILL_EXIT = 137;
-const SPEC = { version: 'stable_22Jul2025_update1', packages: ['MANYBODY'], accelerator: 'none' as const };
+const SPEC = { version: 'stable_22Jul2025_update1', packages: ['MANYBODY'] };
 const EXECUTION: RunExecution = { mpiRanks: 2, threadsPerRank: 1, gpus: 0, accelerator: 'none' };
 
 const meltScript = (steps: number): string => `# 3d Lennard-Jones melt

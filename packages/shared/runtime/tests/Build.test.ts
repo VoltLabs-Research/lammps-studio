@@ -6,7 +6,6 @@ import { cmakeArguments, renderDockerfile } from '../src/infrastructure/docker/r
 const spec = (overrides: Partial<BuildSpec>): BuildSpec => ({
     version: 'stable_22Jul2025_update1',
     packages: ['MANYBODY', 'OPENMP'],
-    accelerator: 'omp',
     ...overrides
 });
 
@@ -25,7 +24,6 @@ describe('Build identity', () => {
 
     it.each([
         ['version', spec({ version: 'stable_29Aug2024' })],
-        ['accelerator', spec({ accelerator: 'kokkos' })],
         ['packages', spec({ packages: ['MANYBODY'] })]
     ])('changes the hash when the %s changes', (_, changed) => {
         expect(new Build(changed).hash()).not.toBe(new Build(spec({})).hash());
@@ -34,7 +32,7 @@ describe('Build identity', () => {
     it('keys and tags the image from the sorted package list', () => {
         const build = new Build(spec({ packages: ['OPENMP', 'MANYBODY'] }));
 
-        expect(build.key()).toBe('stable_22Jul2025_update1|omp|MANYBODY,OPENMP');
+        expect(build.key()).toBe('stable_22Jul2025_update1|MANYBODY,OPENMP');
         expect(build.hash()).toMatch(/^[0-9a-f]{12}$/);
         expect(build.tag()).toBe(`lammps/lammps-runtime:${build.hash()}`);
     });
@@ -48,15 +46,15 @@ describe('the LAMMPS image recipe', () => {
     });
 
     it('turns threading on for KOKKOS with the OpenMP backend and off for a plain set', () => {
-        expect(cmakeArguments(new Build(spec({ packages: ['KOKKOS'], accelerator: 'kokkos' }))))
+        expect(cmakeArguments(new Build(spec({ packages: ['KOKKOS'] }))))
             .toEqual(expect.arrayContaining(['-DBUILD_OMP=yes', '-DKokkos_ENABLE_OPENMP=yes']));
-        expect(cmakeArguments(new Build(spec({ packages: ['MANYBODY'], accelerator: 'none' }))))
+        expect(cmakeArguments(new Build(spec({ packages: ['MANYBODY'] }))))
             .toContain('-DBUILD_OMP=no');
     });
 
     it('starts from Ubuntu 24.04, or the CUDA image when GPU is in the set', () => {
         expect(renderDockerfile(new Build(spec({}))).text).toMatch(/^FROM ubuntu:24\.04\n/);
-        expect(renderDockerfile(new Build(spec({ packages: ['GPU'], accelerator: 'gpu' }))).text).toMatch(/^FROM nvidia\/cuda:[^\n]+-devel-ubuntu24\.04\n/);
+        expect(renderDockerfile(new Build(spec({ packages: ['GPU'] }))).text).toMatch(/^FROM nvidia\/cuda:[^\n]+-devel-ubuntu24\.04\n/);
     });
 
     it('clones the requested ref and installs lmp onto the PATH', () => {

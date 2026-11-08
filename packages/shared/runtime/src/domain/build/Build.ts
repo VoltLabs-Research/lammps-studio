@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import type { Accelerator } from '../shared/types';
 import type { BuildIdentity, BuildSpec } from './BuildSpec';
 
 const IMAGE_REPOSITORY = 'lammps/lammps-runtime';
@@ -16,12 +15,10 @@ const normalizePackages = (packages: string[]): string[] => {
 export default class Build{
     readonly version: string;
     readonly packages: string[];
-    readonly accelerator: Accelerator;
 
     constructor(spec: BuildSpec){
         this.version = spec.version.trim();
         this.packages = normalizePackages(spec.packages);
-        this.accelerator = spec.accelerator;
     }
 
     has(name: string): boolean{
@@ -29,7 +26,7 @@ export default class Build{
     }
 
     key(): string{
-        return `${this.version}|${this.accelerator}|${this.packages.join(',')}`;
+        return `${this.version}|${this.packages.join(',')}`;
     }
 
     hash(): string{
