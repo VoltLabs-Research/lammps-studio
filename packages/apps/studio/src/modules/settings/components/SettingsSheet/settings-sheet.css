@@ -1,0 +1,13 @@
+.modal.settings-modal { height: min(680px, 100%); padding: 18px 22px 0; overflow: hidden; }
+.settings { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; }
+.settings__bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.settings__bar h2 { margin: 0; font-size: 1.125rem; font-weight: var(--w-semibold); }
+.settings__bar .icon-btn { justify-self: end; }
+.settings__body { flex: 1; min-height: 0; overflow: auto; margin: 0 -22px; padding: 0 22px 22px; }
+.settings__body > .gsec:first-child { margin-top: 4px; }
+.settings__back { display: inline-flex; align-items: center; gap: 2px; margin-top: 4px; padding: 4px 6px 4px 0; border: 0; background: transparent; color: var(--muted); font-size: var(--text-sm); }
+.settings__back:hover { color: var(--fg); }
+.settings__head { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.settings__icon { width: 40px; height: 40px; border-radius: 12px; background: var(--tile); display: grid; place-items: center; flex: none; }
+.settings__name { font-size: 1rem; font-weight: var(--w-semibold); }
+.settings__head .muted { font-size: var(--text-sm); }
