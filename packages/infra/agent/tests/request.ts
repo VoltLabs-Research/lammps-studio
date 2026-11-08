@@ -5,6 +5,8 @@ import { AgentApp } from './harness';
 
 type RouteValues = Record<string, number | string>;
 
+export const authorized = { authorization: `Bearer ${config.token}` };
+
 export interface RequestOptions<I>{
     body?: I;
     params?: RouteValues;
@@ -46,7 +48,7 @@ export const request = async <I, O>(
     const res = await app.inject({
         method: endpoint.method,
         url: withQuery(withParams(endpoint.path, params), query),
-        headers: { authorization: `Bearer ${config.token}` },
+        headers: authorized,
         payload: body as object | undefined
     });
 
