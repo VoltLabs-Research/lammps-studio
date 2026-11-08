@@ -10,6 +10,9 @@ importers:
 
   packages/apps/desktop:
     devDependencies:
+      '@lammps-studio/contracts':
+        specifier: workspace:*
+        version: link:../../shared/contracts
       '@types/node':
         specifier: ^26.1.1
         version: 26.6.6

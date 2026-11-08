@@ -1,5 +1,7 @@
 import { app, BrowserWindow, nativeTheme, session } from 'electron';
+import AgentSupervisor from './AgentSupervisor';
 import { config } from './config';
+import { reserveEndpoint } from './endpoint';
 import { guardNavigation, isOwnFrame } from './navigation';
 import { readPlacement, rememberPlacement } from './placement';
 
@@ -57,6 +59,9 @@ const hideOnClose = (window: BrowserWindow) => {
 
 const start = async () => {
     await app.whenReady();
+    const agent = new AgentSupervisor(await reserveEndpoint());
+    agent.start();
+    app.on('will-quit', () => agent.stop());
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, grant, details) => {
         grant(isOwnFrame(details.requestingUrl));
     });

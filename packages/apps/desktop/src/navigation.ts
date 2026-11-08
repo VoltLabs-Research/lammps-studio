@@ -1,8 +1,7 @@
 import { BrowserWindow, shell } from 'electron';
-import { config } from './config';
+import { config, LOOPBACK } from './config';
 
 const EXTERNAL_PROTOCOLS = new Set(['https:', 'http:', 'mailto:']);
-const LOOPBACK = '127.0.0.1';
 
 const studio = new URL(config.studioUrl);
 

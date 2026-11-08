@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
+    "@lammps-studio/contracts": "workspace:*",
     "@types/node": "^26.1.1",
     "electron": "44.7.1",
     "electron-builder": "26.17.0",
