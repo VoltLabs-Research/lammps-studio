@@ -34,7 +34,7 @@ const LineChart = (props: LineChartProps) => {
     const { xs, ys, width, height, bare, plotMode } = props;
     const [hover, setHover] = useState<number | null>(null);
     const svgRef = useRef<SVGSVGElement>(null);
-    const tipRef = useRef<HTMLDivElement>(null);
+    const tipRef = useRef<HTMLSpanElement>(null);
     const geometry = chartGeometry({ xs, ys, width, height, bare, xDomain: props.xDomain, yRange: props.yRange });
     const { margin, scale, sx, sy, x0, x1 } = geometry;
     const shown = plotMode === 'raw' ? ys : smoothSeries(ys);
@@ -45,18 +45,19 @@ const LineChart = (props: LineChartProps) => {
     useLayoutEffect(() => {
         const tip = tipRef.current;
         const svg = svgRef.current;
+        const card = tip?.offsetParent;
 
-        if(!tip || !svg){
+        if(!tip || !svg || !card){
             return;
         }
 
         const box = svg.getBoundingClientRect();
-        const left = (hoverX / width) * box.width;
-        const top = (hoverY / height) * box.height;
-        const wrap = svg.parentElement?.getBoundingClientRect().width ?? box.width;
+        const frame = card.getBoundingClientRect();
+        const left = box.left - frame.left + (hoverX / width) * box.width;
+        const top = box.top - frame.top + (hoverY / height) * box.height;
 
-        tip.style.left = `${Math.min(Math.max(left + TIP_OFFSET_X, TIP_INSET), wrap - tip.offsetWidth - TIP_INSET)}px`;
-        tip.style.top = `${top - TIP_OFFSET_Y}px`;
+        tip.style.left = `${Math.min(Math.max(left + TIP_OFFSET_X, TIP_INSET), frame.width - tip.offsetWidth - TIP_INSET)}px`;
+        tip.style.top = `${Math.max(TIP_INSET, top - TIP_OFFSET_Y)}px`;
     }, [hover, hoverX, hoverY, width, height]);
 
     const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
@@ -75,7 +76,7 @@ const LineChart = (props: LineChartProps) => {
     const endY = plotted ? sy(shown[shown.length - 1]) : 0;
 
     return (
-        <div className='line-chart'>
+        <>
             <svg
                 ref={svgRef}
                 className='chart-svg'
@@ -125,14 +126,14 @@ const LineChart = (props: LineChartProps) => {
                 <rect x={margin.left} y={0} width={width - margin.left - margin.right} height={height} fill='transparent' />
             </svg>
             {hover !== null && (
-                <div ref={tipRef} className='chart-tip'>
+                <span ref={tipRef} className='chart-tip glass'>
                     {props.formatX(xs[hover])}
                     <br />
                     <b>{props.formatY(ys[hover])}</b>
                     {plotMode === 'both' && <span className='muted'> · smoothed {props.formatY(shown[hover])}</span>}
-                </div>
+                </span>
             )}
-        </div>
+        </>
     );
 };
 

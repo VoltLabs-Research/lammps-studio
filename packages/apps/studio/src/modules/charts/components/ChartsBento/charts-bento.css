@@ -1,0 +1,6 @@
+.bento { padding: 12px; display: grid; gap: 12px; grid-auto-rows: 148px; }
+.chart-card { border: 0; border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; background: var(--tile); text-align: left; position: relative; color: var(--fg); }
+button.chart-card { cursor: pointer; transition: transform 220ms var(--ease), background-color 150ms; }
+button.chart-card:hover { background: var(--tile-hover); }
+button.chart-card:active { transform: scale(0.985); }
+.chart-card .chart-svg { margin-top: auto; }

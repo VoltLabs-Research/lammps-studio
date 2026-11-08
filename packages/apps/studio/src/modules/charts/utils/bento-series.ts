@@ -28,10 +28,16 @@ const columnValues = (section: ThermoSection, column: string): number[] => {
     return section.rows.map((row) => row[index]);
 };
 
+export const sectionSteps = (section: ThermoSection): number[] => {
+    if(!section.columns.includes(STEP_COLUMN)){
+        return section.rows.map((_, index) => index);
+    }
+
+    return columnValues(section, STEP_COLUMN);
+};
+
 export const bentoSeries = (section: ThermoSection, units: UnitStyle): BentoSeries[] => {
-    const steps = section.columns.includes(STEP_COLUMN)
-        ? columnValues(section, STEP_COLUMN)
-        : section.rows.map((_, index) => index);
+    const steps = sectionSteps(section);
     const pair = findStressStrain(section.columns);
     const series: BentoSeries[] = [];
 
