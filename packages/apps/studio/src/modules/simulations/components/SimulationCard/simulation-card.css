@@ -18,5 +18,6 @@
 .card__progress { height: 2px; border-radius: 2px; background: var(--tint-2); overflow: hidden; margin-top: 6px; }
 .card__progress i { display: block; height: 100%; background: var(--fg); border-radius: 2px; }
 .card__state { color: var(--fg); font-weight: var(--w-medium); }
+.card__state.danger-ink { color: var(--danger-ink); }
 .card.is-idle .card__frame img { filter: grayscale(1); opacity: 0.5; transition: filter 300ms var(--ease), opacity 300ms var(--ease), transform 500ms var(--ease); }
 .card.is-idle .card__frame:hover img { filter: grayscale(0.4); opacity: 0.85; }

@@ -37,7 +37,7 @@ importers:
 
   packages/apps/studio:
     dependencies:
-      '@fontsource/geist':
+      '@fontsource-variable/geist':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/geist-mono':
@@ -467,11 +467,11 @@ packages:
   '@fastify/websocket@11.3.0':
     resolution: {integrity: sha512-g89ag4BCcD9YP5wBZXixzoLnuf5j89p/sXFcfpCiv2pdEkYYukBEoK3heVzqsp0EAtszVDc2BBZG0KZqeAShIA==}
 
+  '@fontsource-variable/geist@5.3.0':
+    resolution: {integrity: sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA==}
+
   '@fontsource/geist-mono@5.3.0':
     resolution: {integrity: sha512-UtJ1BBBCVpMYdIcW7nEB45UAoAw5M53ZXs2t0ciPW+IokuAAIc56M8+kW5tXbRJCTpDw4XTtU7proT6NdQAHTg==}
-
-  '@fontsource/geist@5.3.0':
-    resolution: {integrity: sha512-u03ftlfVwb05uijq2jGDJ03/HKGqMKaNFk7KOhkpBUex8+BhrAOfMs/XciJ2UUNUX9fEsZbZQld/RWMA2oFU7g==}
 
   '@grpc/grpc-js@1.14.7':
     resolution: {integrity: sha512-W4W/fcBMGRVtG6dW2c7cw2mnpS3hvbBd+oQXjh2iYFTZDk1JJmcNqkM5KSaPubQpamlUUurrlb7G1s9NJeERmQ==}
@@ -2892,9 +2892,9 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@fontsource/geist-mono@5.3.0': {}
+  '@fontsource-variable/geist@5.3.0': {}
 
-  '@fontsource/geist@5.3.0': {}
+  '@fontsource/geist-mono@5.3.0': {}
 
   '@grpc/grpc-js@1.14.7':
     dependencies:
