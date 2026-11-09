@@ -1,6 +1,6 @@
 import { Machine } from '@lammps-studio/contracts/machine/domain';
+import { PACKAGES } from '@lammps-studio/lammps/catalog/packages';
 import { MACHINE_KIND_LABEL } from '@/modules/machines/utils/machine-labels';
-import { PACKAGES } from '@/modules/settings/utils/package-catalog';
 import { MENU_SEPARATOR, MenuEntry } from '@/shared/contracts/menu';
 
 export const machineEntries = (machines: Machine[], machineId: string | null, choose: (machineId: string) => void): MenuEntry[] =>

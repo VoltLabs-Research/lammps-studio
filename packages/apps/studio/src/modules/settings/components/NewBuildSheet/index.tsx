@@ -1,8 +1,8 @@
+import { LAMMPS_VERSIONS } from '@lammps-studio/lammps/catalog/versions';
 import { useState } from 'react';
 import { buildApi } from '@/modules/settings/api/api';
 import { buildErrorCopy } from '@/modules/settings/utils/error-messages';
 import { machineEntries, packageEntries, toggledPackages } from '@/modules/settings/utils/build-entries';
-import { LAMMPS_VERSION } from '@/modules/settings/utils/package-catalog';
 import Button from '@/shared/components/Button';
 import Group from '@/shared/components/Group';
 import GroupRow from '@/shared/components/GroupRow';
@@ -30,7 +30,7 @@ const NewBuildSheet = () => {
     const build = () => submit(async () => {
         if(!machine) return;
 
-        useBuildsStore.getState().upsert(await buildApi.create({ machineId: machine.id, version: LAMMPS_VERSION, packages }));
+        useBuildsStore.getState().upsert(await buildApi.create({ machineId: machine.id, version: LAMMPS_VERSIONS[0].ref, packages }));
         close();
     });
 
