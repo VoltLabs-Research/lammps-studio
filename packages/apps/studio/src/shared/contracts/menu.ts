@@ -22,9 +22,13 @@ export interface MenuAction{
     run: () => void;
 }
 
+export interface MenuCaption{
+    caption: string;
+}
+
 export const MENU_SEPARATOR = 'separator';
 
-export type MenuEntry = MenuAction | typeof MENU_SEPARATOR;
+export type MenuEntry = MenuAction | MenuCaption | typeof MENU_SEPARATOR;
 
 export interface OpenMenu{
     key: string;

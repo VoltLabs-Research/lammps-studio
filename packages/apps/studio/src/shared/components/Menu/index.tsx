@@ -18,8 +18,17 @@ const DISMISS_KEYS = ['Escape', 'Tab'];
 
 const separatorKey = (entries: MenuEntry[], index: number): string => {
     const previous = entries[index - 1];
+    if(previous === MENU_SEPARATOR || previous === undefined) return `separator-${index}`;
 
-    return previous === MENU_SEPARATOR || previous === undefined ? `separator-${index}` : `separator-after-${previous.id}`;
+    return `separator-after-${'caption' in previous ? previous.caption : previous.id}`;
+};
+
+const renderEntry = (entries: MenuEntry[], index: number, activate: (action: MenuAction) => void) => {
+    const entry = entries[index];
+    if(entry === MENU_SEPARATOR) return <div key={separatorKey(entries, index)} className='menu-sep' role='separator' />;
+    if('caption' in entry) return <div key={`caption-${entry.caption}`} className='menu-caption' role='presentation'>{entry.caption}</div>;
+
+    return <MenuItem key={entry.id} action={entry} onActivate={activate} />;
 };
 
 const Menu = ({ menu, entries, width = DEFAULT_WIDTH, align = 'right' }: MenuProps) => {
@@ -52,9 +61,7 @@ const Menu = ({ menu, entries, width = DEFAULT_WIDTH, align = 'right' }: MenuPro
 
     return createPortal(
         <div ref={ref} className='popover glass menu' role='menu' tabIndex={-1} style={{ width }} onKeyDown={onKeyDown}>
-            {entries.map((entry, index) => (entry === MENU_SEPARATOR
-                ? <div key={separatorKey(entries, index)} className='menu-sep' role='separator' />
-                : <MenuItem key={entry.id} action={entry} onActivate={activate} />))}
+            {entries.map((_, index) => renderEntry(entries, index, activate))}
         </div>,
         document.body
     );
