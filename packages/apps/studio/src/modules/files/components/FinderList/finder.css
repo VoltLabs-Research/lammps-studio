@@ -1,0 +1,9 @@
+.finder { container-type: inline-size; display: flex; flex-direction: column; min-height: 100%; font-size: var(--text-sm); }
+.finder__head, .frow { display: grid; grid-template-columns: minmax(0, 1fr) 76px 148px 112px; align-items: center; gap: 12px; }
+.finder__head { position: sticky; top: 0; z-index: 1; height: 30px; padding: 0 14px; font-size: var(--text-xs); color: var(--muted); background: var(--canvas); border-bottom: 1px solid var(--separator); }
+.finder__head span:nth-child(2) { text-align: right; }
+.finder__list { flex: 1; padding: 4px 6px; }
+.finder__foot { position: sticky; bottom: 0; height: 30px; flex: none; display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); color: var(--muted); background: var(--canvas); border-top: 1px solid var(--separator); }
+.finder__empty { padding: 48px 16px; text-align: center; color: var(--muted); font-size: var(--text-sm); }
+@container (max-width: 560px) { .finder__head, .frow { grid-template-columns: minmax(0, 1fr) 72px 132px; } .finder .frow__kind { display: none; } }
+@container (max-width: 400px) { .finder__head, .frow { grid-template-columns: minmax(0, 1fr) 72px; } .finder .frow__mod { display: none; } }

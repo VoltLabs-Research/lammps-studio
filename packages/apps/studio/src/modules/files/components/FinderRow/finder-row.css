@@ -1,0 +1,10 @@
+.frow { height: 28px; padding: 0 8px; border-radius: 6px; color: var(--fg); cursor: default; user-select: none; -webkit-user-select: none; }
+.frow:nth-child(even) { background: color-mix(in oklab, var(--fg) 3%, transparent); }
+.frow:hover { background: var(--tint); }
+.frow[aria-selected="true"] { background: var(--tint-2); }
+.frow:focus-visible { outline: none; box-shadow: inset 0 0 0 1px var(--border-2); }
+.frow__name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.frow__name .icon { color: var(--muted); }
+.frow__name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.frow__size, .frow__mod, .frow__kind { font-size: var(--text-xs); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.frow__size { text-align: right; font-variant-numeric: tabular-nums; }

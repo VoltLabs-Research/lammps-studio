@@ -1,4 +1,4 @@
-import { formatAgo, formatBytes, formatDuration, formatEta, formatInt } from '@/shared/utils/format';
+import { formatAgo, formatBytes, formatDay, formatDayTime, formatDuration, formatEta, formatInt } from '@/shared/utils/format';
 import { describe, expect, it } from 'vitest';
 
 const NOW = Date.parse('2026-11-08T12:00:00.000Z');
@@ -50,5 +50,22 @@ describe('numbers', () => {
     it('formats sizes', () => {
         expect(formatBytes(1_400_000_000)).toBe('1.4 GB');
         expect(formatBytes(612_000_000)).toBe('612 MB');
+    });
+});
+
+describe('days', () => {
+    const now = new Date(2026, 10, 9, 14, 0).getTime();
+    const at = (month: number, day: number, hour: number, minute: number, year = 2026): string => new Date(year, month, day, hour, minute).toISOString();
+
+    it('names today and yesterday, then the date, and the year only when it differs', () => {
+        expect(formatDay(at(10, 9, 0, 5), now)).toBe('Today');
+        expect(formatDay(at(10, 8, 23, 59), now)).toBe('Yesterday');
+        expect(formatDay(at(10, 2, 16, 20), now)).toBe('Nov 2');
+        expect(formatDay(at(11, 30, 9, 0, 2025), now)).toBe('Dec 30, 2025');
+    });
+
+    it('adds a 24-hour clock', () => {
+        expect(formatDayTime(at(10, 9, 9, 40), now)).toBe('Today at 09:40');
+        expect(formatDayTime(at(10, 2, 16, 20), now)).toBe('Nov 2 at 16:20');
     });
 });

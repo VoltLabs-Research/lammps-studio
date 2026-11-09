@@ -69,3 +69,21 @@ export const formatBytes = (bytes: number): string => {
 };
 
 export const secondsBetween = (startIso: string, endIso: string): number => (Date.parse(endIso) - Date.parse(startIso)) / MS_PER_SECOND;
+
+const SHORT_DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+const LONG_DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const CLOCK = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+const startOfDay = (ms: number): number => new Date(ms).setHours(0, 0, 0, 0);
+
+export const formatDay = (iso: string, now: number): string => {
+    const day = startOfDay(Date.parse(iso));
+    const today = startOfDay(now);
+    if(day === today) return 'Today';
+    if(day === startOfDay(today - 1)) return 'Yesterday';
+    if(new Date(day).getFullYear() === new Date(today).getFullYear()) return SHORT_DAY.format(day);
+
+    return LONG_DAY.format(day);
+};
+
+export const formatDayTime = (iso: string, now: number): string => `${formatDay(iso, now)} at ${CLOCK.format(Date.parse(iso))}`;
