@@ -29,6 +29,18 @@ describe('Build identity', () => {
         expect(new Build(changed).hash()).not.toBe(new Build(spec({})).hash());
     });
 
+    it('describes itself with the trimmed version and the normalized package list it hashes', () => {
+        const build = new Build(spec({ version: ' stable_22Jul2025_update1 ', packages: ['openmp', ' MANYBODY', 'OPENMP'] }));
+
+        expect(build.identity()).toEqual({
+            version: 'stable_22Jul2025_update1',
+            packages: ['MANYBODY', 'OPENMP'],
+            key: 'stable_22Jul2025_update1|MANYBODY,OPENMP',
+            hash: build.hash(),
+            tag: build.tag()
+        });
+    });
+
     it('keys and tags the image from the sorted package list', () => {
         const build = new Build(spec({ packages: ['OPENMP', 'MANYBODY'] }));
 

@@ -39,6 +39,8 @@ export default class Build{
 
     identity(): BuildIdentity{
         return {
+            version: this.version,
+            packages: this.packages,
             key: this.key(),
             hash: this.hash(),
             tag: this.tag()

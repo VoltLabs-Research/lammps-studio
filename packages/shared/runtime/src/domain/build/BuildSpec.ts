@@ -3,7 +3,7 @@ export interface BuildSpec{
     packages: string[];
 }
 
-export interface BuildIdentity{
+export interface BuildIdentity extends BuildSpec{
     key: string;
     hash: string;
     tag: string;
