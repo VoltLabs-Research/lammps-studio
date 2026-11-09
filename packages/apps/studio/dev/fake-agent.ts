@@ -6,6 +6,7 @@ import { createState } from './fake-state';
 import { fail, Failure, matchRoute } from './fake-router';
 import { routesFor } from './fake-routes';
 import { runRoutesFor } from './fake-run-routes';
+import { simulationRoutesFor } from './fake-simulation-routes';
 import { acceptSocket } from './fake-socket';
 import { startTicker } from './fake-ticker';
 
@@ -23,7 +24,7 @@ const CORS_HEADERS = {
 };
 
 const state = createState();
-const routes = [...routesFor(state), ...runRoutesFor(state)];
+const routes = [...routesFor(state), ...simulationRoutesFor(state), ...runRoutesFor(state)];
 
 const send = (response: ServerResponse, status: number, body?: object) => {
     if(body === undefined){

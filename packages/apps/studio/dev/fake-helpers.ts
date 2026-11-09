@@ -1,6 +1,6 @@
 import { Run, RunSummary } from '@lammps-studio/contracts/run/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
-import { FakeState, latestRecord } from './fake-state';
+import { FakeState, latestFrame, latestRecord } from './fake-state';
 
 const summaryOf = ({ number, state, startedAt, endedAt, progress, error }: Run): RunSummary => ({
     number,
@@ -14,7 +14,11 @@ const summaryOf = ({ number, state, startedAt, endedAt, progress, error }: Run):
 export const withRun = (state: FakeState, simulation: Simulation): Simulation => {
     const record = latestRecord(state, simulation.id);
 
-    return { ...simulation, lastRun: record ? summaryOf(record.run) : null };
+    return {
+        ...simulation,
+        lastRun: record ? summaryOf(record.run) : null,
+        hasPreview: latestFrame(state, simulation.id) !== null
+    };
 };
 
 export const slugOf = (name: string, taken: string[]): string => {

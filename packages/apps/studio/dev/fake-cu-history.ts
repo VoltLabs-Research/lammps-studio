@@ -1,8 +1,8 @@
 import { Machine } from '@lammps-studio/contracts/machine/domain';
-import { Run, RunConfig } from '@lammps-studio/contracts/run/domain';
+import { Run, RunConfig, RunProgress } from '@lammps-studio/contracts/run/domain';
 import { TPS } from './cu/cu-model';
 import { configFor } from './fake-data';
-import { contextOf, CU_SIMULATION_ID, missingPackageCu, plannedCuProgress, replayCu, RunPosition, stopCu, cancelCu } from './fake-cu-run';
+import { cancelCu, contextOf, CU_SIMULATION_ID, EQUILIBRATION, missingPackageCu, plannedCuProgress, replayCu, RunPosition, stopCu, TENSION } from './fake-cu-run';
 import { applyChange, recordOf, RunRecord } from './fake-runs';
 
 export const CU_OMP_BUILD = '3f9a0c21b7e4';
@@ -15,7 +15,7 @@ const EQUILIBRATION_SECONDS = 31.2;
 const RUN_ONE_SECONDS = 2;
 const RUN_ONE_ENDED_AGO = 81 * MINUTE_MS;
 const RUN_TWO_ENDED_AGO = 41 * MINUTE_MS;
-const RUN_TWO_STOPPED: RunPosition = { section: 2, step: 96000 };
+const RUN_TWO_STOPPED: RunPosition = { section: TENSION, step: 96000 };
 
 export const CU_OMP_CONFIG: RunConfig = configFor('local', ['MANYBODY', 'OPENMP']);
 
@@ -28,6 +28,8 @@ const CU_CORE_CONFIG: RunConfig = {
 const iso = (ms: number): string => new Date(ms).toISOString();
 
 export const tensionSeconds = (step: number): number => EQUILIBRATION_SECONDS + step / TPS;
+
+export const progressSeconds = ({ section, step }: RunProgress): number => (section === EQUILIBRATION ? step / TPS : tensionSeconds(step));
 
 export const cuRun = (number: number, config: RunConfig, buildHash: string, startedAt: string): Run => ({
     simulationId: CU_SIMULATION_ID,

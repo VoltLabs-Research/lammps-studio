@@ -27,8 +27,8 @@ export interface RunPosition{
 
 export const CU_SIMULATION_ID = 'cu-nanowire-tension';
 
-const EQUILIBRATION = 1;
-const TENSION = 2;
+export const EQUILIBRATION = 1;
+export const TENSION = 2;
 const SECTIONS = 2;
 
 export const plannedCuProgress = (): RunProgress => ({

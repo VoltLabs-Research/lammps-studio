@@ -49,7 +49,10 @@ const duplicateSimulation = (state: FakeState, simulationId: string) => {
     const original = state.simulations.find((item) => item.id === simulationId);
     if(!original) return fail(SimulationErrors, 'NotFound');
 
-    return createSimulation(state, { name: `${original.name} copy`, machineId: original.machineId, template: 'empty', source: null });
+    const copy = createSimulation(state, { name: `${original.name} copy`, machineId: original.machineId, template: 'empty', source: null });
+    if(!(copy instanceof Failure)) state.folders.set(copy.id, state.folders.get(original.id) ?? []);
+
+    return copy;
 };
 
 const removeSimulation = (state: FakeState, simulationId: string): Failure | undefined => {
@@ -57,6 +60,7 @@ const removeSimulation = (state: FakeState, simulationId: string): Failure | und
 
     state.simulations = state.simulations.filter((item) => item.id !== simulationId);
     state.runs.delete(simulationId);
+    state.folders.delete(simulationId);
     broadcast({ type: 'simulation:removed', simulationId });
 
     return undefined;
@@ -109,7 +113,6 @@ export const routesFor = (state: FakeState): Route[] => [
     route(simulationRoutes.create, (_, body) => createSimulation(state, body)),
     route(simulationRoutes.duplicate, ({ simulationId }) => duplicateSimulation(state, simulationId)),
     route(simulationRoutes.remove, ({ simulationId }) => removeSimulation(state, simulationId)),
-    route(simulationRoutes.preview, () => fail(SimulationErrors, 'NoPreview')),
     route(machineRoutes.list, () => state.machines),
     route(machineRoutes.get, ({ machineId }) => state.machines.find((item) => item.id === machineId) ?? fail(MachineErrors, 'NotFound')),
     route(buildRoutes.list, () => state.builds),
