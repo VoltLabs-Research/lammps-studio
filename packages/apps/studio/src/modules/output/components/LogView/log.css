@@ -1,0 +1,10 @@
+.log { font-family: var(--font-mono); font-size: 12px; line-height: 18px; padding: 8px 0 24px; }
+.log__line { display: flex; white-space: pre; padding: 0 14px 0 0; min-width: max-content; }
+.log__line .n { width: 52px; flex: none; text-align: right; padding-right: 14px; color: var(--muted); opacity: 0.55; user-select: none; }
+.log__line.head { font-weight: var(--w-semibold); }
+.log__line.thermo { font-variant-numeric: tabular-nums; }
+.log__line.warn { background: var(--warning-soft); color: var(--warning-ink); }
+.log__line.error { background: var(--danger-soft); color: var(--danger-ink); }
+.log__line.meta { color: var(--muted); }
+.log__line.new { animation: flash 900ms var(--ease); }
+@keyframes flash { from { background: var(--tint-2); } }
