@@ -18,10 +18,17 @@ on:
       - pnpm-workspace.yaml
       - .nvmrc
       - .github/workflows/desktop.yml
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build the installers for (leave empty to release main)
+        required: false
+        default: ''
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.tag || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -31,35 +38,54 @@ jobs:
   version:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.next.outputs.version }}
-      previous: ${{ steps.next.outputs.previous }}
+      version: ${{ steps.pick.outputs.version }}
+      previous: ${{ steps.pick.outputs.previous }}
+      ref: ${{ steps.pick.outputs.ref }}
+      existing: ${{ steps.pick.outputs.existing }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: work out the next version from the commits since the last release
-        id: next
+      - name: pick the version and the commit to build
+        id: pick
         run: |
-          previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' 2>/dev/null || true)
-          if [ -z "$previous" ]; then
-            version=$(jq -r .version packages/apps/desktop/package.json)
+          tag="${RELEASE_TAG:-$INPUT_TAG}"
+          if [ -n "$tag" ]; then
+            git rev-parse --verify --quiet "refs/tags/$tag" > /dev/null || { echo "::error::no tag $tag"; exit 1; }
+            version="${tag#[vV]}"
+            previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' "$tag^" 2>/dev/null || true)
+            echo "ref=refs/tags/$tag" >> "$GITHUB_OUTPUT"
+            echo "existing=true" >> "$GITHUB_OUTPUT"
           else
-            IFS=. read -r major minor patch <<< "${previous#v}"
-            if git log --format=%s "$previous..HEAD" | grep -qE '^feat(\([^)]*\))?:'; then
-              version="$major.$((minor + 1)).0"
+            previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' 2>/dev/null || true)
+            if [ -z "$previous" ]; then
+              version=$(jq -r .version packages/apps/desktop/package.json)
             else
-              version="$major.$minor.$((patch + 1))"
+              IFS=. read -r major minor patch <<< "${previous#v}"
+              if git log --format=%s "$previous..HEAD" | grep -qE '^feat(\([^)]*\))?:'; then
+                version="$major.$((minor + 1)).0"
+              else
+                version="$major.$minor.$((patch + 1))"
+              fi
             fi
+            echo "ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            echo "existing=false" >> "$GITHUB_OUTPUT"
           fi
           echo "previous=$previous" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
 
   check:
+    needs: version
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.ref }}
 
       - uses: pnpm/action-setup@v6
         with:
@@ -88,7 +114,10 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 40
+    timeout-minutes: 45
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
 
     defaults:
       run:
@@ -97,6 +126,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.ref }}
 
       - uses: pnpm/action-setup@v6
         with:
@@ -109,6 +140,15 @@ jobs:
       - name: install — frozen lockfile
         run: pnpm install --frozen-lockfile
 
+      - name: keep Electron and the packaging tools between runs
+        uses: actions/cache@v6
+        with:
+          path: |
+            .cache/electron
+            .cache/electron-builder
+          key: electron-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: electron-${{ runner.os }}-
+
       - name: package
         run: |
           if [ "$RUNNER_OS" = macOS ] && [ -n "$MAC_CERTIFICATE" ]; then
@@ -117,10 +157,11 @@ jobs:
           else
             export CSC_IDENTITY_AUTO_DISCOVERY=false
           fi
-          for attempt in 1 2 3; do
+          for wait in 30 60 120 0; do
             pnpm dist --publish never -c.extraMetadata.version="$VERSION" && exit 0
-            echo "::warning::packaging failed on attempt $attempt of 3"
-            sleep 30
+            [ "$wait" = 0 ] && break
+            echo "::warning::packaging failed, retrying in $wait s"
+            sleep "$wait"
           done
           exit 1
         env:
@@ -143,7 +184,7 @@ jobs:
             packages/apps/desktop/release/*.deb
 
   publish:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && (needs.version.outputs.existing == 'true' || github.ref == 'refs/heads/main')
     needs: [version, check, package]
     runs-on: ubuntu-latest
     permissions:
@@ -152,6 +193,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ needs.version.outputs.ref }}
 
       - uses: actions/download-artifact@v8
         with:
@@ -171,11 +213,19 @@ jobs:
 
       - name: publish the release with the installers
         run: |
-          if gh release view "v$VERSION" > /dev/null 2>&1; then
-            gh release upload "v$VERSION" installers/* --clobber
+          tag="v$VERSION"
+          if [ "$EXISTING" = true ]; then
+            tag=$(git describe --tags --exact-match HEAD --match "[vV]$VERSION")
+          fi
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release upload "$tag" installers/* --clobber
+            if [ -z "$(gh release view "$tag" --json body -q .body)" ]; then
+              gh release edit "$tag" --notes-file notes.md
+            fi
           else
-            gh release create "v$VERSION" installers/* --target "$GITHUB_SHA" --title "LAMMPS Studio $VERSION" --notes-file notes.md
+            gh release create "$tag" installers/* --target "$GITHUB_SHA" --title "LAMMPS Studio $VERSION" --notes-file notes.md
           fi
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.version.outputs.version }}
+          EXISTING: ${{ needs.version.outputs.existing }}
