@@ -5,7 +5,7 @@ import { LAMMPS_VERSIONS } from '@lammps-studio/lammps/catalog/versions';
 import { FileCode, LoaderCircle } from 'lucide-react';
 import { MACHINE_ICON } from '@/modules/machines/utils/machine-labels';
 import { RunPhase, Statusbar, StatusItem } from '@/modules/run-control/domain/run-control';
-import { parallelSummary } from '@/modules/run-control/utils/config-summary';
+import { runResources } from '@/modules/runs/utils/run-rows';
 import { formatInt } from '@/shared/utils/format';
 
 export interface StatusbarContext{
@@ -47,7 +47,7 @@ const leftItems = ({ machine, config, build }: StatusbarContext): StatusItem[] =
         ...items,
         item('image', imageText(build), { mono: true, wideOnly: true }),
         item('version', versionText(config.version)),
-        item('parallel', parallelSummary(config))
+        item('parallel', runResources(config))
     ];
 };
 
