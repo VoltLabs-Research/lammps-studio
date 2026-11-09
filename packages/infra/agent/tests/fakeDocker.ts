@@ -205,11 +205,15 @@ export class FakeDocker{
             },
             inspect: async (id) => this.#find({ id }).describe(),
             list: async () => {
-                if(this.unreachable) throw Object.assign(new Error('connect ECONNREFUSED /var/run/docker.sock'), { code: 'ECONNREFUSED', syscall: 'connect' });
+                this.#reach();
 
                 return [...this.containers.values()].map((container) => container.describe());
             }
         };
+    }
+
+    #reach(){
+        if(this.unreachable) throw Object.assign(new Error('connect ECONNREFUSED /var/run/docker.sock'), { code: 'ECONNREFUSED', syscall: 'connect' });
     }
 
     #logStreamer(generation: number): LogStreamerPort{
@@ -266,7 +270,11 @@ export class FakeDocker{
 
     #imageBuilder(): ImageBuilderPort{
         return {
-            inspect: async (tag) => this.images.get(tag) ?? null,
+            inspect: async (tag) => {
+                this.#reach();
+
+                return this.images.get(tag) ?? null;
+            },
             build: (build, observer, signal) => new Promise<ImageInfo>((resolve, reject) => {
                 const tag = build.tag();
                 const settle = () => this.#builds.delete(tag);

@@ -19,6 +19,7 @@ import {
     meltSimulation,
     runDirOf,
     runningContainer,
+    runConfig,
     runRecord,
     startRun,
     statesOf
@@ -171,19 +172,31 @@ describe('a run', () => {
         });
     });
 
-    it('fails a run on the error LAMMPS printed, near the step it reached', async () => {
+    it('fails a run on the error LAMMPS printed, near the step it reached, counting the warnings before it', async () => {
         const simulation = await meltSimulation(app, 'Lost atoms');
         await startRun(app, simulation);
         const container = await runningContainer(docker, simulation, 1);
 
-        container.print(...MELT_SETUP, meltRow(0), meltRow(50), 'ERROR: Lost atoms: original 3 current 2 (src/thermo.cpp:488)', 'Last command: run 100');
+        container.print(...MELT_SETUP, meltRow(0), 'WARNING: Too many neighbors in CNA for 3 atoms (src/compute_cna_atom.cpp:180)', meltRow(50));
+        container.print('ERROR: Lost atoms: original 3 current 2 (src/thermo.cpp:488)', 'Last command: run 100');
         container.exit(1);
 
-        await expect.poll(() => fetchRun(app, simulation, 1)).toMatchObject({ state: 'failed' });
+        await expect.poll(() => fetchRun(app, simulation, 1)).toMatchObject({ state: 'failed', warnings: 1 });
         const log = (await request(app, runRoutes.log, { params: { simulationId: simulation.id, runNumber: 1 } })).data();
         const errorLine = log.find((line) => line.kind === 'error');
         expect((await fetchRun(app, simulation, 1)).error).toEqual({ message: 'Lost atoms: original 3 current 2', step: 50, line: errorLine?.index });
         expect(textsOf(log).at(-1)).toBe('studio › LAMMPS exited with code 1 near step 50 · container removed');
+    });
+
+    it('answers Machine::Offline when Docker cannot be reached, leaving no run behind', async () => {
+        const simulation = await meltSimulation(app, 'No Docker');
+        docker.unreachable = true;
+
+        const res = await request(app, runRoutes.start, { params: { simulationId: simulation.id }, body: { config: runConfig() } });
+        docker.unreachable = false;
+
+        expectError(res, 503, 'Machine::Offline');
+        expect((await request(app, runRoutes.list, { params: { simulationId: simulation.id } })).data()).toEqual([]);
     });
 
     it('cancels a run the user stopped, though mpirun exits 1 on SIGTERM', async () => {
