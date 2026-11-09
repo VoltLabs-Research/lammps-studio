@@ -1,7 +1,7 @@
 import { RunError, RunProgress } from '@lammps-studio/contracts/run/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
 import { isActive, phaseOf } from '@/modules/simulations/utils/simulation-phase';
-import { formatAgo, formatDuration, formatEta, formatInt, formatPercent, secondsBetween } from '@/shared/utils/format';
+import { DetailPart, formatAgo, formatDuration, formatEta, formatInt, formatPercent, joinDetails as joined, secondsBetween } from '@/shared/utils/format';
 
 export interface CardCaption{
     word: string;
@@ -15,13 +15,9 @@ export interface CaptionContext{
     now: number;
 }
 
-type Part = string | null;
-
-const joined = (...parts: Part[]): string => parts.filter((part) => part !== null && part !== '').join(' · ');
-
 const caption = (word: string, detail: string): CardCaption => ({ word, detail, danger: false });
 
-const atStep = (step: number | null): Part => (step === null ? null : `at step ${formatInt(step)}`);
+const atStep = (step: number | null): DetailPart => (step === null ? null : `at step ${formatInt(step)}`);
 
 const runningDetail = (progress: RunProgress, machineName: string): string => {
     if(progress.totalSteps === null) return joined(`step ${formatInt(progress.step)}`, machineName);

@@ -11,6 +11,10 @@ const KILOBYTE = 1e3;
 
 const integer = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 
+export type DetailPart = string | null;
+
+export const joinDetails = (...parts: DetailPart[]): string => parts.filter((part) => part !== null && part !== '').join(' · ');
+
 export const formatInt = (value: number): string => integer.format(Math.round(value));
 
 export const formatPercent = (fraction: number): string => `${Math.round(fraction * 100)}%`;
