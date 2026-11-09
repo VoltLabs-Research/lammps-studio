@@ -61,7 +61,7 @@ export const partitionEntries = (partitions: string[], current: string, choose: 
         run: () => choose(partition)
     }));
 
-export const isInputScript = (path: string): boolean => INPUT_SCRIPT.test(path);
+const isInputScript = (path: string): boolean => INPUT_SCRIPT.test(path);
 
 export const entryEntries = (candidates: EntryCandidate[], current: string | null, choose: (path: string) => void, other: () => void): MenuEntry[] => {
     const scripts = candidates.map((candidate) => candidate.path).filter(isInputScript);

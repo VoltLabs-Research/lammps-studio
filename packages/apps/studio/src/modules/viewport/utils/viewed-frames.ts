@@ -1,4 +1,3 @@
-import type { FrameInfo } from '@lammps-studio/contracts/run/domain';
 import type { FrameSpan } from '@/modules/viewport/domain/workspace';
 import { useRunSessionStore, viewedRun } from '@/shared/store/run-session';
 
@@ -14,5 +13,3 @@ export const spanOf = (session: RunSession): FrameSpan => ({
     count: session.frames.length,
     running: viewedRun(session)?.state === 'running'
 });
-
-export const frameKeyOf = (runKey: string, frame: FrameInfo): string => `${runKey}/${frame.index}`;
