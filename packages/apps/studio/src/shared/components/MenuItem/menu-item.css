@@ -9,5 +9,5 @@
 .menu-item[disabled] { opacity: 0.45; cursor: default; }
 .menu-item[disabled]:hover { background: transparent; }
 .menu-check { width: 16px; height: 16px; display: grid; place-items: center; flex: none; margin-right: -2px; }
-.menu-item > span { white-space: nowrap; }
+.menu-item > :is(span, kbd) { white-space: nowrap; }
 .menu-hint { margin-left: auto; padding-left: 12px; color: var(--muted); font-size: var(--text-xs); white-space: nowrap; }
