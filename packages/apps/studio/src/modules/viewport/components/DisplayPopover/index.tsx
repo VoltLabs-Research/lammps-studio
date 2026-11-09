@@ -10,7 +10,7 @@ import Icon from '@/shared/components/Icon';
 import Seg from '@/shared/components/Seg';
 import { SegOption } from '@/shared/contracts/ui';
 import { copyText } from '@/shared/services/clipboard';
-import { saveBlob } from '@/shared/services/download';
+import { saveBlob } from '@/shared/services/save-file';
 import { toast } from '@/shared/store/toast';
 import '@/shared/components/Menu/menu.css';
 import '@/shared/components/MenuItem/menu-item.css';
