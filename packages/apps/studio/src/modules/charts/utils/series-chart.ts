@@ -13,6 +13,7 @@ const STRESS_PAD_SHARE = 0.04;
 const ROWS_PAST_YIELD = 4;
 const STRAIN_DIGITS = 3;
 const STRESS_DIGITS = 2;
+const TICK_TOLERANCE = 1e-9;
 
 const withUnit = (text: string, unit: string): string => {
     return unit ? `${text} ${unit}` : text;
@@ -75,7 +76,7 @@ export const seriesChart = (series: BentoSeries, steps: number[], sizing: ChartS
         bare: !sizing.big,
         plotMode: sizing.plotMode,
         xDomain: domain,
-        xTicks: ticks.ticks.filter((tick) => tick >= domain.min && tick <= domain.max),
+        xTicks: ticks.ticks.filter((tick) => tick >= domain.min - ticks.step * TICK_TOLERANCE && tick <= domain.max + ticks.step * TICK_TOLERANCE),
         yRange: {
             pad: strain ? span * STRESS_PAD_SHARE : 0,
             min: strain ? 0 : null,

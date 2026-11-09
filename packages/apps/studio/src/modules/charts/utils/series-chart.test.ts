@@ -48,6 +48,14 @@ describe('seriesChart', () => {
         expect(chart.annotations).toEqual([{ x: 0.002, y: 4.6, label: 'Yield 4.60 GPa' }]);
     });
 
+    it('keeps the last strain tick when the projection lands a rounding error short of it', () => {
+        const steps = Array.from({ length: 187 }, (_, index) => index * 1000);
+        const strain: BentoSeries = { ...STRESS, xs: steps.map((step) => step * 1e-6), ys: steps.map(() => 1) };
+        const chart = seriesChart(strain, steps, { ...SIZING, totalSteps: 500_000 });
+
+        expect(chart.xTicks.at(-1)).toBe(0.5);
+    });
+
     it('leaves sparklines bare and unannotated', () => {
         const chart = seriesChart(STRESS, STEPS, { ...SIZING, big: false });
 
