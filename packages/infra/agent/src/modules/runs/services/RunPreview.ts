@@ -9,8 +9,8 @@ import LammpsRuntime from '@lammps-studio/runtime/public/LammpsRuntime';
 import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
-export const PREVIEW_EVERY_MS = 2000;
-export const PREVIEW_ATOMS = 10_000;
+const PREVIEW_EVERY_MS = 2000;
+const PREVIEW_ATOMS = 10_000;
 
 export type PreviewCreated = () => void;
 

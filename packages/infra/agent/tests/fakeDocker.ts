@@ -29,7 +29,7 @@ interface FakeFrame extends DumpFrame{
 
 type WaitResolver = (result: ContainerWaitResult) => void;
 
-export const dumpText = (step: number, atoms: number): string => [
+const dumpText = (step: number, atoms: number): string => [
     'ITEM: TIMESTEP',
     String(step),
     'ITEM: NUMBER OF ATOMS',

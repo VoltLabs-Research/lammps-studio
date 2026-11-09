@@ -17,8 +17,8 @@ import { runIdOf } from '@lammps-studio/runtime/domain/simulation/RunSpec';
 import LammpsRuntime from '@lammps-studio/runtime/public/LammpsRuntime';
 import { join } from 'node:path';
 
-export const FLUSH_MS = 100;
-export const PROGRESS_MS = 1000;
+const FLUSH_MS = 100;
+const PROGRESS_MS = 1000;
 
 const FINAL_STATES: RunState[] = ['cancelled', 'completed', 'failed'];
 const MS_PER_SECOND = 1000;

@@ -2,14 +2,14 @@ import { config } from '@/config';
 import { BuildRecord } from '@/modules/builds/contracts/domain/build';
 import { Build } from '@lammps-studio/contracts/build/domain';
 import { buildRoutes } from '@lammps-studio/contracts/build/routes';
-import { BuildUpdatedFrame } from '@lammps-studio/contracts/events/gateway';
+import { StudioEvent } from '@lammps-studio/contracts/events/gateway';
 import { BuildIdentity } from '@lammps-studio/runtime/domain/build/BuildSpec';
 import { listenToEvents } from '@tests/events';
 import { FakeDocker, IMAGE_BYTES } from '@tests/fakeDocker';
 import { writeTree } from '@tests/files';
 import { bootAgent, startAgent } from '@tests/harness';
 import { expectError, request } from '@tests/request';
-import { identityOf, LAMMPS_VERSION, runRecord } from '@tests/runs';
+import { eventsOf, identityOf, LAMMPS_VERSION, runRecord } from '@tests/runs';
 import { createSimulation, folderOf } from '@tests/simulations';
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
@@ -23,8 +23,7 @@ const createBuild = (...packages: string[]) => request(app, buildRoutes.create, 
 
 const getBuild = async (hash: string): Promise<Build> => (await request(app, buildRoutes.get, { params: { hash } })).data();
 
-const updatesOf = (received: unknown[], hash: string): Build[] => received
-    .filter((event): event is BuildUpdatedFrame => (event as BuildUpdatedFrame).type === 'build:updated')
+const updatesOf = (received: StudioEvent[], hash: string): Build[] => eventsOf(received, 'build:updated')
     .map((event) => event.build)
     .filter((build) => build.hash === hash);
 
