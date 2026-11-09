@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -25,22 +25,31 @@ interface CdpReply{
 }
 
 const CHROME = process.env.CHROME ?? 'google-chrome';
-const PORT = 9333;
 const SETTLE_MS = 1500;
 const STEP_MS = 450;
 const POLL_MS = 100;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const listTargets = async (): Promise<CdpTarget[]> => {
-    const body = await fetch(`http://127.0.0.1:${PORT}/json/list`).then((response) => response.text(), () => '[]');
+const PROFILE = mkdtempSync(join(tmpdir(), 'shoot-'));
+const ACTIVE_PORT_FILE = join(PROFILE, 'DevToolsActivePort');
+
+const debuggingPort = async (): Promise<string> => {
+    while(!existsSync(ACTIVE_PORT_FILE)) await sleep(POLL_MS);
+
+    return readFileSync(ACTIVE_PORT_FILE, 'utf8').split('\n')[0];
+};
+
+const listTargets = async (port: string): Promise<CdpTarget[]> => {
+    const body = await fetch(`http://127.0.0.1:${port}/json/list`).then((response) => response.text(), () => '[]');
 
     return JSON.parse(body);
 };
 
 const pageSocketUrl = async (): Promise<string> => {
+    const port = await debuggingPort();
     for(;;){
-        const page = (await listTargets()).find((target) => target.type === 'page');
+        const page = (await listTargets(port)).find((target) => target.type === 'page');
         if(page) return page.webSocketDebuggerUrl;
         await sleep(POLL_MS);
     }
@@ -102,8 +111,8 @@ const take = async (cdp: Awaited<ReturnType<typeof connect>>, shot: Shot) => {
 const shots: Shot[] = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const chrome = spawn(CHROME, [
     '--headless=new',
-    `--remote-debugging-port=${PORT}`,
-    `--user-data-dir=${mkdtempSync(join(tmpdir(), 'shoot-'))}`,
+    '--remote-debugging-port=0',
+    `--user-data-dir=${PROFILE}`,
     '--hide-scrollbars',
     '--use-angle=swiftshader',
     '--enable-unsafe-swiftshader',
