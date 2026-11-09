@@ -106,15 +106,34 @@ const hintOf = (file: ClassifiedFile, includedBy: string | undefined): string =>
 };
 
 const LIKELY_RANK = 2;
+const DEFAULT_RANK = 1;
 
-export const resolveEntry = (files: ScriptFile[]): EntryCandidate[] => {
+interface RankedFile{
+    file: ClassifiedFile;
+    includedBy: string | undefined;
+    rank: number;
+}
+
+const rankFiles = (files: ScriptFile[]): RankedFile[] => {
     const classified = files.map(classify);
     const parents = includesOf(classified);
-    const ranked = classified
+
+    return classified
         .map((file) => ({ file, includedBy: parents.get(file.path), rank: rankOf(file, parents.get(file.path)) }))
         .sort((a, b) => a.rank - b.rank || depthOf(a.file.path) - depthOf(b.file.path) || a.file.path.localeCompare(b.file.path));
+};
 
-    return ranked.map(({ file, includedBy, rank }, index) => ({
+export const defaultEntry = (files: ScriptFile[]): string | null => {
+    const [first] = rankFiles(files);
+    if(first === undefined || first.rank > DEFAULT_RANK){
+        return null;
+    }
+
+    return first.file.path;
+};
+
+export const resolveEntry = (files: ScriptFile[]): EntryCandidate[] => {
+    return rankFiles(files).map(({ file, includedBy, rank }, index) => ({
         path: file.path,
         lines: file.lines,
         hint: hintOf(file, includedBy),

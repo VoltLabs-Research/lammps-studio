@@ -3,7 +3,7 @@ import waterScript from './fixtures/water-box/water.lmp?raw';
 import waterSetup from './fixtures/water-box/setup.lammps?raw';
 import boxData from './fixtures/water-box/box.data?raw';
 import readme from './fixtures/water-box/README.md?raw';
-import { resolveEntry } from '../src/script/resolve-entry';
+import { defaultEntry, resolveEntry } from '../src/script/resolve-entry';
 import { ScriptFile } from '../src/script/domain';
 
 describe('resolveEntry', () => {
@@ -49,5 +49,27 @@ describe('resolveEntry', () => {
         ]);
 
         expect(candidates.map((candidate) => candidate.likely)).toEqual([false, false]);
+    });
+});
+
+describe('defaultEntry', () => {
+    const script = (path: string, text = 'units lj\nrun 10\n'): ScriptFile => ({ path, text });
+
+    it.each([
+        [['other.in', 'main.in'], 'main.in'],
+        [['b.in', 'a.in', 'z.lmp'], 'a.in'],
+        [['water.lmp', 'in.melt'], 'in.melt'],
+        [['inputs/shear.in'], 'inputs/shear.in']
+    ])('takes main.in, then an input script nothing includes (%j → %s)', (paths, entry) => {
+        expect(defaultEntry(paths.map((path) => script(path)))).toBe(entry);
+    });
+
+    it('leaves the choice to the user when no file is named like an entry script', () => {
+        expect(defaultEntry([script('water.lmp', 'include setup.lammps\nrun 1000\n'), script('setup.lammps', 'units real\n')])).toBeNull();
+        expect(defaultEntry([])).toBeNull();
+    });
+
+    it('does not take an input script another one includes', () => {
+        expect(defaultEntry([script('settings.in', 'units metal\n'), script('job.lmp', 'include settings.in\nrun 100\n')])).toBeNull();
     });
 });
