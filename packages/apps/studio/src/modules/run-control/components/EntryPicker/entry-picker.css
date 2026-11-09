@@ -2,7 +2,7 @@
 .picker h3 { margin: 0; font-size: 1rem; font-weight: var(--w-semibold); }
 .picker p { margin: 0; color: var(--muted); font-size: var(--text-sm); }
 .picker__head { display: flex; align-items: center; gap: 12px; }
-.picker__icon { width: 36px; height: 36px; border-radius: 14px; background: var(--tint); display: grid; place-items: center; color: var(--warning-ink); flex: none; }
+.picker__icon { width: 36px; height: 36px; border-radius: 14px; background: var(--tint); display: grid; place-items: center; color: var(--warning-ink); }
 .picker__actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
 .file-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
 .file-opt { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 0; background: transparent; text-align: left; font-size: var(--text-sm); border-bottom: 1px solid var(--separator); width: 100%; cursor: pointer; }
