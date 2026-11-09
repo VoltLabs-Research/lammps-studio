@@ -1,0 +1,13 @@
+.ws-top { height: 52px; flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 14px 0 8px; -webkit-app-region: drag; }
+.ws-top :is(button, input, select, textarea, a, [role="button"], [tabindex]) { -webkit-app-region: no-drag; }
+.ws-top__center { display: flex; justify-content: center; min-width: 0; }
+.ws-top__left, .ws-top__right { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.ws-top__left { flex: 1 1 auto; }
+.ws-top__right { flex: 0 1 auto; justify-content: flex-end; gap: 6px; }
+.ws-top__right .traffic { margin-left: 10px; }
+.ws-title { font-size: var(--text-sm); font-weight: var(--w-medium); padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 860px) {
+    .ws-top { grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; }
+    .ws-top .traffic { display: none; }
+}

@@ -1,0 +1,9 @@
+.machine-chip {
+    display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--border);
+    background: transparent; font-size: var(--text-xs); color: var(--fg); white-space: nowrap; flex: none;
+}
+.machine-chip:hover { background: var(--tint); }
+
+@media (max-width: 860px) {
+    .machine-chip { display: none; }
+}

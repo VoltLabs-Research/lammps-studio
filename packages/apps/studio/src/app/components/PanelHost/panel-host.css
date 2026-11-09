@@ -1,0 +1,14 @@
+.panel {
+    width: var(--panel-w, 46%); min-width: 320px; max-width: 70%; flex: none; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden;
+    background: var(--background); border: 1px solid var(--border); margin-bottom: 8px;
+}
+.panel.collapsed { display: none; }
+
+.resize { width: 8px; flex: none; position: relative; cursor: col-resize; touch-action: none; }
+.resize::before { content: ""; position: absolute; left: 50%; top: 50%; width: 3px; height: 26px; transform: translate(-50%, -50%); border-radius: 999px; background: color-mix(in srgb, var(--muted) 75%, transparent); opacity: 0.6; transition: opacity 140ms; }
+.resize:hover::before, .resize.dragging::before { opacity: 1; }
+
+@media (max-width: 860px) {
+    .resize { display: none; }
+    .panel { width: auto; max-width: none; min-width: 0; height: 70vh; margin-bottom: 8px; }
+}

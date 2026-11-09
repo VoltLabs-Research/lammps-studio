@@ -1,0 +1,22 @@
+.activity { width: 48px; flex: none; display: flex; flex-direction: column; align-items: center; padding: 4px 0 8px; gap: 2px; }
+.act {
+    position: relative; width: 48px; height: 46px; border: 0; background: transparent; color: var(--muted); display: grid; place-items: center;
+    transition: color 140ms;
+}
+.act:hover { color: var(--fg); }
+.act[aria-pressed="true"] { color: var(--fg); }
+.act[aria-pressed="true"]::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 2px; border-radius: 0 2px 2px 0; background: var(--fg); }
+.act__badge {
+    position: absolute; right: 8px; bottom: 7px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--info); color: #fff;
+    font-size: 9.5px; font-weight: var(--w-semibold); display: grid; place-items: center; line-height: 1; font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 0 2px var(--canvas);
+}
+.act__badge.warn { background: var(--warning); color: #1a1a1a; }
+.activity__spacer { flex: 1; }
+
+@media (max-width: 860px) {
+    .activity { width: 100%; flex-direction: row; height: 44px; padding: 0; justify-content: flex-start; overflow-x: auto; }
+    .activity__spacer { display: none; }
+    .act { width: 44px; height: 44px; flex: none; }
+    .act[aria-pressed="true"]::before { left: 10px; right: 10px; top: auto; bottom: 0; width: auto; height: 2px; border-radius: 2px 2px 0 0; }
+}

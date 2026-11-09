@@ -1,0 +1,6 @@
+.btn-split { display: inline-flex; flex: none; }
+.btn-split .btn { height: 30px; padding: 0 12px; font-size: var(--text-xs); }
+.btn-split .btn:first-child { border-radius: 999px 0 0 999px; padding-right: 12px; }
+.btn-split .btn:last-child { border-radius: 0 999px 999px 0; width: 28px; padding: 0; border-left: 1px solid color-mix(in oklab, var(--canvas) 22%, transparent); }
+.btn-split .btn.secondary:last-child, .btn-split .btn.danger:last-child { border-left-color: var(--border-2); }
+.btn-split .btn:only-child { border-radius: 999px; width: auto; padding: 0 12px; border-left: 0; }

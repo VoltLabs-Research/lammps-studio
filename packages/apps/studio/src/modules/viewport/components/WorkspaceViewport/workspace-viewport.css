@@ -1,0 +1,7 @@
+.viewport {
+    position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: var(--viewport); border: 1px solid var(--border); margin-bottom: 8px;
+}
+
+@media (max-width: 860px) {
+    .viewport { order: -1; flex: none; height: 62vh; min-height: 420px; margin: 0; }
+}
