@@ -3,22 +3,19 @@ import { BuildRecord } from '@/modules/builds/contracts/domain/build';
 import { Build } from '@lammps-studio/contracts/build/domain';
 import { buildRoutes } from '@lammps-studio/contracts/build/routes';
 import { BuildUpdatedFrame } from '@lammps-studio/contracts/events/gateway';
-import RuntimeBuild from '@lammps-studio/runtime/domain/build/Build';
 import { BuildIdentity } from '@lammps-studio/runtime/domain/build/BuildSpec';
 import { listenToEvents } from '@tests/events';
 import { FakeDocker, IMAGE_BYTES } from '@tests/fakeDocker';
 import { writeTree } from '@tests/files';
 import { bootAgent, startAgent } from '@tests/harness';
 import { expectError, request } from '@tests/request';
-import { LAMMPS_VERSION, runRecord } from '@tests/runs';
+import { identityOf, LAMMPS_VERSION, runRecord } from '@tests/runs';
 import { createSimulation, folderOf } from '@tests/simulations';
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 const docker = new FakeDocker();
 const app = await startAgent(docker.runtime);
-
-const identityOf = (...packages: string[]): BuildIdentity => new RuntimeBuild({ version: LAMMPS_VERSION, packages }).identity();
 
 const createBuild = (...packages: string[]) => request(app, buildRoutes.create, {
     body: { machineId: 'local', version: LAMMPS_VERSION, packages }

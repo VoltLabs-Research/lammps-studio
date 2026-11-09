@@ -1,5 +1,5 @@
 import { Stats } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 
 const MISSING = ['ENOENT', 'ENOTDIR'];
 const TAKEN = 'EEXIST';
@@ -17,6 +17,15 @@ export const isTaken = (error: unknown): boolean => codeOf(error) === TAKEN;
 export const statIfExists = async (path: string): Promise<Stats | null> => {
     try{
         return await stat(path);
+    }catch(error: unknown){
+        if(isMissing(error)) return null;
+        throw error;
+    }
+};
+
+export const readTextIfExists = async (path: string): Promise<string | null> => {
+    try{
+        return await readFile(path, 'utf8');
     }catch(error: unknown){
         if(isMissing(error)) return null;
         throw error;

@@ -43,6 +43,10 @@ export default class SimulationService{
         return this.#view(await this.#store.find(simulationId));
     }
 
+    async announce(simulationId: string){
+        await this.#publish(await this.#store.find(simulationId));
+    }
+
     async create(input: CreateSimulationInput): Promise<Simulation>{
         this.#machines.assertKnown(input.machineId);
         const name = await this.#availableName(input.name);

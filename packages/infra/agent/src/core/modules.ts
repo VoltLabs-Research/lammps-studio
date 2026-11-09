@@ -27,6 +27,11 @@ export const modules: ModuleEntry[] = [
         load: () => import('../modules/machines/controllers/Machine')
     },
     {
+        module: 'runs',
+        category: 'controllers',
+        load: () => import('../modules/runs/controllers/Run')
+    },
+    {
         module: 'simulations',
         category: 'controllers',
         load: () => import('../modules/simulations/controllers/Simulation')

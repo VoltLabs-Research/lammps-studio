@@ -194,14 +194,14 @@ export class FakeDocker{
         return {
             stream: async (handle, handlers): Promise<LogStreamHandle> => {
                 const container = this.#find(handle);
-                const history = [...container.output];
-                setImmediate(() => {
-                    history.forEach((line) => handlers.onStdout(line));
+                const attached = new Promise<void>((resolve) => setImmediate(() => {
+                    container.output.forEach((line) => handlers.onStdout(line));
                     container.streams.add(handlers);
-                });
+                    resolve();
+                }));
 
                 return {
-                    ended: container.exited.then(() => undefined),
+                    ended: Promise.all([attached, container.exited]).then(() => undefined),
                     close: async () => {
                         container.streams.delete(handlers);
                     }
@@ -215,14 +215,14 @@ export class FakeDocker{
             watch: async (runDir, handlers): Promise<DumpWatch> => {
                 const watchers = this.#watchers.get(runDir) ?? new Set();
                 this.#watchers.set(runDir, watchers);
-                const existing = [...(this.#frames.get(runDir) ?? [])];
-                setImmediate(() => {
-                    existing.forEach((frame) => handlers.onFrame(frame));
+                const attached = new Promise<void>((resolve) => setImmediate(() => {
+                    (this.#frames.get(runDir) ?? []).forEach((frame) => handlers.onFrame(frame));
                     watchers.add(handlers);
-                });
+                    resolve();
+                }));
 
                 return {
-                    flush: async () => undefined,
+                    flush: () => attached,
                     close: async () => {
                         watchers.delete(handlers);
                     }

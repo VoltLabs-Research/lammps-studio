@@ -4,6 +4,7 @@ import LammpsRuntime from '@lammps-studio/runtime/public/LammpsRuntime';
 import { config } from '@/config';
 import { builds } from '@/modules/builds/services/Build';
 import { codeServer } from '@/modules/editor/services/CodeServer';
+import { runSupervisor } from '@/modules/runs/services/RunSupervisor';
 import { logger } from '@lammps-studio/readable/utils/Logger';
 import { modules } from './modules';
 import { mkdir } from 'node:fs/promises';
@@ -21,9 +22,12 @@ const createApp = (openRuntime: RuntimeFactory = dockerRuntime) => new Applicati
     discover: () => ModuleDiscovery.load(modules),
     beforeMount: async () => {
         await mkdir(config.simulationsDir, { recursive: true });
-        await builds.open(openRuntime());
+        const runtime = openRuntime();
+        await builds.open(runtime);
+        await runSupervisor.open(runtime);
     },
     onClose: async () => {
+        await runSupervisor.close();
         builds.close();
         await codeServer.closeAll();
     }
