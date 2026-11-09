@@ -3,13 +3,6 @@ import { Machine } from '@lammps-studio/contracts/machine/domain';
 import { Run, RunConfig } from '@lammps-studio/contracts/run/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
 
-export interface FakeState{
-    machines: Machine[];
-    simulations: Simulation[];
-    runs: Map<string, Run>;
-    builds: Build[];
-}
-
 const SECOND = 1000;
 const HOUR = 3600 * SECOND;
 const DAY = 24 * HOUR;
@@ -34,7 +27,7 @@ const machine = (patch: Partial<Machine> & Pick<Machine, 'id' | 'name' | 'kind'>
     ...patch
 });
 
-const MACHINES: Machine[] = [
+export const MACHINES: Machine[] = [
     machine({ id: 'local', name: 'This computer', kind: 'local', host: 'rody-workstation', cpu: 'Ryzen 9 7950X', cores: 16, memory: '64 GB' }),
     machine({
         id: 'atlas',
@@ -79,7 +72,7 @@ const simulation = (id: string, name: string, machineId: string, entry: string |
     hasPreview: false
 });
 
-const SIMULATIONS: Simulation[] = [
+export const SIMULATIONS: Simulation[] = [
     simulation('cu-nanowire-tension', 'Cu nanowire tension', 'local', 'main.in', 3 * DAY),
     simulation('al-gb-shear', 'Al Σ5 grain boundary shear', 'atlas', 'main.in', 5 * DAY),
     simulation('ni-sintering', 'Ni nanoparticle sintering', 'atlas', 'main.in', 2 * DAY),
@@ -124,12 +117,7 @@ const runOf = ({ simulationId, machineId, patch }: RunSeed): Run => ({
     ...patch
 });
 
-const RUNS: Run[] = [
-    runOf({
-        simulationId: 'cu-nanowire-tension',
-        machineId: 'local',
-        patch: { number: 3, startedAt: at(330 * SECOND), outputDir: 'runs/run-3', progress: { step: 190_000, totalSteps: 500_000, section: 2, sections: 2, stepsPerSecond: 640.82 } }
-    }),
+export const RUNS: Run[] = [
     runOf({
         simulationId: 'al-gb-shear',
         machineId: 'atlas',
@@ -173,7 +161,7 @@ const build = (patch: Partial<Build> & Pick<Build, 'hash' | 'machineId' | 'packa
     ...patch
 });
 
-const BUILDS: Build[] = [
+export const BUILDS: Build[] = [
     build({ hash: '3f9a0c21b7e4', machineId: 'local', packages: ['MANYBODY', 'OPENMP'], sizeBytes: 1.4e9, buildSeconds: 408, usedBy: 2, createdAt: at(3 * DAY) }),
     build({
         hash: '8d21e6f04a9b',
@@ -203,10 +191,3 @@ const BUILDS: Build[] = [
     build({ hash: '1e0f7a3c9d82', machineId: 'gpu', packages: ['MANYBODY', 'KOKKOS', 'GPU'], sizeBytes: 3.1e9, buildSeconds: 1120, createdAt: at(15 * DAY) }),
     build({ hash: '5b6e2d81f0c4', machineId: 'local', packages: [], sizeBytes: 1.1e9, buildSeconds: 312, createdAt: at(30 * HOUR) })
 ];
-
-export const createState = (): FakeState => ({
-    machines: MACHINES,
-    simulations: SIMULATIONS,
-    runs: new Map(RUNS.map((run) => [run.simulationId, run])),
-    builds: BUILDS
-});

@@ -4,12 +4,11 @@ import { BuildErrors } from '@lammps-studio/contracts/build/errors';
 import { CreateBuildInput } from '@lammps-studio/contracts/build/http';
 import { machineRoutes } from '@lammps-studio/contracts/machine/routes';
 import { MachineErrors } from '@lammps-studio/contracts/machine/errors';
-import { runRoutes } from '@lammps-studio/contracts/run/routes';
 import { SimulationTemplate } from '@lammps-studio/contracts/simulation/domain';
 import { SimulationErrors } from '@lammps-studio/contracts/simulation/errors';
 import { CreateSimulationInput } from '@lammps-studio/contracts/simulation/http';
 import { simulationRoutes } from '@lammps-studio/contracts/simulation/routes';
-import { FakeState } from './fake-data';
+import { FakeState } from './fake-state';
 import { randomHash, slugOf, withRun } from './fake-helpers';
 import { fail, Failure, route, Route } from './fake-router';
 import { broadcast } from './fake-socket';
@@ -116,10 +115,5 @@ export const routesFor = (state: FakeState): Route[] => [
     route(buildRoutes.list, () => state.builds),
     route(buildRoutes.create, (_, body) => createBuild(state, body)),
     route(buildRoutes.get, ({ hash }) => state.builds.find((item) => item.hash === hash) ?? fail(BuildErrors, 'NotFound')),
-    route(buildRoutes.remove, ({ hash }) => removeBuild(state, hash)),
-    route(runRoutes.list, ({ simulationId }) => {
-        const run = state.runs.get(simulationId);
-
-        return run ? [run] : [];
-    })
+    route(buildRoutes.remove, ({ hash }) => removeBuild(state, hash))
 ];

@@ -1,10 +1,10 @@
 import type { ThermoSection } from '@lammps-studio/contracts/run/domain';
 import { E_MOD, EPS_Y, ERATE, gauss2, KB, L0, R_WIRE, smoothstep, STEPS_EQ, stressAt, THERMO_EVERY, WIRE } from './cu-model';
 
-const COLS_EQ = ['Step', 'Temp', 'PotEng', 'KinEng', 'TotEng', 'Press'];
-const COLS_RUN = ['Step', 'Temp', 'PotEng', 'KinEng', 'TotEng', 'Press', 'Lz', 'v_strain', 'v_stress'];
+export const COLS_EQ = ['Step', 'Temp', 'PotEng', 'KinEng', 'TotEng', 'Press'];
+export const COLS_RUN = ['Step', 'Temp', 'PotEng', 'KinEng', 'TotEng', 'Press', 'Lz', 'v_strain', 'v_stress'];
 
-const tensionRow = (step: number): number[] => {
+export const tensionRow = (step: number): number[] => {
     const count = WIRE.count;
     const eps = step * ERATE;
     const k = Math.round(step / THERMO_EVERY);
@@ -24,7 +24,7 @@ const tensionRow = (step: number): number[] => {
     return [step, temperature, potential, kinetic, potential + kinetic, pressure, L0 * (1 + eps), eps, sigma];
 };
 
-const equilibrationRow = (step: number): number[] => {
+export const equilibrationRow = (step: number): number[] => {
     const count = WIRE.count;
     const k = Math.round(step / THERMO_EVERY);
     const temperature = step === 0 ? 300 : 300 - 148 * Math.exp(-(step - 1000) / 1100) + 2.4 * gauss2(k, 11);

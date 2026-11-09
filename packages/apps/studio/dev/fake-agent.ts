@@ -2,9 +2,10 @@ import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import { AGENT_READY_PREFIX } from '@lammps-studio/contracts/desktop/bridge';
 import { EVENTS_CHANNEL } from '@lammps-studio/contracts/events/gateway';
 import { RequestErrors } from '@lammps-studio/contracts/shared/errors';
-import { createState } from './fake-data';
+import { createState } from './fake-state';
 import { fail, Failure, matchRoute } from './fake-router';
 import { routesFor } from './fake-routes';
+import { runRoutesFor } from './fake-run-routes';
 import { acceptSocket } from './fake-socket';
 import { startTicker } from './fake-ticker';
 
@@ -13,6 +14,7 @@ const PORT = 4100;
 const TOKEN = 'dev';
 const ORIGIN = `http://${HOST}:${PORT}`;
 const VERSION = '0.0.0-fake';
+const OCTET_STREAM = 'application/octet-stream';
 
 const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
@@ -21,7 +23,7 @@ const CORS_HEADERS = {
 };
 
 const state = createState();
-const routes = routesFor(state);
+const routes = [...routesFor(state), ...runRoutesFor(state)];
 
 const send = (response: ServerResponse, status: number, body?: object) => {
     if(body === undefined){
@@ -49,6 +51,11 @@ const reply = (response: ServerResponse, result: unknown) => {
 
     if(result === undefined){
         send(response, 204);
+        return;
+    }
+
+    if(result instanceof ArrayBuffer){
+        response.writeHead(200, { ...CORS_HEADERS, 'Content-Type': OCTET_STREAM }).end(Buffer.from(result));
         return;
     }
 

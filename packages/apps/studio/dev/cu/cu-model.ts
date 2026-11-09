@@ -7,11 +7,13 @@ export const STEPS_EQ = 20000;
 export const STEPS_RUN = 500000;
 export const THERMO_EVERY = 1000;
 export const DUMP_EVERY = 2000;
+export const RESTART_EVERY = 50000;
 export const ERATE = 1e-6;
 export const EPS_Y = 0.075;
 export const SIG_Y = 4.62;
 export const E_MOD = 85;
 export const KB = 8.617333262e-5;
+export const TPS = 640.82;
 
 const FCC_BASIS = [[0, 0, 0], [0.5, 0.5, 0], [0.5, 0, 0.5], [0, 0.5, 0.5]];
 const FAULT_FAMILIES = [[1, 1, 1], [1, 1, -1], [1, -1, 1], [-1, 1, 1]];
