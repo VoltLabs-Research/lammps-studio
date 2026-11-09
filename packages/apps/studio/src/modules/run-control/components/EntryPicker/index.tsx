@@ -2,7 +2,7 @@ import { Simulation } from '@lammps-studio/contracts/simulation/domain';
 import { TriangleAlert } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import EntryOption from '@/modules/run-control/components/EntryOption';
-import { loadEntryCandidates, useEntryStore } from '@/modules/run-control/store/entry';
+import { candidatesOf, loadEntryCandidates, useEntryStore } from '@/modules/run-control/store/entry';
 import { chooseEntry } from '@/modules/run-control/utils/entry-actions';
 import Button from '@/shared/components/Button';
 import Icon from '@/shared/components/Icon';
@@ -17,7 +17,7 @@ interface EntryPickerProps{
 const EntryPicker = ({ simulation }: EntryPickerProps) => {
     const group = useId();
     const pathId = useId();
-    const candidates = useEntryStore((state) => (state.simulationId === simulation.id ? state.candidates : []));
+    const candidates = useEntryStore(candidatesOf(simulation.id));
     const openPanel = useWorkspaceStore((state) => state.openPanel);
     const [picked, setPicked] = useState<string | null>(null);
     const [typed, setTyped] = useState('');

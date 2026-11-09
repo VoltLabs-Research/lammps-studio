@@ -21,6 +21,10 @@ export const useEntryStore = create<EntryState>(() => ({
 
 const { getState: read, setState: write } = useEntryStore;
 
+const NO_CANDIDATES: EntryCandidate[] = [];
+
+export const candidatesOf = (simulationId: string) => (state: EntryState): EntryCandidate[] => (state.simulationId === simulationId ? state.candidates : NO_CANDIDATES);
+
 export const loadEntryCandidates = async (simulationId: string) => {
     if(read().simulationId === simulationId && read().status !== 'failed') return;
 

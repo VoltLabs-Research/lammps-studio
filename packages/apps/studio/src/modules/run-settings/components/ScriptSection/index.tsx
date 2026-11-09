@@ -2,7 +2,7 @@ import { RunConfig } from '@lammps-studio/contracts/run/domain';
 import { runCommand } from '@lammps-studio/lammps/command/run-command';
 import { Copy } from 'lucide-react';
 import { useEffect } from 'react';
-import { loadEntryCandidates, startPicking, useEntryStore } from '@/modules/run-control/store/entry';
+import { candidatesOf, loadEntryCandidates, startPicking, useEntryStore } from '@/modules/run-control/store/entry';
 import { chooseEntry } from '@/modules/run-control/utils/entry-actions';
 import { entryEntries } from '@/modules/run-settings/utils/setting-entries';
 import Group from '@/shared/components/Group';
@@ -22,7 +22,7 @@ interface ScriptSectionProps{
 const NO_ENTRY = 'Choose a file';
 
 const ScriptSection = ({ simulationId, entry, config, buildHash }: ScriptSectionProps) => {
-    const candidates = useEntryStore((state) => (state.simulationId === simulationId ? state.candidates : []));
+    const candidates = useEntryStore(candidatesOf(simulationId));
     const command = runCommand(config, buildHash);
 
     useEffect(() => {
