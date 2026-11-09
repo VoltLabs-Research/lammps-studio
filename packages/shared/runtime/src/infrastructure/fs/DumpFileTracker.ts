@@ -83,7 +83,7 @@ export default class DumpFileTracker{
 
         tracked.offset += chunk.length;
         for(const frame of scanner.push(chunk)){
-            this.handlers.onFrame({ path: filePath, step: frame.step, index: frame.index, byteOffset: frame.byteOffset });
+            this.handlers.onFrame({ path: filePath, step: frame.step, index: frame.index, atoms: frame.atoms, byteOffset: frame.byteOffset });
         }
     }
 

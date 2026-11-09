@@ -15,12 +15,14 @@ export type DumpSniff = DumpFormat | 'not-dump' | 'undecided';
 export interface DumpFrameLocation{
     step: number;
     index: number;
+    atoms: number;
     byteOffset: number;
     byteLength: number;
 }
 
 interface FrameShape{
     step: number;
+    atoms: number;
     lines: number;
 }
 
@@ -110,6 +112,7 @@ export default class DumpFrameScanner{
         const location = {
             step: shape.step,
             index: this.#index,
+            atoms: shape.atoms,
             byteOffset: this.#offset,
             byteLength
         };
@@ -138,7 +141,7 @@ export default class DumpFrameScanner{
                     throw DumpErrors.Malformed('ATOMS before TIMESTEP or NUMBER OF ATOMS');
                 }
 
-                return { step, lines: consumed + 1 + atoms };
+                return { step, atoms, lines: consumed + 1 + atoms };
             }
 
             const span = item.startsWith(`${ITEM}BOX BOUNDS`) ? 1 + BOX_LINES : 2;
@@ -171,6 +174,7 @@ export default class DumpFrameScanner{
         }
 
         const step = XYZ_TIMESTEP.exec(comment)?.[1];
-        return { step: step === undefined ? this.#index : Number(step), lines: XYZ_HEADER_LINES + Number(count) };
+        const atoms = Number(count);
+        return { step: step === undefined ? this.#index : Number(step), atoms, lines: XYZ_HEADER_LINES + atoms };
     }
 }

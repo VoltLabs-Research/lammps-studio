@@ -23,6 +23,7 @@ const BUILD_TIMEOUT_MS = 30 * 60 * 1000;
 const RUN_TIMEOUT_MS = 2 * 60 * 1000;
 const MPIRUN_TERMINATED_EXIT = 1;
 const KILL_EXIT = 137;
+const MELT_ATOMS = 4000;
 const SPEC = { version: 'stable_22Jul2025_update1', packages: ['MANYBODY'] };
 const EXECUTION: RunExecution = { mpiRanks: 2, threadsPerRank: 1, gpus: 0, accelerator: 'none' };
 
@@ -107,7 +108,7 @@ describe.skipIf(!dockerAvailable())('LAMMPS in Docker', () => {
 
         const dump = path.join(spec.run.dir, 'melt.lammpstrj');
         const own = frames.filter((frame) => frame.runId === handle.runId);
-        expect(own.map(({ path: file, step, index }) => [file, step, index])).toEqual([0, 100, 200, 300].map((step, index) => [dump, step, index]));
+        expect(own.map(({ path: file, step, index, atoms }) => [file, step, index, atoms])).toEqual([0, 100, 200, 300].map((step, index) => [dump, step, index, MELT_ATOMS]));
 
         const third = await runtime.readFrame(dump, own[2].byteOffset);
         expect(third.startsWith('ITEM: TIMESTEP\n200\nITEM: NUMBER OF ATOMS\n4000\n')).toBe(true);

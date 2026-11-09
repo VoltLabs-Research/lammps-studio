@@ -8,6 +8,8 @@ import ChokidarDumpWatcher from '../src/infrastructure/fs/ChokidarDumpWatcher';
 import DumpFileTracker from '../src/infrastructure/fs/DumpFileTracker';
 import { Logger } from '../src/ports/Logger';
 
+const FIXTURE_ATOMS = 108;
+
 const fixture = async (name: string): Promise<Buffer> => await readFile(new URL(`./fixtures/${name}`, import.meta.url));
 
 const silent: Logger = {
@@ -37,6 +39,7 @@ describe('DumpFrameScanner', () => {
 
         expect(frames.map((frame) => frame.step)).toEqual(steps);
         expect(frames.map((frame) => frame.index)).toEqual(steps.map((_, index) => index));
+        expect(frames.map((frame) => frame.atoms)).toEqual(steps.map(() => FIXTURE_ATOMS));
         expect(frames.map((frame) => frame.byteOffset)).toEqual(frameStarts(bytes.toString('utf8'), marker));
         expect(frames.reduce((total, frame) => total + frame.byteLength, 0)).toBe(bytes.length);
     });
@@ -116,6 +119,7 @@ describe('dump watching', () => {
             path: dump,
             step,
             index,
+            atoms: FIXTURE_ATOMS,
             byteOffset: frameStarts(bytes.toString('utf8'), 'ITEM: TIMESTEP')[index]
         })));
         await rm(path.join(dir, '..', `${path.basename(dir)}-source.lammpstrj`));
