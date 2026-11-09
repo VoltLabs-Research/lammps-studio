@@ -1,6 +1,7 @@
 import ActivityBar from '@/app/components/ActivityBar';
 import PanelHost from '@/app/components/PanelHost';
 import WorkspaceHeader from '@/app/components/WorkspaceHeader';
+import { useWorkspaceKeys } from '@/app/hooks/use-workspace-keys';
 import { useWorkspaceSession } from '@/app/hooks/use-workspace-session';
 import FailureBanner from '@/modules/run-control/components/FailureBanner';
 import RunOverlay from '@/modules/run-control/components/RunOverlay';
@@ -14,6 +15,7 @@ const WorkspaceView = () => {
     const simulationId = useNavigationStore((state) => state.simulationId);
     const simulation = useOpenSimulation();
     useWorkspaceSession(simulationId);
+    useWorkspaceKeys();
 
     return (
         <div className='view'>
