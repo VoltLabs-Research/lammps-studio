@@ -8,6 +8,12 @@ export type RunPhase = 'noscript' | 'idle' | RunState;
 
 export type OverlayKind = 'picker' | 'idle' | 'building' | 'starting';
 
+export interface RunFolder{
+    simulationId: string;
+    number: number;
+    outputDir: string;
+}
+
 export type RunChipTone = 'neutral' | 'warn' | 'danger';
 
 export interface RunChipModel{
