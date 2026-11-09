@@ -18,7 +18,7 @@ const WorkspaceView = () => {
                 <div className='ws-body'>
                     <ActivityBar />
                     <PanelHost />
-                    <WorkspaceViewport />
+                    <WorkspaceViewport banner={null}>{null}</WorkspaceViewport>
                 </div>
                 <Statusbar />
             </div>

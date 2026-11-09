@@ -1,0 +1,5 @@
+.display-pop { position: absolute; right: 58px; top: 10px; width: 280px; z-index: 50; border-radius: 16px; padding: 6px; font-size: var(--text-base); }
+.display-pop__modes { padding: 2px 6px 8px; }
+.display-pop__size { padding: 0 10px 8px; display: flex; align-items: center; gap: 10px; }
+.display-pop__size input { flex: 1; accent-color: var(--fg); }
+.display-pop__value { font-size: var(--text-xs); width: 52px; text-align: right; }

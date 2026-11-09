@@ -1,0 +1,6 @@
+.live-btn { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; margin-left: 4px; border-radius: 999px; border: 0; font-size: var(--text-2xs); font-weight: var(--w-semibold); letter-spacing: 0.04em; text-transform: uppercase; background: var(--tint); color: var(--muted); flex: none; }
+.live-btn[aria-pressed="true"] { background: var(--danger-soft); color: var(--danger-ink); }
+.live-btn[aria-pressed="true"] .dot { background: var(--danger); }
+.live-btn:disabled { opacity: 0.5; cursor: default; }
+.live-btn .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+@container (max-width: 520px) { .timeline .live-btn { margin-left: auto; } }
