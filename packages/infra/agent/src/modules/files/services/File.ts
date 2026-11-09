@@ -1,10 +1,10 @@
 import SimulationStoreService from '@/modules/simulations/services/SimulationStore';
 import { FileError } from '../contracts/domain/errors';
 import { LocatedPath } from '../contracts/domain/file';
-import { FOLDER, fileKindOf } from '@/shared/utils/fileKind';
 import { isMissing } from '@/shared/utils/fsErrors';
 import { isWithin } from '@/shared/utils/isWithin';
 import { FileEntry } from '@lammps-studio/contracts/file/domain';
+import { FOLDER, fileKindOf } from '@lammps-studio/lammps/files/file-kind';
 import { createReadStream } from 'node:fs';
 import { lstat, readdir, realpath, rm } from 'node:fs/promises';
 import { basename, join, relative, resolve } from 'node:path';

@@ -1,9 +1,9 @@
 import { SimulationError } from '../contracts/domain/errors';
 import { RUNS_DIR } from '../utils/layout';
 import { statIfExists } from '@/shared/utils/fsErrors';
-import { LAMMPS_INPUT, fileKindOf } from '@/shared/utils/fileKind';
 import { isWithin } from '@/shared/utils/isWithin';
 import { EntryCandidate } from '@lammps-studio/contracts/script/domain';
+import { LAMMPS_INPUT, fileKindOf } from '@lammps-studio/lammps/files/file-kind';
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join, relative, resolve } from 'node:path';
 
