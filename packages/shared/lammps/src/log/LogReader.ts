@@ -1,6 +1,6 @@
 import type { LogLineKind, RunError, ThermoSection } from '@lammps-studio/contracts/run/domain';
 import { isNumeric, parseNumber, splitTokens } from '../shared/text';
-import { LogRead, META_PREFIX, ThermoRow } from './domain';
+import { LogRead, META_PREFIX, SectionKind, ThermoRow } from './domain';
 
 const BANNER = /^LAMMPS \(.+\)\s*$/;
 const MEMORY = /^\s*(?:Per MPI rank memory allocation|Memory usage per processor)/;
@@ -11,12 +11,14 @@ const LAST_COMMAND = /^\s*Last command:/;
 const RUN_COMMAND = /^\s*run\s+(\d+)(?:\s|$)/;
 const MINIMIZE_COMMAND = /^\s*minimize\s/;
 const SOURCE_LOCATION = /\s*\([^()]*\.(?:cpp|h)(?::\d+)?\)\s*$/;
+const MINIMIZE_SETUP = /^Setting up .*minimization/;
 const STEP_COLUMN = 'Step';
 
 type ReaderState = 'idle' | 'header' | 'rows';
 
 export default class LogReader{
     readonly sections: ThermoSection[] = [];
+    readonly sectionKinds: SectionKind[] = [];
     error: RunError | null = null;
     warnings = 0;
     totalSteps: number | null = null;
@@ -24,6 +26,7 @@ export default class LogReader{
     #index = 0;
     #state: ReaderState = 'idle';
     #pendingSteps: number | null = null;
+    #pendingKind: SectionKind = 'run';
 
     read(text: string): LogRead{
         const index = this.#index;
@@ -69,6 +72,11 @@ export default class LogReader{
     }
 
     #trackSections(text: string): LogLineKind{
+        if(MINIMIZE_SETUP.test(text)){
+            this.#pendingKind = 'minimize';
+            return 'text';
+        }
+
         if(MEMORY.test(text)){
             this.#state = 'header';
             return 'text';
@@ -110,8 +118,10 @@ export default class LogReader{
             columns,
             rows: []
         });
+        this.sectionKinds.push(this.#pendingKind);
         this.totalSteps = this.#pendingSteps;
         this.#pendingSteps = null;
+        this.#pendingKind = 'run';
         this.#state = 'rows';
 
         return true;

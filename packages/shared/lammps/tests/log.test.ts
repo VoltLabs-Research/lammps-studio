@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import meltLog from './fixtures/log.melt.lammps?raw';
 import meltStdout from './fixtures/melt.stdout?raw';
+import minimizeStdout from './fixtures/minimize-run.stdout?raw';
 import overflowStdout from './fixtures/neighbor-overflow.stdout?raw';
 import LogReader from '../src/log/LogReader';
 import { parseLog } from '../src/log/parse-log';
@@ -106,6 +107,25 @@ describe('parseLog on a failed run', () => {
 });
 
 describe('LogReader', () => {
+    const kindsOf = (text: string): string[] => {
+        const reader = new LogReader();
+        text.split('\n').forEach((line) => reader.read(line));
+
+        return reader.sectionKinds;
+    };
+
+    it('tells a minimization section from the run after it on the screen stream', () => {
+        const reader = new LogReader();
+        minimizeStdout.split('\n').forEach((line) => reader.read(line));
+
+        expect(reader.sectionKinds).toEqual(['minimize', 'run']);
+        expect(reader.sections.map((section) => section.rows.map((row) => row[0]))).toEqual([[0, 1], [1, 10, 20, 30, 40, 41]]);
+    });
+
+    it('takes every section of a script without minimize for a run', () => {
+        expect(kindsOf(meltStdout)).toEqual(['run', 'run']);
+        expect(kindsOf(meltLog)).toEqual(['run', 'run']);
+    });
     it('counts warnings from any rank and classifies them', () => {
         const reader = new LogReader();
         const kinds = [

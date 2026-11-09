@@ -2,6 +2,8 @@ import type { LogLine, RunError, ThermoSection } from '@lammps-studio/contracts/
 
 export const META_PREFIX = 'studio › ';
 
+export type SectionKind = 'run' | 'minimize';
+
 export interface ThermoRow{
     section: number;
     columns: string[];
