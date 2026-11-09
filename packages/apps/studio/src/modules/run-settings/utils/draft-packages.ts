@@ -29,3 +29,10 @@ export const toggledPackage = (packages: string[], name: string): string[] => {
 };
 
 export const physicsPackages = (packages: string[]): string[] => packages.filter((name) => !isAcceleratorPackage(name));
+
+export const withRequired = (packages: string[], required: string[]): string[] => {
+    const missing = required.filter((name) => !packages.includes(name));
+    if(missing.length === 0) return packages;
+
+    return orderedPackages([...packages, ...missing]);
+};

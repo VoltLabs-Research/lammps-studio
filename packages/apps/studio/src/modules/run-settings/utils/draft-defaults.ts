@@ -3,7 +3,7 @@ import { Accelerator, Run, RunConfig, SlurmOptions } from '@lammps-studio/contra
 import { ScriptInfo } from '@lammps-studio/contracts/script/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
 import { LAMMPS_VERSIONS } from '@lammps-studio/lammps/catalog/versions';
-import { withAccelerator, orderedPackages } from '@/modules/run-settings/utils/draft-packages';
+import { orderedPackages, withAccelerator, withRequired } from '@/modules/run-settings/utils/draft-packages';
 import { STEP_LIMITS } from '@/modules/run-settings/utils/step-limits';
 
 export interface DraftSource{
@@ -19,7 +19,7 @@ interface ParallelDefaults{
     accelerator: Accelerator;
 }
 
-const DEFAULT_ENTRY = 'main.in';
+export const DEFAULT_ENTRY = 'main.in';
 const DEFAULT_THREADS = 2;
 const DEFAULT_TIME_LIMIT = '04:00:00';
 const PARTITION_LIST = ' · ';
@@ -51,11 +51,11 @@ const parallelDefaults = (machine: Machine | null): ParallelDefaults => {
     };
 };
 
-const requiredNames = (script: ScriptInfo | null): string[] => [...new Set(script?.requiredPackages.map((pkg) => pkg.name) ?? [])];
+export const requiredNames = (script: ScriptInfo | null): string[] => [...new Set(script?.requiredPackages.map((pkg) => pkg.name) ?? [])];
 
 export const initialDraft = ({ simulation, machine, latestRun, script }: DraftSource): RunConfig => {
     const entry = simulation.entry ?? script?.entry ?? DEFAULT_ENTRY;
-    if(latestRun) return { ...latestRun.config, entry };
+    if(latestRun) return { ...latestRun.config, entry, packages: withRequired(latestRun.config.packages, requiredNames(script)) };
 
     const parallel = parallelDefaults(machine);
 

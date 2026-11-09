@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { initialDraft } from '@/modules/run-settings/utils/draft-defaults';
+import { requireScriptPackages } from '@/modules/run-settings/utils/draft-edits';
 import { useMachinesStore } from '@/shared/store/machines';
 import { useRunDraftStore } from '@/shared/store/run-draft';
 import { latestRun, useRunSessionStore } from '@/shared/store/run-session';
@@ -26,4 +27,8 @@ export const useDraftInit = (simulationId: string | null) => {
 
         draftFrom(simulationId);
     }, [simulationId, drafted, sessionReady, machinesReady, simulationKnown]);
+
+    useEffect(() => useRunSessionStore.subscribe((state, previous) => {
+        if(state.script !== previous.script && state.simulationId === simulationId) requireScriptPackages(state.script);
+    }), [simulationId]);
 };

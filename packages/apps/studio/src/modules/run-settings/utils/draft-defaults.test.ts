@@ -3,7 +3,7 @@ import { buildFixture, configFixture, machineFixture, runFixture, scriptFixture,
 import { buildFor, typicalBuildMinutes } from '@/modules/run-settings/utils/build-match';
 import { initialDraft, partitionsOf } from '@/modules/run-settings/utils/draft-defaults';
 import { acceleratorPatch, machinePatch } from '@/modules/run-settings/utils/draft-edits';
-import { orderedPackages, toggledPackage, withAccelerator } from '@/modules/run-settings/utils/draft-packages';
+import { orderedPackages, toggledPackage, withAccelerator, withRequired } from '@/modules/run-settings/utils/draft-packages';
 
 const atlas = machineFixture({
     id: 'atlas',
@@ -79,6 +79,20 @@ describe('draft packages', () => {
     it('toggles a package in and out', () => {
         expect(toggledPackage(['MANYBODY', 'OPENMP'], 'KSPACE')).toEqual(['MANYBODY', 'KSPACE', 'OPENMP']);
         expect(toggledPackage(['MANYBODY', 'KSPACE', 'OPENMP'], 'KSPACE')).toEqual(['MANYBODY', 'OPENMP']);
+    });
+
+    it('adds the packages the script needs and keeps the list when nothing is missing', () => {
+        const packages = ['OPENMP'];
+
+        expect(withRequired(packages, ['RIGID', 'KSPACE'])).toEqual(['KSPACE', 'RIGID', 'OPENMP']);
+        expect(withRequired(packages, ['OPENMP'])).toBe(packages);
+    });
+
+    it('adds a package the latest run lacked but the script now needs', () => {
+        const latest = runFixture('failed', { config: configFixture({ packages: [], accelerator: 'none' }) });
+        const draft = initialDraft({ simulation: simulationFixture(), machine: machineFixture(), latestRun: latest, script: scriptFixture() });
+
+        expect(draft.packages).toEqual(['MANYBODY']);
     });
 });
 

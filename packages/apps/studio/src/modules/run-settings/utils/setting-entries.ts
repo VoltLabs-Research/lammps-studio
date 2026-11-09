@@ -36,7 +36,7 @@ export const packageEntries = ({ selected, required, entry, toggle }: PackageCho
             id: name,
             label: name,
             hint: needed ? `${entry} needs it` : hint,
-            checked: selected.includes(name),
+            checked: needed || selected.includes(name),
             disabled: needed,
             keepOpen: true,
             run: () => toggle(name)
