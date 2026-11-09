@@ -1,4 +1,5 @@
 appId: com.voltlabs.lammps-studio
+artifactName: lammps-studio-${version}-${arch}.${ext}
 extraMetadata:
   name: lammps-studio
   desktopName: lammps-studio.desktop
@@ -24,7 +25,7 @@ mac:
 win:
   target: nsis
 nsis:
-  artifactName: ${productName}-Setup-${version}.${ext}
+  artifactName: lammps-studio-${version}-${arch}-setup.${ext}
 linux:
   category: Science
   maintainer: VoltLabs Research <voltlabs-research@users.noreply.github.com>
