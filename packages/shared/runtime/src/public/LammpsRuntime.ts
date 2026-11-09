@@ -19,9 +19,10 @@ import StopSimulation from '../application/simulations/StopSimulation';
 import { EventBusPort, EventHandler } from '../ports/EventBusPort';
 import { Logger } from '../ports/Logger';
 import { RunDirectoryPort } from '../ports/RunDirectoryPort';
-import { RunContainer } from '../ports/ContainerManagerPort';
+import { ContainerManagerPort, RunContainer } from '../ports/ContainerManagerPort';
 import { ImageBuilderPort, ImageInfo } from '../ports/ImageBuilderPort';
 import { DumpWatcherPort } from '../ports/DumpWatcherPort';
+import { LogStreamerPort } from '../ports/LogStreamerPort';
 import InMemoryRunStore from '../infrastructure/fs/InMemoryRunStore';
 import NodeRunDirectoryPreparer from '../infrastructure/fs/NodeRunDirectoryPreparer';
 import ChokidarDumpWatcher from '../infrastructure/fs/ChokidarDumpWatcher';
@@ -32,9 +33,17 @@ import DockerContainerManager from '../infrastructure/docker/DockerContainerMana
 import DockerContainerResolver from '../infrastructure/docker/DockerContainerResolver';
 import DockerLogStreamer from '../infrastructure/docker/DockerLogStreamer';
 
+export interface RuntimePorts{
+    containerManager: ContainerManagerPort;
+    logStreamer: LogStreamerPort;
+    dumpWatcher: DumpWatcherPort;
+    imageBuilder: ImageBuilderPort;
+}
+
 export interface LammpsRuntimeOptions{
     docker?: Docker;
     logger?: PinoBaseLogger;
+    ports?: Partial<RuntimePorts>;
 }
 
 const ROOT_UID = 0;
@@ -63,21 +72,22 @@ export default class LammpsRuntime{
 
     constructor(options: LammpsRuntimeOptions = {}){
         const docker = options.docker ?? new Docker();
+        const ports = options.ports ?? {};
 
         this.logger = new PinoLogger(options.logger);
         this.eventBus = new EventEmitterBus<RuntimeEventMap>();
 
         const scoped = (scope: string) => this.logger.child({ scope });
         const containerResolver = new DockerContainerResolver(docker);
-        const containerManager = new DockerContainerManager(docker, containerResolver, scoped('container-manager'));
-        const logStreamer = new DockerLogStreamer(docker, containerResolver, scoped('log-streamer'));
+        const containerManager = ports.containerManager ?? new DockerContainerManager(docker, containerResolver, scoped('container-manager'));
+        const logStreamer = ports.logStreamer ?? new DockerLogStreamer(docker, containerResolver, scoped('log-streamer'));
         const eventPublisher = new SimulationEventPublisher(this.eventBus);
         const lifecycleManager = new SimulationLifecycleManager(this.runStore, eventPublisher);
-        this.dumpWatcher = new ChokidarDumpWatcher(scoped('dump-watcher'));
+        this.dumpWatcher = ports.dumpWatcher ?? new ChokidarDumpWatcher(scoped('dump-watcher'));
         const monitor = new RunMonitor(containerManager, logStreamer, this.dumpWatcher, eventPublisher, lifecycleManager, scoped('run-monitor'));
 
         this.runDirectories = new NodeRunDirectoryPreparer(scoped('run-directories'));
-        this.imageBuilder = new DockerImageBuilder(docker, scoped('image-builder'));
+        this.imageBuilder = ports.imageBuilder ?? new DockerImageBuilder(docker, scoped('image-builder'));
         this.ensureImage = new EnsureImage(this.imageBuilder, this.eventBus, scoped('ensure-image'));
         this.stopSimulation = new StopSimulation(this.runStore, containerManager, lifecycleManager, scoped('stop-simulation'));
         this.startSimulation = new StartSimulation(
