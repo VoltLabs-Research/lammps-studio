@@ -1,4 +1,5 @@
 import { BuildErrorCode } from '@lammps-studio/contracts/build/errors';
+import { EditorErrorCode } from '@lammps-studio/contracts/editor/errors';
 import { FileErrorCode } from '@lammps-studio/contracts/file/errors';
 import { MachineErrorCode } from '@lammps-studio/contracts/machine/errors';
 import { RunErrorCode } from '@lammps-studio/contracts/run/errors';
@@ -29,6 +30,7 @@ export type UiErrorCode = ErrorCode<typeof UiErrors>;
 export type StudioErrorCode =
     | AgentErrorCode
     | BuildErrorCode
+    | EditorErrorCode
     | FileErrorCode
     | GatewayErrorCode
     | MachineErrorCode
