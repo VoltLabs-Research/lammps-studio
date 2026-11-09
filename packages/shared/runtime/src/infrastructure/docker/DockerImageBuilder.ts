@@ -33,6 +33,21 @@ export default class DockerImageBuilder implements ImageBuilderPort{
         }
     }
 
+    async remove(tag: string){
+        try{
+            await this.docker.getImage(tag).remove();
+        }catch(error){
+            if(!isDockerNotFound(error)){
+                throw error;
+            }
+
+            this.logger.debug(`Image already removed: ${tag}`);
+            return;
+        }
+
+        this.logger.info(`Docker image removed: ${tag}`);
+    }
+
     async build(build: Build, observer: BuildObserver, signal: AbortSignal): Promise<ImageInfo>{
         const tag = build.tag();
         const dockerfile = renderDockerfile(build);

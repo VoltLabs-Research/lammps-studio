@@ -43,6 +43,8 @@ class GatedBuilder implements ImageBuilderPort{
         });
     }
 
+    async remove(){}
+
     finish(){
         this.#release(IMAGE);
     }

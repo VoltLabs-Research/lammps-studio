@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import Docker from 'dockerode';
 import { access, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -24,6 +25,7 @@ const RUN_TIMEOUT_MS = 2 * 60 * 1000;
 const MPIRUN_TERMINATED_EXIT = 1;
 const KILL_EXIT = 137;
 const MELT_ATOMS = 4000;
+const IMAGE_REPOSITORY = 'lammps/lammps-runtime';
 const SPEC = { version: 'stable_22Jul2025_update1', packages: ['MANYBODY'] };
 const EXECUTION: RunExecution = { mpiRanks: 2, threadsPerRank: 1, gpus: 0, accelerator: 'none' };
 
@@ -85,6 +87,19 @@ describe.skipIf(!dockerAvailable())('LAMMPS in Docker', () => {
 
     afterAll(async () => {
         await rm(simulationDir, { recursive: true, force: true });
+    });
+
+    it('inspects an image by its tag, removes it, and takes a missing one as already removed', async () => {
+        const probeTag = `probe-${process.pid}`;
+        const probe = `${IMAGE_REPOSITORY}:${probeTag}`;
+        await new Docker().getImage(image).tag({ repo: IMAGE_REPOSITORY, tag: probeTag });
+
+        expect(await runtime.inspectImage(probe)).toEqual(await runtime.inspectImage(image));
+        await runtime.removeImage(probe);
+
+        expect(await runtime.inspectImage(probe)).toBeNull();
+        await expect(runtime.removeImage(probe)).resolves.toBeUndefined();
+        expect(await runtime.inspectImage(image)).toMatchObject({ imageId: expect.stringMatching(/^sha256:/) });
     });
 
     it('runs a few hundred steps of LJ melt in runs/run-<n> and streams its output and dump frames', async () => {

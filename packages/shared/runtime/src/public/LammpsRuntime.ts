@@ -20,6 +20,7 @@ import { EventBusPort, EventHandler } from '../ports/EventBusPort';
 import { Logger } from '../ports/Logger';
 import { RunDirectoryPort } from '../ports/RunDirectoryPort';
 import { RunContainer } from '../ports/ContainerManagerPort';
+import { ImageBuilderPort, ImageInfo } from '../ports/ImageBuilderPort';
 import { DumpWatcherPort } from '../ports/DumpWatcherPort';
 import InMemoryRunStore from '../infrastructure/fs/InMemoryRunStore';
 import NodeRunDirectoryPreparer from '../infrastructure/fs/NodeRunDirectoryPreparer';
@@ -54,6 +55,7 @@ export default class LammpsRuntime{
     private readonly runStore = new InMemoryRunStore();
     private readonly runDirectories: RunDirectoryPort;
     private readonly dumpWatcher: DumpWatcherPort;
+    private readonly imageBuilder: ImageBuilderPort;
     private readonly ensureImage: EnsureImage;
     private readonly startSimulation: StartSimulation;
     private readonly stopSimulation: StopSimulation;
@@ -75,7 +77,8 @@ export default class LammpsRuntime{
         const monitor = new RunMonitor(containerManager, logStreamer, this.dumpWatcher, eventPublisher, lifecycleManager, scoped('run-monitor'));
 
         this.runDirectories = new NodeRunDirectoryPreparer(scoped('run-directories'));
-        this.ensureImage = new EnsureImage(new DockerImageBuilder(docker, scoped('image-builder')), this.eventBus, scoped('ensure-image'));
+        this.imageBuilder = new DockerImageBuilder(docker, scoped('image-builder'));
+        this.ensureImage = new EnsureImage(this.imageBuilder, this.eventBus, scoped('ensure-image'));
         this.stopSimulation = new StopSimulation(this.runStore, containerManager, lifecycleManager, scoped('stop-simulation'));
         this.startSimulation = new StartSimulation(
             new LammpsCommandBuilder(),
@@ -101,6 +104,14 @@ export default class LammpsRuntime{
 
     async build(spec: BuildSpec, signal?: AbortSignal): Promise<BuildResult>{
         return await this.ensureImage.execute(spec, signal);
+    }
+
+    async inspectImage(tag: string): Promise<ImageInfo | null>{
+        return await this.imageBuilder.inspect(tag);
+    }
+
+    async removeImage(tag: string){
+        await this.imageBuilder.remove(tag);
     }
 
     async prepareRun(simulationDir: string, entry: string): Promise<PreparedRun>{
