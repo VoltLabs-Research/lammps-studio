@@ -1,5 +1,5 @@
 import type { Frame } from '@lammps-studio/contracts/run/frame';
-import { hash2 } from '@dev/cu-model';
+import { hash2 } from '../cu/cu-model';
 
 const BASIS = [[0, 0, 0], [0.5, 0.5, 0], [0.5, 0, 0.5], [0, 0.5, 0.5]];
 const LATTICE = 3.615;

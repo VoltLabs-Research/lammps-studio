@@ -10,9 +10,9 @@ import FrameRuler from '@/modules/viewport/components/FrameRuler';
 import ViewportBar from '@/modules/viewport/components/ViewportBar';
 import { legendFor } from '@/modules/viewport/utils/legend-for';
 import { currentTheme } from '@/modules/viewport/utils/theme-tokens';
-import { DUMP_EVERY, EPS_Y, ERATE, STEPS_RUN } from '@dev/cu-model';
-import { cuFrame } from '@dev/cu-frame';
-import { cuThermo } from '@dev/cu-thermo';
+import { DUMP_EVERY, EPS_Y, ERATE, STEPS_RUN } from '../../cu/cu-model';
+import { cuFrame } from '../../cu/cu-frame';
+import { cuThermo } from '../../cu/cu-thermo';
 
 const params = new URLSearchParams(location.search);
 const SHOWN_STEP = Number(params.get('step') ?? 192000);

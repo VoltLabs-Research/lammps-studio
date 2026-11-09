@@ -1,5 +1,5 @@
 import type { ThermoSection } from '@lammps-studio/contracts/run/domain';
-import { E_MOD, EPS_Y, ERATE, gauss2, KB, L0, R_WIRE, smoothstep, STEPS_EQ, stressAt, THERMO_EVERY, WIRE } from '@dev/cu-model';
+import { E_MOD, EPS_Y, ERATE, gauss2, KB, L0, R_WIRE, smoothstep, STEPS_EQ, stressAt, THERMO_EVERY, WIRE } from './cu-model';
 
 const COLS_EQ = ['Step', 'Temp', 'PotEng', 'KinEng', 'TotEng', 'Press'];
 const COLS_RUN = ['Step', 'Temp', 'PotEng', 'KinEng', 'TotEng', 'Press', 'Lz', 'v_strain', 'v_stress'];

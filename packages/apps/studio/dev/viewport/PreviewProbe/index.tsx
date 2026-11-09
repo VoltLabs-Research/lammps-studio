@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AtomScene } from '@/modules/viewport/scene/AtomScene';
 import { renderPreview } from '@/modules/viewport/scene/render-preview';
 import { readSceneTheme } from '@/modules/viewport/utils/theme-tokens';
-import { cuFrame } from '@dev/cu-frame';
+import { cuFrame } from '../../cu/cu-frame';
 
 const PREVIEW_STEP = 184000;
 const PREVIEW_WIDTH = 720;

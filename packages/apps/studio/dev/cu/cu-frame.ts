@@ -1,5 +1,5 @@
 import type { Frame } from '@lammps-studio/contracts/run/frame';
-import { DUMP_EVERY, E_MOD, EPS_Y, ERATE, hash2, L0, lerp, normalCdf, normalPdf, R_WIRE, smoothstep, stressAt, WIRE, Z_NECK } from '@dev/cu-model';
+import { DUMP_EVERY, E_MOD, EPS_Y, ERATE, hash2, L0, lerp, normalCdf, normalPdf, R_WIRE, smoothstep, stressAt, WIRE, Z_NECK } from './cu-model';
 
 const CNA_CODES = [1, 2, 3, 0];
 
