@@ -13,7 +13,10 @@ const CANCELLED: Partial<Record<RunState, string>> = {
     starting: 'Start cancelled'
 };
 
-const adopt = (run: Run) => {
+const adoptStarted = (run: Run) => {
+    const known = useRunSessionStore.getState().runs.some((other) => other.simulationId === run.simulationId && other.number === run.number);
+    if(known) return;
+
     applyRun(run);
     applySessionRun(run);
 };
@@ -39,7 +42,7 @@ export const startRun = async () => {
 
     try{
         const run = await runApi.start(simulation.id, draft.config);
-        adopt(run);
+        adoptStarted(run);
         if(useRunSessionStore.getState().runNumber !== run.number) await selectRun(run.number);
     }catch(error){
         toast(runErrorCopy(error));
@@ -54,7 +57,7 @@ const stop = async (kill: boolean) => {
     if(kill && run.state !== 'running' && run.state !== 'stopping') return;
 
     try{
-        adopt(await runApi.stop(session.simulationId, run.number, kill));
+        await runApi.stop(session.simulationId, run.number, kill);
         const cancelled = CANCELLED[run.state];
         if(cancelled) toast(cancelled);
     }catch(error){
