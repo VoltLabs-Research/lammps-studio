@@ -23,7 +23,7 @@ desktop (Electron main) ── spawns ──► agent (127.0.0.1:<port>, token)
 | `@lammps-studio/runtime` | `packages/shared/runtime` | LAMMPS in Docker, adopted from `VoltLabs-Research/lammps-runtime` (the npm 1.0.0 release ships no code). Builds an image per package set, runs `lmp` with MPI, streams stdout, watches dump files, emits typed events. Relative imports only, so it can be consumed from source. |
 | `@lammps-studio/lammps` | `packages/shared/lammps` | Pure LAMMPS knowledge, no I/O: log line classification and thermo parsing, input script analysis (variables, computes, fixes, dumps, runs, the packages a style needs), entry script resolution, text dump parsing, the package catalog, the run command preview. Used by the agent and by studio. |
 | `@lammps-studio/agent` | `packages/infra/agent` | The lammps-agent: a readable `Application` with modules `machines`, `simulations`, `runs`, `builds`, `files`, `editor` and the `/events` gateway. Persists to JSON files on disk, never to a database. |
-| `studio` | `packages/apps/studio` | The UI. React 19 + Vite + zustand. A 1:1 implementation of `design/mockup`. |
+| `studio` | `packages/apps/studio` | The UI. React 19 + Vite + zustand. |
 | `desktop` | `packages/apps/desktop` | The Electron shell: frameless window, the traffic lights drawn by studio, spawning and supervising the local agent, handing its URL and token to the renderer through the preload. |
 
 ## The one hard boundary

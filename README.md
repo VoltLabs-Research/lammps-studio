@@ -8,5 +8,3 @@ pnpm dev
 ```
 
 `pnpm dev` starts the agent, the studio and the Electron window. The agent needs Docker.
-
-The approved UI lives in `design/mockup/`: open `design/mockup/preview.html` in a browser.

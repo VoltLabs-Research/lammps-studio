@@ -1,27 +1,27 @@
 # UI
 
-`design/mockup/` is the approved UI. Studio implements it 1:1: same layout, spacing, tokens, copy,
-states, keyboard shortcuts and behaviour, with real data instead of the mockup's sample data.
-Open `design/mockup/preview.html` in a browser to see it; the query params `?state=`, `?act=`,
-`?theme=`, `?seq=` jump to any state (see the script at the end of `preview.html`).
+The UI is settled: the user approved it screen by screen. Keep new work consistent with what studio
+already has: same tokens (`studio/src/app/styles/tokens.css`), the shared components in
+`studio/src/shared/components`, the same spacing, copy style, states and keyboard behaviour.
 
-## Where each part lives in the mockup
+## Where each part lives
 
-| Mockup file | What it holds | Port it to |
-|---|---|---|
-| `styles.css` | every token (`:root`, both dark blocks) and every component rule | `studio/src/app/styles/` tokens + one CSS file per component, same values |
-| `index.html` | the markup of the window, dashboard, workspace and the icon set (`<symbol id="i-…">`, Lucide shapes) | components; icons come from `lucide-react` |
-| `src/01-core.js` | helpers, sample `MACHINES`/`SIMS`/`PACKAGES`/`BUILDS`, a fake physics model | the catalog in `shared/lammps`; the samples and the physics are mock-only, drop them |
-| `src/02-viewport.js` | the three.js atom renderer (impostor spheres, orbit, fit, box, axes gizmo, structure/energy/type colours, legend, frame ruler, dashboard previews) | `studio/src/modules/viewport/` |
-| `src/03-panels.js` | the workspace panels: Editor, Output, Charts (bento), Variables, Files (Finder), Runs, Build and run | `studio/src/modules/<panel>/` |
-| `src/04-dashboard.js` | the simulations grid and cards, the machine filter popup, menus, modals (connect a cluster, new simulation), the command palette, the Settings sheet | `studio/src/modules/{simulations,machines,settings,palette}/` |
-| `src/05-run.js` | the run lifecycle chrome: run chip, Run/Stop split button and its menu, statusbar, viewport overlays (build progress, entry picker), the failure banner, display popover, every click and key handler | spread across the modules above |
+| Part | Module |
+|---|---|
+| Tokens, base styles, shared panel content (`section`, `kv`, `note`, `cmd`, `list`, `tabs`, `pane`) | `src/app/styles/`, `src/shared/styles/` |
+| Window, dashboard and workspace layout: header, activity bar, panel host | `src/app/components/` |
+| Simulations grid and cards, new simulation, machine filter | `src/modules/simulations/`, `src/modules/machines/` |
+| Settings sheet (General, Machines, Builds) | `src/modules/settings/` |
+| Command palette | `src/modules/palette/` |
+| Run chip, Run/Stop button and menu, build progress, entry picker, failure banner, statusbar | `src/modules/run-control/` |
+| Build and run panel | `src/modules/run-settings/` |
+| Atom renderer, tool rail, display popover, frame bar, ruler, previews | `src/modules/viewport/` |
+| Editor, Output, Charts, Variables, Files, Runs panels | `src/modules/<panel>/` |
 
-The mockup bar at the top (View, Run state, Theme, Cards) is a mockup control, not part of the app.
-Cards use variant 2, "Text + image": the caption leads with the state word and anything that is not
-running shows a greyscale, dimmed preview.
+Cards use the "Text + image" style: the caption leads with the state word, and anything that is
+not running shows a greyscale, dimmed preview.
 
-## Rules the user set while reviewing the mockup
+## Rules the user set while reviewing the UI
 
 - No explanatory prose: no page leads, no chart captions, no info boxes that explain mechanics.
 - No status dots for the normal state. State shows as text, and only when it matters.
@@ -41,13 +41,13 @@ running shows a greyscale, dimmed preview.
 
 ## Done means
 
-Put the studio screen next to the mockup in the same state, light and dark, at 1600×1000 and at
-400 px wide, and they match. Screenshot both with headless Chrome (see `design/mockup/preview.html`
-for state params) and compare before calling a screen done.
+Screenshot the screen in every state it has, light and dark, at 1600×1000 and at 400 px wide
+(`node packages/apps/studio/dev/shoot.ts plan.json` against the fake agent below), check it against
+the rules above and the screens next to it, and check StrictMode logs no errors.
 
 ## Fake agent
 
-`packages/apps/studio/dev/fake-agent.ts` serves the whole wire with the mockup's data, so studio
+`packages/apps/studio/dev/fake-agent.ts` serves the whole wire with sample data, so studio
 can be built and screenshotted without Docker. Token `dev`, port 4100 (`FAKE_PORT` to change it).
 
 ```
@@ -57,9 +57,9 @@ VITE_AGENT_URL=http://127.0.0.1:4100 VITE_AGENT_TOKEN=dev pnpm --filter studio d
 
 Started plain, it plays: Cu nanowire tension runs on from step 184,000 and streams `run:updated`,
 `run:log`, `run:thermo` and `run:frame`, builds progress, and Run, Stop and Kill from studio go
-through building, starting, running and the stop grace like the mockup.
+through building, starting, running and the stop grace with the real agent's timing.
 
-A scenario puts Cu nanowire tension into one mockup state and holds it still: fixed step, no
+A scenario puts Cu nanowire tension into one run state and holds it still: fixed step, no
 ticking. Add `FAKE_LIVE=1` to let it play forward from there. Run and Stop from studio set the
 agent playing, so a started run goes on and a stop finishes its grace.
 

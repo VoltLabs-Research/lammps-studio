@@ -13,7 +13,7 @@ This file is a router, not a manual. Read the file that matches your task before
 |---|---|
 | Understand how the pieces fit, the on-disk layout, the wire, the run lifecycle | [.agents/architecture.md](.agents/architecture.md) |
 | Write any code (formatting, naming, errors, validation, tests, commits) | [.agents/conventions.md](.agents/conventions.md) |
-| Build or change anything the user sees | [.agents/ui.md](.agents/ui.md), then `design/mockup/` |
+| Build or change anything the user sees | [.agents/ui.md](.agents/ui.md) |
 | Know the quality bar — what not to write, comments included | [.agents/anti-slop.md](.agents/anti-slop.md) |
 
 ## Things that will otherwise burn an hour
@@ -23,4 +23,5 @@ This file is a router, not a manual. Read the file that matches your task before
   inside `shared/*` breaks every consumer.
 - **The agent needs Docker.** Runtime and agent tests that start containers skip themselves when
   `docker info` fails; don't mock Docker to make them pass.
-- **The mockup is the spec, not a suggestion.** Port its CSS values as they are; don't restyle.
+- **The UI is settled.** Reuse the tokens in `studio/src/app/styles/tokens.css` and the existing
+  components; follow the rules in `.agents/ui.md`. Don't restyle.
