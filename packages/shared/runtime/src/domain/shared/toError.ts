@@ -12,6 +12,8 @@ const NOT_MODIFIED = 304;
 const NOT_FOUND = 404;
 const CONFLICT = 409;
 const REMOVAL_IN_PROGRESS = /removal of container .* is already in progress/;
+const CONNECT = 'connect';
+const UNREACHABLE_CODES = new Set(['ENOENT', 'ECONNREFUSED', 'EACCES']);
 
 const statusOf = (cause: unknown): number | null => {
     if(typeof cause !== 'object' || cause === null || !('statusCode' in cause) || typeof cause.statusCode !== 'number'){
@@ -25,8 +27,20 @@ export const isDockerNotFound = (cause: unknown): boolean => {
     return statusOf(cause) === NOT_FOUND;
 };
 
+export const isDockerConflict = (cause: unknown): boolean => {
+    return statusOf(cause) === CONFLICT;
+};
+
 export const isDockerAlreadyStopped = (cause: unknown): boolean => {
     return statusOf(cause) === NOT_MODIFIED || isDockerNotFound(cause);
+};
+
+export const isDockerUnreachable = (cause: unknown): boolean => {
+    if(!(cause instanceof Error) || !('syscall' in cause) || !('code' in cause)){
+        return false;
+    }
+
+    return cause.syscall === CONNECT && UNREACHABLE_CODES.has(String(cause.code));
 };
 
 export const isDockerGone = (cause: unknown): boolean => {
