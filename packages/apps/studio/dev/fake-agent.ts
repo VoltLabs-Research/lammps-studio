@@ -13,7 +13,8 @@ import { acceptSocket } from './fake-socket';
 import { startTicker } from './fake-ticker';
 
 const HOST = '127.0.0.1';
-const PORT = 4100;
+const DEFAULT_PORT = 4100;
+const PORT = Number(process.env.FAKE_PORT ?? DEFAULT_PORT);
 const TOKEN = 'dev';
 const ORIGIN = `http://${HOST}:${PORT}`;
 const VERSION = '0.0.0-fake';
