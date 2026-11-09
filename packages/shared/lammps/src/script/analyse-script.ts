@@ -26,10 +26,12 @@ const IMPLIED_DUMP_COLUMNS: Record<string, string[]> = {
 const LISTED_DUMP_STYLES = new Set(['custom', 'cfg', 'local', 'netcdf', 'h5md']);
 const DUMP_STYLE_VARIANT = /\/(?:gz|zstd|mpiio|adios)$/;
 const INTEGER = /^\d+$/;
+const WHITESPACE = /\s+/;
 const UNIT_STYLES: readonly UnitStyle[] = ['lj', 'real', 'metal', 'si', 'cgs', 'electron', 'micro', 'nano'];
 
 interface ScriptState{
     files: Map<string, string>;
+    overrides: Map<string, string>;
     visited: Set<string>;
     variables: VariableTable;
     computes: ScriptCommand[];
@@ -42,6 +44,14 @@ interface ScriptState{
 }
 
 type CommandHandler = (state: ScriptState, args: string[], line: number) => void;
+
+const overrideValues = (overrides: Record<string, string>): Map<string, string> => {
+    const values = Object.entries(overrides)
+        .map(([name, value]): [string, string] => [name, value.trim().split(WHITESPACE)[0]])
+        .filter(([, value]) => value !== '');
+
+    return new Map(values);
+};
 
 const isStyleCommand = (word: string): word is StyleCommand => STYLE_COMMANDS.has(word);
 
@@ -176,7 +186,7 @@ function walk(state: ScriptState, path: string, includeLine: number | null){
     }
 
     state.visited.add(path);
-    const lookup = (name: string) => state.variables.values.get(name) ?? null;
+    const lookup = (name: string) => state.overrides.get(name) ?? state.variables.values.get(name) ?? null;
 
     for(const statement of readStatements(text)){
         const words = splitWords(substitute(statement.text, lookup));
@@ -186,10 +196,11 @@ function walk(state: ScriptState, path: string, includeLine: number | null){
     }
 }
 
-export const analyseScript = (entry: string, files: ScriptFile[]): ScriptInfo => {
+export const analyseScript = (entry: string, files: ScriptFile[], overrides: Record<string, string> = {}): ScriptInfo => {
     const path = normalizePath(entry);
     const state: ScriptState = {
         files: new Map(files.map((file) => [normalizePath(file.path), file.text])),
+        overrides: overrideValues(overrides),
         visited: new Set(),
         variables: createVariableTable(),
         computes: [],

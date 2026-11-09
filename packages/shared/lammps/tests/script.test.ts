@@ -87,6 +87,21 @@ describe('analyseScript on a real nanowire script', () => {
     });
 });
 
+describe('command line overrides', () => {
+    it('substitutes a -var value over the script default, as LAMMPS does for index variables', () => {
+        const { fixes } = analyseScript('main.in', NANOWIRE, { T: '450', erate: '' });
+
+        expect(fixes.map((fix) => fix.args)).toEqual(['temp 450 450 0.1', '1 z erate 0.001 units box remap x']);
+    });
+
+    it('counts the steps of a run whose length comes from an override', () => {
+        const files: ScriptFile[] = [{ path: 'in.melt', text: 'variable n index 100\nrun ${n}\nrun ${n}\n' }];
+
+        expect(analyseScript('in.melt', files, { n: ' 2500 ' }).runs.map((run) => run.steps)).toEqual([2500, 2500]);
+        expect(analyseScript('in.melt', files).runs.map((run) => run.steps)).toEqual([100, 100]);
+    });
+});
+
 describe('units', () => {
     it('reads real units from the water box', () => {
         const water = analyseScript('water.lmp', [{ path: 'water.lmp', text: waterScript }, { path: 'setup.lammps', text: waterSetup }]);
