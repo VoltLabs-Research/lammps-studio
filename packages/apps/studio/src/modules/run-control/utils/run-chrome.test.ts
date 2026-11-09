@@ -61,9 +61,27 @@ describe('runChipOf', () => {
     });
 
     it('leaves the ETA out until the speed is known', () => {
-        const warming = run('running', { progress: { step: 0, totalSteps: 500_000, section: 1, sections: 2, stepsPerSecond: null } });
+        const warming = run('running', { progress: { step: 0, totalSteps: 500_000, section: 2, sections: 2, stepsPerSecond: null } });
 
         expect(runChipOf(withScript, warming, CONTEXT)?.meta).toBe('0%');
+    });
+
+    it('counts the steps of an earlier run section, whose length is not the whole run', () => {
+        const equilibrating = run('running', { progress: { step: 12_000, totalSteps: 20_000, section: 1, sections: 2, stepsPerSecond: 640 } });
+
+        expect(runChipOf(withScript, equilibrating, CONTEXT)?.meta).toBe('section 1 of 2 · 12,000 of 20,000 steps');
+    });
+
+    it('names no step for a failure before the first step', () => {
+        const unbuilt = run('failed', { progress: { step: 0, totalSteps: 20_000, section: 1, sections: 2, stepsPerSecond: null }, error: { message: 'The LAMMPS build failed: exit 2', step: null, line: null } });
+
+        expect(runChipOf(withScript, unbuilt, CONTEXT)?.meta).toBe('');
+    });
+
+    it('falls back to the last progress when LAMMPS exits without naming a step', () => {
+        const crashed = run('failed', { error: { message: 'LAMMPS exited with code 1', step: null, line: null } });
+
+        expect(runChipOf(withScript, crashed, CONTEXT)?.meta).toBe('near step 184,000');
     });
 
     it('leaves the time left out until the build has made progress', () => {

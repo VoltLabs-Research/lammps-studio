@@ -58,7 +58,7 @@ const statusItems = ({ phase, run, machine }: StatusbarContext): StatusItem[] =>
 
     const speed = run?.progress.stepsPerSecond ?? null;
 
-    return speed === null ? [] : [item('speed', `${formatInt(speed)} steps/s`)];
+    return speed ? [item('speed', `${formatInt(speed)} steps/s`)] : [];
 };
 
 export const statusbarOf = (context: StatusbarContext): Statusbar => ({

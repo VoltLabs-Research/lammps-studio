@@ -3,6 +3,7 @@ import { Run, RunProgress } from '@lammps-studio/contracts/run/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
 import { RunChipModel, RunChipTone } from '@/modules/run-control/domain/run-control';
 import { timeLeftText } from '@/modules/run-control/utils/build-eta';
+import { failedStepOf } from '@/modules/run-control/utils/run-failure';
 import { runPhaseOf } from '@/modules/run-control/utils/run-phase';
 import { formatDuration, formatEta, formatInt, formatPercent, joinDetails, secondsBetween } from '@/shared/utils/format';
 
@@ -36,11 +37,18 @@ const buildMeta = (build: Build | null, now: number): string => {
 
 const runningMeta = (progress: RunProgress): string => {
     if(progress.totalSteps === null) return atStep(progress.step);
+    if(progress.section < progress.sections) return `section ${progress.section} of ${progress.sections} · ${formatInt(progress.step)} of ${formatInt(progress.totalSteps)} steps`;
 
     const remaining = progress.totalSteps - progress.step;
     const eta = progress.stepsPerSecond ? formatEta(remaining / progress.stepsPerSecond) : null;
 
     return joinDetails(formatPercent(progress.step / progress.totalSteps), eta);
+};
+
+const failedMeta = (run: Run): string => {
+    const step = failedStepOf(run);
+
+    return step === null ? '' : `near ${atStep(step)}`;
 };
 
 const stoppedMeta = (progress: RunProgress): string => {
@@ -67,6 +75,6 @@ export const runChipOf = (simulation: Simulation | null, run: Run | null, contex
         case 'stopping': return chip('Stopping', atStep(run.progress.step));
         case 'cancelled': return chip('Stopped', stoppedMeta(run.progress));
         case 'completed': return chip('Completed', completedMeta(run));
-        case 'failed': return chip('Failed', `near ${atStep(run.error?.step ?? run.progress.step)}`, 'danger');
+        case 'failed': return chip('Failed', failedMeta(run), 'danger');
     }
 };

@@ -65,6 +65,13 @@ describe('statusbarOf', () => {
         expect(texts(statusbarOf(context({ phase: 'running', run: runFixture('running') })).status)).toEqual(['641 steps/s']);
     });
 
+    it('shows no speed while the agent has not measured it yet', () => {
+        const warming = runFixture('running', { progress: { step: 0, totalSteps: 500_000, section: 2, sections: 2, stepsPerSecond: null } });
+
+        expect(statusbarOf(context({ phase: 'running', run: warming })).status).toEqual([]);
+        expect(statusbarOf(context({ phase: 'running', run: { ...warming, progress: { ...warming.progress, stepsPerSecond: 0 } } })).status).toEqual([]);
+    });
+
     it('shows a spinner while LAMMPS compiles', () => {
         const [item] = statusbarOf(context({ phase: 'building' })).status;
 

@@ -1,6 +1,7 @@
 import { CircleAlert, X } from 'lucide-react';
 import { useState } from 'react';
 import { useLatestRun } from '@/modules/run-control/hooks/use-workspace';
+import { failedStepOf } from '@/modules/run-control/utils/run-failure';
 import Button from '@/shared/components/Button';
 import Icon from '@/shared/components/Icon';
 import IconButton from '@/shared/components/IconButton';
@@ -16,11 +17,13 @@ const FailureBanner = () => {
     const key = run ? `${run.simulationId}/${run.number}` : null;
     if(!run || run.state !== 'failed' || dismissed === key) return null;
 
+    const step = failedStepOf(run);
+
     return (
         <div className='banner' role='alert'>
             <span className='banner__icon'><Icon glyph={CircleAlert} size='sm' /></span>
             <div className='banner__body'>
-                <div className='banner__title'>Run {run.number} failed near step {formatInt(run.error?.step ?? run.progress.step)}</div>
+                <div className='banner__title'>Run {run.number} failed{step === null ? null : ` near step ${formatInt(step)}`}</div>
                 {run.error ? <div className='banner__msg'>{run.error.message}</div> : null}
             </div>
             <div className='banner__actions'>
