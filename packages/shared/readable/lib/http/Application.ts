@@ -9,8 +9,9 @@ import { bearerToken } from '../auth/bearerToken';
 import { LogLevel } from '../contracts/logging';
 import { websocketOptions } from '../gateway/websocket-options';
 import { Discovered, MountedController } from '../services/ModuleDiscovery';
+import { RequestError } from '../errors/Request';
 import { logger } from '../utils/Logger';
-import Fastify, { LogController, FastifyInstance, FastifyBaseLogger } from 'fastify';
+import Fastify, { LogController, FastifyError, FastifyInstance, FastifyBaseLogger } from 'fastify';
 
 export interface ApplicationLog{
     level: string;
@@ -28,6 +29,28 @@ export interface ApplicationOptions{
 }
 
 const CORS_METHODS: HttpMethod[] = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'];
+const CLIENT_ERROR = 400;
+const SERVER_ERROR = 500;
+const INTERNAL = 'Internal Server Error';
+
+interface FastifyClientError extends FastifyError{
+    statusCode: number;
+}
+
+const isFastifyClientError = (error: unknown): error is FastifyClientError => {
+    if(!(error instanceof Error) || !('statusCode' in error) || typeof error.statusCode !== 'number') return false;
+
+    return error.statusCode >= CLIENT_ERROR && error.statusCode < SERVER_ERROR;
+};
+
+const toRuntimeError = (error: unknown): RuntimeError => {
+    if(error instanceof RuntimeError) return error;
+    if(isFastifyClientError(error)){
+        return new ValidationError({ body: error.message }, new RuntimeError(RequestError.ValidationFailed().message, error.statusCode));
+    }
+
+    return new RuntimeError(error instanceof Error ? error.message : INTERNAL, SERVER_ERROR);
+};
 
 export default class Application{
     #app: FastifyInstance | undefined;
@@ -75,17 +98,16 @@ export default class Application{
 
     #registerErrorHandler(app: FastifyInstance){
         app.setErrorHandler((err, req, reply) => {
-            const status = err instanceof RuntimeError ? err.statusCode : 500;
-            const message = err instanceof Error ? err.message : 'Internal Server Error';
+            const error = toRuntimeError(err);
 
-            if(status >= 500){
-                logger.error(`${req.method} ${req.url}`, err, { scope: 'http', statusCode: status });
+            if(error.statusCode >= SERVER_ERROR){
+                logger.error(`${req.method} ${req.url}`, err, { scope: 'http', statusCode: error.statusCode });
             }
 
-            const payload: ApiError = { error: message };
-            if(err instanceof ValidationError) payload.errors = err.errors;
+            const payload: ApiError = { error: error.message };
+            if(error instanceof ValidationError) payload.errors = error.errors;
 
-            reply.status(status).send(payload);
+            reply.status(error.statusCode).send(payload);
         });
     }
 

@@ -21,6 +21,7 @@ const ELECTRON_ORIGIN = 'null';
 const FOREIGN_ORIGIN = 'https://example.com';
 const CREATED = 201;
 const RAW_BYTES = Buffer.from([1, 2, 3, 4]);
+const OVER_BODY_LIMIT = 1024 * 1024;
 
 const ProbeError = defineErrors({
     domain: 'Probe',
@@ -34,7 +35,8 @@ const probeRoutes = {
     create: post<Echo, Echo>('/probes'),
     remove: del('/probes/:word'),
     raw: get<ArrayBuffer>('/probes/raw/bytes'),
-    gone: get('/probes/gone/forever')
+    gone: get('/probes/gone/forever'),
+    broken: get('/probes/broken/inside')
 };
 
 const isEcho = (input: unknown): input is Echo => {
@@ -79,6 +81,11 @@ class ProbeController extends BaseController{
     @Route(probeRoutes.gone)
     gone(){
         throw ProbeError.Gone();
+    }
+
+    @Route(probeRoutes.broken)
+    broken(){
+        throw new TypeError('unexpected');
     }
 }
 
@@ -172,6 +179,30 @@ describe('Application', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.json()).toEqual({ error: 'Request::ValidationFailed', errors: { word: 'Required' } });
+    });
+
+    it.each([
+        ['malformed JSON', 'application/json', '{"word":', 400],
+        ['an empty JSON body', 'application/json', '', 400],
+        ['a body over the size limit', 'application/json', JSON.stringify({ word: 'x'.repeat(OVER_BODY_LIMIT) }), 413],
+        ['a media type it does not parse', 'application/xml', '<word/>', 415]
+    ])('answers %s with its client status in the error envelope', async (_, contentType, payload, status) => {
+        const res = await app.inject({
+            method: 'POST',
+            url: '/probes',
+            headers: { ...authorized, 'content-type': contentType },
+            payload
+        });
+
+        expect(res.statusCode).toBe(status);
+        expect(res.json()).toEqual({ error: 'Request::ValidationFailed', errors: { body: expect.any(String) } });
+    });
+
+    it('answers an unexpected failure with 500', async () => {
+        const res = await app.inject({ method: 'GET', url: '/probes/broken/inside', headers: authorized });
+
+        expect(res.statusCode).toBe(500);
+        expect(res.json()).toEqual({ error: 'unexpected' });
     });
 
     it('lets studio and the electron window through cors', async () => {
