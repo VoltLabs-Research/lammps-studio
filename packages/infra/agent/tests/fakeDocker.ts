@@ -96,16 +96,28 @@ export class FakeDocker{
     readonly #frames = new Map<string, FakeFrame[]>();
     readonly #watchers = new Map<string, Set<DumpWatchHandlers>>();
     #created = 0;
+    #generation = 0;
+    unreachable = false;
 
-    runtime = (): LammpsRuntime => new LammpsRuntime({
-        logger: logger.raw,
-        ports: {
-            containerManager: this.#containerManager(),
-            logStreamer: this.#logStreamer(),
-            dumpWatcher: this.#dumpWatcher(),
-            imageBuilder: this.#imageBuilder()
-        }
-    });
+    runtime = (): LammpsRuntime => {
+        const generation = this.#generation;
+
+        return new LammpsRuntime({
+            logger: logger.raw,
+            ports: {
+                containerManager: this.#containerManager(generation),
+                logStreamer: this.#logStreamer(generation),
+                dumpWatcher: this.#dumpWatcher(generation),
+                imageBuilder: this.#imageBuilder()
+            }
+        });
+    };
+
+    disconnect(){
+        this.#generation += 1;
+        this.containers.forEach((container) => container.streams.clear());
+        this.#watchers.clear();
+    }
 
     addImage(tag: string){
         this.images.set(tag, { imageId: `sha256:${tag}`, sizeBytes: IMAGE_BYTES });
@@ -164,7 +176,11 @@ export class FakeDocker{
         return found;
     }
 
-    #containerManager(): ContainerManagerPort{
+    #alive(generation: number): boolean{
+        return generation === this.#generation;
+    }
+
+    #containerManager(generation: number): ContainerManagerPort{
         return {
             create: async (request) => {
                 this.#created += 1;
@@ -179,24 +195,32 @@ export class FakeDocker{
             },
             wait: (handle) => this.#find(handle).exited,
             stop: async (handle) => {
-                this.containers.get(handle.id)?.exit(SIGTERM_EXIT);
+                if(this.#alive(generation)) this.containers.get(handle.id)?.exit(SIGTERM_EXIT);
             },
             remove: async (handle) => {
+                if(!this.#alive(generation)) return;
+
                 this.containers.get(handle.id)?.exit(KILL_EXIT);
                 this.containers.delete(handle.id);
             },
             inspect: async (id) => this.#find({ id }).describe(),
-            list: async () => [...this.containers.values()].map((container) => container.describe())
+            list: async () => {
+                if(this.unreachable) throw Object.assign(new Error('connect ECONNREFUSED /var/run/docker.sock'), { code: 'ECONNREFUSED', syscall: 'connect' });
+
+                return [...this.containers.values()].map((container) => container.describe());
+            }
         };
     }
 
-    #logStreamer(): LogStreamerPort{
+    #logStreamer(generation: number): LogStreamerPort{
         return {
             stream: async (handle, handlers): Promise<LogStreamHandle> => {
                 const container = this.#find(handle);
                 const attached = new Promise<void>((resolve) => setImmediate(() => {
-                    container.output.forEach((line) => handlers.onStdout(line));
-                    container.streams.add(handlers);
+                    if(this.#alive(generation)){
+                        container.output.forEach((line) => handlers.onStdout(line));
+                        container.streams.add(handlers);
+                    }
                     resolve();
                 }));
 
@@ -210,14 +234,16 @@ export class FakeDocker{
         };
     }
 
-    #dumpWatcher(): DumpWatcherPort{
+    #dumpWatcher(generation: number): DumpWatcherPort{
         return {
             watch: async (runDir, handlers): Promise<DumpWatch> => {
                 const watchers = this.#watchers.get(runDir) ?? new Set();
                 this.#watchers.set(runDir, watchers);
                 const attached = new Promise<void>((resolve) => setImmediate(() => {
-                    (this.#frames.get(runDir) ?? []).forEach((frame) => handlers.onFrame(frame));
-                    watchers.add(handlers);
+                    if(this.#alive(generation)){
+                        (this.#frames.get(runDir) ?? []).forEach((frame) => handlers.onFrame(frame));
+                        watchers.add(handlers);
+                    }
                     resolve();
                 }));
 

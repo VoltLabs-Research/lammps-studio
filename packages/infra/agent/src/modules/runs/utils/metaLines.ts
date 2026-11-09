@@ -52,3 +52,5 @@ export const exitedLine = (exitCode: number, step: number | null): string => `LA
 export const terminatedLine = (step: number | null): string => `LAMMPS received SIGTERM${nearStep(step)}`;
 
 export const stoppedLine = (runNumber: number): string => `run ${runNumber} stopped`;
+
+export const orphanedLine = (): string => 'the agent was not running when this run ended';

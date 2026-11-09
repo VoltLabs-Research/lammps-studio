@@ -4,7 +4,7 @@ import RunPreview from './RunPreview';
 import StepRate from './StepRate';
 import SimulationService from '@/modules/simulations/services/Simulation';
 import { RunLocation, StopRequest } from '../contracts/domain/run';
-import { completedLine, containerLines, exitedLine, killedLine, lostLine, notStartedLine, stopRequestedLine, stoppedLine, terminatedLine } from '../utils/metaLines';
+import { completedLine, containerLines, exitedLine, killedLine, lostLine, notStartedLine, orphanedLine, stopRequestedLine, stoppedLine, terminatedLine } from '../utils/metaLines';
 import { PREVIEW_FILE, STUDIO_DIR } from '@/modules/simulations/utils/layout';
 import { eventBus } from '@/shared/events/EventBus';
 import { RunThermoFrame } from '@lammps-studio/contracts/events/gateway';
@@ -22,6 +22,7 @@ export const PROGRESS_MS = 1000;
 
 const FINAL_STATES: RunState[] = ['cancelled', 'completed', 'failed'];
 const MS_PER_SECOND = 1000;
+const ORPHANED = 'The agent was not running when this run ended';
 const UNKNOWN_FAILURE = 'The run ended without an exit code';
 
 type LiveFields = Pick<Run, 'progress' | 'warnings' | 'frames'>;
@@ -33,6 +34,7 @@ export interface RunSessionOptions{
     location: RunLocation;
     output: RunOutput;
     runtime: LammpsRuntime;
+    resumed: boolean;
     settled: SessionSettled;
 }
 
@@ -60,25 +62,28 @@ export default class RunSession{
     readonly #location: RunLocation;
     readonly #files: RunFiles;
     readonly #preview: RunPreview;
+    readonly #resumed: boolean;
     readonly #settled: SessionSettled;
     readonly #rate = new StepRate();
     readonly #simulations = new SimulationService();
     #run: Run;
-    #stop: StopRequest = 'none';
+    #stop: StopRequest;
     #container: string | null = null;
     #flushTimer: NodeJS.Timeout | null = null;
     #announceTimer: NodeJS.Timeout | null = null;
     #announcedAt = 0;
     #tasks = Promise.resolve();
 
-    constructor({ run, location, output, runtime, settled }: RunSessionOptions){
+    constructor({ run, location, output, runtime, resumed, settled }: RunSessionOptions){
         this.output = output;
         this.runtimeId = runIdOf(location.simulationId, run.number);
         this.#location = location;
         this.#files = new RunFiles(location.runDir);
         this.#preview = new RunPreview(runtime, join(location.folder, STUDIO_DIR, PREVIEW_FILE), () => this.#enqueue(() => this.#announceSimulation()));
+        this.#resumed = resumed;
         this.#settled = settled;
         this.#run = run;
+        this.#stop = run.state === 'stopping' ? 'term' : 'none';
     }
 
     get run(): Run{
@@ -122,6 +127,8 @@ export default class RunSession{
 
     attached(containerId: string){
         this.#container = containerId;
+        if(this.#resumed) return;
+
         containerLines(containerId, this.#run.config, this.#run.buildHash).forEach((line) => this.output.meta(line));
         this.#schedule();
     }
@@ -157,6 +164,10 @@ export default class RunSession{
 
     fail(message: string, line: string){
         this.#fail({ message, step: this.output.reader.lastStep, line: null }, line);
+    }
+
+    orphaned(){
+        this.#fail({ message: ORPHANED, step: this.output.reader.lastStep, line: null }, orphanedLine());
     }
 
     cancel(){

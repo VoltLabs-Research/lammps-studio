@@ -1,5 +1,6 @@
+import RunFiles from './RunFiles';
 import RunOutput from './RunOutput';
-import RunSession from './RunSession';
+import RunSession, { isFinal } from './RunSession';
 import EntryScriptService from '@/modules/simulations/services/EntryScript';
 import MachineService from '@/modules/machines/services/Machine';
 import RunHistoryService from '@/modules/simulations/services/RunHistory';
@@ -9,7 +10,7 @@ import { builds } from '@/modules/builds/services/Build';
 import { PreparedBuild } from '@/modules/builds/contracts/domain/build';
 import { buildOutputOf } from '@/modules/builds/utils/buildOutput';
 import { RunError } from '../contracts/domain/errors';
-import { buildFailedLine, buildingLine, notStartedLine, startedLine } from '../utils/metaLines';
+import { buildFailedLine, buildingLine, lostLine, notStartedLine, startedLine } from '../utils/metaLines';
 import { MachineError } from '@/modules/machines/contracts/domain/errors';
 import { StoredSimulation } from '@/modules/simulations/contracts/domain/simulation';
 import { outputDirOf, runDirOf } from '@/modules/simulations/utils/layout';
@@ -21,7 +22,9 @@ import { sectionProgress } from '@lammps-studio/lammps/log/section-progress';
 import { analyseScript } from '@lammps-studio/lammps/script/analyse-script';
 import { logger } from '@lammps-studio/readable/utils/Logger';
 import { BuildSpec } from '@lammps-studio/runtime/domain/build/BuildSpec';
+import { isDockerUnreachable } from '@lammps-studio/runtime/domain/shared/toError';
 import { PreparedRun, runIdOf, RunSpec } from '@lammps-studio/runtime/domain/simulation/RunSpec';
+import { RunContainer } from '@lammps-studio/runtime/ports/ContainerManagerPort';
 import LammpsRuntime from '@lammps-studio/runtime/public/LammpsRuntime';
 import { join, posix } from 'node:path';
 
@@ -72,6 +75,7 @@ export default class RunSupervisorService{
     async open(runtime: LammpsRuntime){
         this.#opened = runtime;
         this.#unsubscribe = this.#listen(runtime);
+        await this.#reattach(runtime);
     }
 
     async close(){
@@ -136,7 +140,7 @@ export default class RunSupervisorService{
         const machine = await this.#machines.get(config.machineId);
         const prepared = await runtime.prepareRun(stored.path, config.entry);
 
-        const session = await this.#register(stored, newRun(stored.record.id, config, build, prepared.number), new RunOutput());
+        const session = await this.#register(stored, newRun(stored.record.id, config, build, prepared.number), new RunOutput(), false);
         session.note(startedLine(prepared.number, machine.name, build.identity.hash));
         if(!build.ready) session.note(buildingLine(config));
         await session.begin();
@@ -205,7 +209,46 @@ export default class RunSupervisorService{
         ];
     }
 
-    async #register(stored: StoredSimulation, run: Run, output: RunOutput): Promise<RunSession>{
+    async #reattach(runtime: LammpsRuntime){
+        const containers = await this.#containers(runtime);
+        if(containers === null) return;
+
+        for(const stored of await this.#store.list()){
+            const unsettled = (await this.#history.list(stored.path)).filter((run) => !isFinal(run.state));
+            for(const run of unsettled){
+                const container = containers.find((entry) => entry.simulationId === stored.record.id && entry.runNumber === run.number);
+                await this.#resume(runtime, stored, run, container ?? null);
+            }
+        }
+    }
+
+    async #containers(runtime: LammpsRuntime): Promise<RunContainer[] | null>{
+        try{
+            return await runtime.listRunning();
+        }catch(error: unknown){
+            if(!isDockerUnreachable(error)) throw error;
+
+            logger.warn('Docker is not reachable, so runs stay as they were recorded', { scope: SCOPE });
+            return null;
+        }
+    }
+
+    async #resume(runtime: LammpsRuntime, stored: StoredSimulation, run: Run, container: RunContainer | null){
+        const output = RunOutput.restore(await new RunFiles(runDirOf(stored.path, run.number)).screen());
+        const session = await this.#register(stored, run, output, true);
+        if(container === null){
+            session.orphaned();
+            return;
+        }
+
+        try{
+            await runtime.attach(container.id);
+        }catch(error: unknown){
+            session.fail(messageOf(error), lostLine(messageOf(error)));
+        }
+    }
+
+    async #register(stored: StoredSimulation, run: Run, output: RunOutput, resumed: boolean): Promise<RunSession>{
         const runDir = runDirOf(stored.path, run.number);
         const session = new RunSession({
             run,
@@ -217,6 +260,7 @@ export default class RunSupervisorService{
             },
             output,
             runtime: this.runtime(),
+            resumed,
             settled: (done) => this.#forget(done)
         });
 
