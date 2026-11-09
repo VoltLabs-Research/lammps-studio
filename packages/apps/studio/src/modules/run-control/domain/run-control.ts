@@ -1,9 +1,12 @@
 import { LucideIcon } from 'lucide-react';
+import { BuildStepState } from '@lammps-studio/contracts/build/domain';
 import { RunState } from '@lammps-studio/contracts/run/domain';
 import { ButtonVariant } from '@/shared/contracts/ui';
 import { PanelId } from '@/shared/contracts/workspace';
 
 export type RunPhase = 'noscript' | 'idle' | RunState;
+
+export type OverlayKind = 'picker' | 'idle' | 'building' | 'starting';
 
 export type RunChipTone = 'neutral' | 'warn' | 'danger';
 
@@ -41,4 +44,18 @@ export interface Statusbar{
     left: StatusItem[];
     status: StatusItem[];
     entry: StatusItem;
+}
+
+export interface BuildLine{
+    name: string;
+    label: string;
+    state: BuildStepState;
+}
+
+export interface BuildProgressModel{
+    sub: string;
+    progress: number;
+    now: string;
+    steps: BuildLine[];
+    output: string | null;
 }

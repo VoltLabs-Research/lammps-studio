@@ -1,0 +1,2 @@
+.vp-overlay { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 24px 24px calc(var(--bar-h, 0px) + 24px); pointer-events: none; overflow: auto; }
+.vp-overlay > * { pointer-events: auto; }

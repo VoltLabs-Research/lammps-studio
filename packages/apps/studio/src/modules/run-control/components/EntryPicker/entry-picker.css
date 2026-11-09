@@ -1,0 +1,17 @@
+.picker { width: min(460px, 100%); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left; }
+.picker h3 { margin: 0; font-size: 1rem; font-weight: var(--w-semibold); }
+.picker p { margin: 0; color: var(--muted); font-size: var(--text-sm); }
+.picker__head { display: flex; align-items: center; gap: 12px; }
+.picker__icon { width: 36px; height: 36px; border-radius: 14px; background: var(--tint); display: grid; place-items: center; color: var(--warning-ink); flex: none; }
+.picker__actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.file-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.file-opt { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 0; background: transparent; text-align: left; font-size: var(--text-sm); border-bottom: 1px solid var(--separator); width: 100%; cursor: pointer; }
+.file-opt:last-child { border-bottom: 0; }
+.file-opt:hover { background: var(--tint); }
+.file-opt:has(:checked) { background: var(--tint-2); }
+.file-opt small { margin-left: auto; color: var(--muted); font-size: var(--text-xs); }
+.file-opt .mono { font-size: var(--text-xs); }
+.file-opt .chip { height: 20px; }
+.radio { appearance: none; margin: 0; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border-2); flex: none; background: transparent; }
+.radio:checked { border-color: var(--fg); background: radial-gradient(circle, var(--fg) 0 4px, transparent 4.5px); }
+.radio:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
