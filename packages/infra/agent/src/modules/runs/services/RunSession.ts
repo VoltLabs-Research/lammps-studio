@@ -1,9 +1,11 @@
 import RunFiles from './RunFiles';
 import RunOutput from './RunOutput';
+import RunPreview from './RunPreview';
 import StepRate from './StepRate';
 import SimulationService from '@/modules/simulations/services/Simulation';
 import { RunLocation, StopRequest } from '../contracts/domain/run';
 import { completedLine, containerLines, exitedLine, killedLine, lostLine, notStartedLine, stopRequestedLine, stoppedLine, terminatedLine } from '../utils/metaLines';
+import { PREVIEW_FILE, STUDIO_DIR } from '@/modules/simulations/utils/layout';
 import { eventBus } from '@/shared/events/EventBus';
 import { RunThermoFrame } from '@lammps-studio/contracts/events/gateway';
 import { Run, RunError, RunState } from '@lammps-studio/contracts/run/domain';
@@ -12,6 +14,8 @@ import { sectionProgress } from '@lammps-studio/lammps/log/section-progress';
 import { logger } from '@lammps-studio/readable/utils/Logger';
 import { DumpFrame } from '@lammps-studio/runtime/domain/dump/DumpFrame';
 import { runIdOf } from '@lammps-studio/runtime/domain/simulation/RunSpec';
+import LammpsRuntime from '@lammps-studio/runtime/public/LammpsRuntime';
+import { join } from 'node:path';
 
 export const FLUSH_MS = 100;
 export const PROGRESS_MS = 1000;
@@ -28,6 +32,7 @@ export interface RunSessionOptions{
     run: Run;
     location: RunLocation;
     output: RunOutput;
+    runtime: LammpsRuntime;
     settled: SessionSettled;
 }
 
@@ -54,6 +59,7 @@ export default class RunSession{
     readonly building = new AbortController();
     readonly #location: RunLocation;
     readonly #files: RunFiles;
+    readonly #preview: RunPreview;
     readonly #settled: SessionSettled;
     readonly #rate = new StepRate();
     readonly #simulations = new SimulationService();
@@ -65,11 +71,12 @@ export default class RunSession{
     #announcedAt = 0;
     #tasks = Promise.resolve();
 
-    constructor({ run, location, output, settled }: RunSessionOptions){
+    constructor({ run, location, output, runtime, settled }: RunSessionOptions){
         this.output = output;
         this.runtimeId = runIdOf(location.simulationId, run.number);
         this.#location = location;
         this.#files = new RunFiles(location.runDir);
+        this.#preview = new RunPreview(runtime, join(location.folder, STUDIO_DIR, PREVIEW_FILE), () => this.#enqueue(() => this.#announceSimulation()));
         this.#settled = settled;
         this.#run = run;
     }
@@ -161,6 +168,7 @@ export default class RunSession{
     async detach(){
         this.#flush();
         this.#clearTimers();
+        this.#preview.stop();
         await this.#tasks;
     }
 
@@ -203,7 +211,10 @@ export default class RunSession{
         this.#run = next;
         this.#flush();
         this.#announce();
-        this.#enqueue(() => this.#announceSimulation());
+        this.#enqueue(async () => {
+            if(isFinal(next.state)) await this.#preview.drain();
+            await this.#announceSimulation();
+        });
     }
 
     #schedule(){
@@ -226,6 +237,9 @@ export default class RunSession{
         }
         thermoFramesOf(simulationId, runNumber, rows).forEach((thermo) => eventBus.emit(thermo));
         frames.forEach((frame) => eventBus.emit({ type: 'run:frame', simulationId, runNumber, frame }));
+
+        const latest = this.output.frames.at(-1);
+        if(frames.length > 0 && latest) this.#preview.offer(latest);
         this.#progressed();
     }
 

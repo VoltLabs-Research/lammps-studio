@@ -95,8 +95,8 @@ describe('a run', () => {
         events.socket.terminate();
     });
 
-    it('serves a frame as bytes and the run as the last run of its simulation', async () => {
-        const simulation = await meltSimulation(app, 'Framed');
+    it('serves a frame as bytes and keeps the latest one as the simulation preview', async () => {
+        const simulation = await meltSimulation(app, 'Previewed');
         await startRun(app, simulation);
         const container = await runningContainer(docker, simulation, 1);
         container.print(...MELT_SETUP, meltRow(0), meltRow(100));
@@ -111,8 +111,11 @@ describe('a run', () => {
         expectError(await request(app, runRoutes.frame, { params: { ...params, frameIndex: 1 } }), 404, 'Run::FrameNotFound');
 
         await expect.poll(async () => (await request(app, simulationRoutes.get, { params: { simulationId: simulation.id } })).data()).toMatchObject({
+            hasPreview: true,
             lastRun: { number: 1, state: 'completed', progress: { step: 100 } }
         });
+        const preview = await request(app, simulationRoutes.preview, { params: { simulationId: simulation.id } });
+        expect(decoded(preview.raw).header).toMatchObject({ step: 100, atoms: 3 });
     });
 
     it('serves a run it is not following from the run folder', async () => {

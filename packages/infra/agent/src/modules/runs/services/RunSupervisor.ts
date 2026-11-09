@@ -216,6 +216,7 @@ export default class RunSupervisorService{
                 plan: await this.#plan(stored.path, run.config, runDir)
             },
             output,
+            runtime: this.runtime(),
             settled: (done) => this.#forget(done)
         });
 
