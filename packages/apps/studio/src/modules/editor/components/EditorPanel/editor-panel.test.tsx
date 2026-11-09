@@ -11,11 +11,6 @@ import { closeSession, useRunSessionStore } from '@/shared/store/run-session';
 import { useSimulationsStore } from '@/shared/store/simulations';
 
 vi.mock('@/shared/api/call', () => ({ call: vi.fn() }));
-vi.mock('@/shared/utils/storage', () => ({
-    readChoice: (_key: string, _choices: readonly string[], fallback: string) => fallback,
-    readFlag: (_key: string, fallback: boolean) => fallback,
-    writeValue: () => undefined
-}));
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
