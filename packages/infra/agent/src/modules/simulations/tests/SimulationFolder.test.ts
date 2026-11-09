@@ -96,7 +96,7 @@ describe('a simulation folder', () => {
         expect(await entryOf()).toBe('a.in');
     });
 
-    it('ranks the entry candidates main.in first, then .in files, then the rest', async () => {
+    it('ranks the entry candidates like the picker, leaving out runs, hidden folders and LAMMPS output', async () => {
         const simulation = await createSimulation(app, { name: 'Candidates' });
         await writeTree(folderOf(simulation), {
             'water.lmp': 'units real\n\nminimize 1e-4 1e-6 100 1000\n',
@@ -106,17 +106,20 @@ describe('a simulation folder', () => {
             'log.lammps': 'run 250\n',
             'runs/run-1/main.in': 'run 250\n',
             '.hidden/secret.in': 'run 1\n',
-            'README.md': 'notes'
+            'README.md': 'notes',
+            'restart.100.cu': Buffer.from([0, 1, 2]),
+            'blob.bin': Buffer.from([0x4c, 0, 0x53])
         });
 
         const res = await request(app, simulationRoutes.entryCandidates, { params: { simulationId: simulation.id } });
 
         expect(res.data()).toEqual([
-            { path: 'main.in', lines: 23, hint: 'has a run command', likely: true },
-            { path: 'equil.in', lines: 1, hint: '', likely: false },
-            { path: 'inputs/shear.in', lines: 1, hint: 'has a run command', likely: true },
-            { path: 'setup.lammps', lines: 2, hint: '', likely: false },
-            { path: 'water.lmp', lines: 3, hint: 'has a minimize command', likely: true }
+            { path: 'main.in', lines: 23, hint: '23 lines · has a run command', likely: true },
+            { path: 'equil.in', lines: 1, hint: '1 lines', likely: false },
+            { path: 'inputs/shear.in', lines: 1, hint: '1 lines · has a run command', likely: false },
+            { path: 'water.lmp', lines: 3, hint: '3 lines · has a run command', likely: false },
+            { path: 'setup.lammps', lines: 2, hint: '2 lines', likely: false },
+            { path: 'README.md', lines: 1, hint: 'text', likely: false }
         ]);
     });
 
