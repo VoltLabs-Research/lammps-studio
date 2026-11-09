@@ -1,5 +1,5 @@
 import { Endpoint, HttpMethod } from '@lammps-studio/contracts/shared/routing';
-import { ErrorTable } from '@lammps-studio/contracts/shared/errors';
+import { ErrorTable, RequestErrors } from '@lammps-studio/contracts/shared/errors';
 
 export type Params = Record<string, string>;
 
@@ -38,11 +38,26 @@ const PARAM = /:(\w+)/g;
 export const fail = <T extends ErrorTable>(table: T, cause: Extract<keyof T['causes'], string>): Failure =>
     new Failure(`${table.domain}::${cause}`, table.causes[cause]);
 
+const parseBody = (rawBody: string) => {
+    if(rawBody === '') return undefined;
+
+    try{
+        return JSON.parse(rawBody);
+    }catch(cause: unknown){
+        if(cause instanceof SyntaxError) return fail(RequestErrors, 'ValidationFailed');
+        throw cause;
+    }
+};
+
 export const route = <I, O>(endpoint: Endpoint<I, O>, handle: (params: Params, body: I) => O | Failure): Route => ({
     method: endpoint.method,
     pattern: new RegExp(`^${endpoint.path.replace(PARAM, '([^/]+)')}$`),
     names: Array.from(endpoint.path.matchAll(PARAM), (match) => match[1]),
-    handle: (params, rawBody) => handle(params, rawBody === '' ? undefined : JSON.parse(rawBody))
+    handle: (params, rawBody) => {
+        const body = parseBody(rawBody);
+
+        return body instanceof Failure ? body : handle(params, body);
+    }
 });
 
 export const matchRoute = (routes: Route[], method: string, path: string): RouteMatch | null => {

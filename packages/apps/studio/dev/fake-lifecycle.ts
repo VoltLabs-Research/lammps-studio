@@ -1,18 +1,12 @@
 import { Build } from '@lammps-studio/contracts/build/domain';
 import { BUILD_PROGRESS_PER_SECOND, advanceBuild } from './fake-builds';
-import { TICK_SECONDS, ticksFor } from './fake-clock';
+import { STARTING_TICKS, TICK_SECONDS } from './fake-clock';
 import { contextOf } from './fake-cu-run';
 import { driverOf } from './fake-run-driver';
 import { publishChange } from './fake-run-events';
 import { RunRecord } from './fake-runs';
 import { broadcast } from './fake-socket';
 import { FakeState, latestRecords } from './fake-state';
-
-const STARTING_MS = 1500;
-const STOP_GRACE_MS = 2400;
-
-export const STARTING_TICKS = ticksFor(STARTING_MS);
-export const STOP_GRACE_TICKS = ticksFor(STOP_GRACE_MS);
 
 const countDown = (record: RunRecord): boolean => {
     record.wait = Math.max(0, record.wait - 1);

@@ -8,6 +8,8 @@ import { fileRoutesFor } from './fake-file-routes';
 import { fail, Failure, HtmlPage, matchRoute } from './fake-router';
 import { routesFor } from './fake-routes';
 import { runRoutesFor } from './fake-run-routes';
+import { scenarioRoutesFor } from './fake-scenario-routes';
+import { isScenario, Scenario, SCENARIOS } from './fake-scenarios';
 import { simulationRoutesFor } from './fake-simulation-routes';
 import { acceptSocket } from './fake-socket';
 import { startTicker } from './fake-ticker';
@@ -27,13 +29,24 @@ const CORS_HEADERS = {
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS'
 };
 
-const state = createState();
+const DEFAULT_SCENARIO: Scenario = 'running';
+
+const scenarioFromEnv = (): Scenario => {
+    const scenario = process.env.FAKE_SCENARIO ?? DEFAULT_SCENARIO;
+    if(isScenario(scenario)) return scenario;
+
+    console.error(`FAKE_SCENARIO must be one of ${SCENARIOS.join(', ')}, got ${scenario}`);
+    process.exit(1);
+};
+
+const state = createState(scenarioFromEnv(), process.env.FAKE_SCENARIO === undefined || process.env.FAKE_LIVE === '1');
 const routes = [
     ...routesFor(state),
     ...simulationRoutesFor(state),
     ...runRoutesFor(state),
     ...fileRoutesFor(state),
-    ...editorRoutesFor(state, ORIGIN)
+    ...editorRoutesFor(state, ORIGIN),
+    ...scenarioRoutesFor(state)
 ];
 const publicRoutes = editorPagesFor(state);
 
@@ -118,5 +131,4 @@ server.listen(PORT, HOST, () => {
     console.log(`${AGENT_READY_PREFIX}${JSON.stringify({ url: ORIGIN, token: TOKEN, version: VERSION })}`);
 });
 
-state.live = process.env.FAKE_AGENT_STILL !== '1';
 startTicker(state);

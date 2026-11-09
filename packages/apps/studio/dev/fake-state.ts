@@ -2,11 +2,11 @@ import { Build } from '@lammps-studio/contracts/build/domain';
 import { Machine } from '@lammps-studio/contracts/machine/domain';
 import { FrameInfo } from '@lammps-studio/contracts/run/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
-import { liveCuRun, pastCuRuns } from './fake-cu-history';
-import { CU_SIMULATION_ID, TENSION } from './fake-cu-run';
+import { CU_SIMULATION_ID } from './fake-cu-run';
 import { BUILDS, MACHINES, RUNS, SIMULATIONS } from './fake-data';
 import { FakeFile, isUnder, runFiles, seededFolders } from './fake-folders';
 import { recordOf, RunRecord } from './fake-runs';
+import { cuScenario, Scenario } from './fake-scenarios';
 
 export interface FakeState{
     machines: Machine[];
@@ -15,25 +15,25 @@ export interface FakeState{
     builds: Build[];
     folders: Map<string, FakeFile[]>;
     removed: Map<string, string[]>;
+    scenario: Scenario;
     live: boolean;
 }
 
-const CU_LIVE_STEP = 184000;
-
-export const createState = (): FakeState => {
+export const createState = (scenario: Scenario, live: boolean): FakeState => {
     const now = Date.now();
-    const cuRuns = [...pastCuRuns(MACHINES, now), liveCuRun(MACHINES, now, { section: TENSION, step: CU_LIVE_STEP })];
+    const cu = cuScenario(scenario, MACHINES, now);
     const runs = new Map(RUNS.map((run) => [run.simulationId, [recordOf(run)]]));
-    runs.set(CU_SIMULATION_ID, cuRuns);
+    runs.set(CU_SIMULATION_ID, cu.runs);
 
     return {
         machines: MACHINES,
         simulations: SIMULATIONS,
         runs,
-        builds: BUILDS,
+        builds: [...BUILDS, ...cu.builds],
         folders: seededFolders(now),
         removed: new Map(),
-        live: true
+        scenario,
+        live
     };
 };
 

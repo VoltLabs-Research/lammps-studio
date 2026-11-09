@@ -29,8 +29,10 @@ const machine = (patch: Partial<Machine> & Pick<Machine, 'id' | 'name' | 'kind'>
     ...patch
 });
 
+export const LOCAL_MACHINE = machine({ id: 'local', name: 'This computer', kind: 'local', host: 'rody-workstation', cpu: 'Ryzen 9 7950X', cores: 16, memory: '64 GB' });
+
 export const MACHINES: Machine[] = [
-    machine({ id: 'local', name: 'This computer', kind: 'local', host: 'rody-workstation', cpu: 'Ryzen 9 7950X', cores: 16, memory: '64 GB' }),
+    LOCAL_MACHINE,
     machine({
         id: 'atlas',
         name: 'atlas',
