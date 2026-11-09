@@ -8,7 +8,7 @@ import {
 } from '../../ports/ContainerManagerPort';
 import type { Logger } from '../../ports/Logger';
 import { RUN_LABEL } from '../../domain/simulation/RunSpec';
-import { isDockerGone } from '../../domain/shared/toError';
+import { isDockerAlreadyStopped, isDockerGone } from '../../domain/shared/toError';
 import DockerContainerResolver from './DockerContainerResolver';
 import { toRunContainer } from './toRunContainer';
 
@@ -66,7 +66,15 @@ export default class DockerContainerManager implements ContainerManagerPort{
     }
 
     async stop(container: ContainerHandle, timeoutSeconds: number){
-        await this.containerResolver.resolve(container).stop({ t: timeoutSeconds });
+        try{
+            await this.containerResolver.resolve(container).stop({ t: timeoutSeconds });
+        }catch(error){
+            if(!isDockerAlreadyStopped(error)){
+                throw error;
+            }
+
+            this.logger.debug(`Container already stopped: ${container.id}`);
+        }
     }
 
     async remove(container: ContainerHandle){

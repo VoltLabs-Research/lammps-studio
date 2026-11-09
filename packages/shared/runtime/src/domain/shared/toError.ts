@@ -8,6 +8,7 @@ export const toError = (cause: unknown): Error => {
     return new LammpsRuntimeError(`Runtime::Unknown:${String(cause)}`);
 };
 
+const NOT_MODIFIED = 304;
 const NOT_FOUND = 404;
 const CONFLICT = 409;
 const REMOVAL_IN_PROGRESS = /removal of container .* is already in progress/;
@@ -22,6 +23,10 @@ const statusOf = (cause: unknown): number | null => {
 
 export const isDockerNotFound = (cause: unknown): boolean => {
     return statusOf(cause) === NOT_FOUND;
+};
+
+export const isDockerAlreadyStopped = (cause: unknown): boolean => {
+    return statusOf(cause) === NOT_MODIFIED || isDockerNotFound(cause);
 };
 
 export const isDockerGone = (cause: unknown): boolean => {
