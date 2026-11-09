@@ -22,6 +22,7 @@ export const config = {
     },
     root,
     simulationsDir: join(root, 'simulations'),
+    buildsFile: join(root, 'builds.json'),
     codeServer: {
         command: optionalEnv('LAMMPS_CODE_SERVER') ?? join(homedir(), '.local', 'bin', 'code-server'),
         userDataDir: join(root, '.code-server')

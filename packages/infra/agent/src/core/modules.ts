@@ -2,6 +2,11 @@ import { ModuleEntry } from '@lammps-studio/readable/services/ModuleDiscovery';
 
 export const modules: ModuleEntry[] = [
     {
+        module: 'builds',
+        category: 'controllers',
+        load: () => import('../modules/builds/controllers/Build')
+    },
+    {
         module: 'editor',
         category: 'controllers',
         load: () => import('../modules/editor/controllers/Editor')
