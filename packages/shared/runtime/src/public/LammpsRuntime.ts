@@ -2,6 +2,7 @@ import Docker from 'dockerode';
 import type { Logger as PinoBaseLogger } from 'pino';
 import Build from '../domain/build/Build';
 import { BuildIdentity, BuildResult, BuildSpec } from '../domain/build/BuildSpec';
+import { DumpFrame } from '../domain/dump/DumpFrame';
 import { RuntimeEvent, RuntimeEventMap } from '../domain/observability/EventMap';
 import Run from '../domain/simulation/Run';
 import RunHandle from '../domain/simulation/RunHandle';
@@ -124,6 +125,10 @@ export default class LammpsRuntime{
 
     async kill(runId: string): Promise<RunSnapshot>{
         return await this.stopSimulation.kill(runId);
+    }
+
+    async scanFrames(runDir: string): Promise<DumpFrame[]>{
+        return await this.dumpWatcher.scan(runDir);
     }
 
     async readFrame(dumpPath: string, byteOffset: number): Promise<string>{

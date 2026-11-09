@@ -125,6 +125,28 @@ describe('dump watching', () => {
         await rm(path.join(dir, '..', `${path.basename(dir)}-source.lammpstrj`));
     });
 
+    it('scans the frames a finished run left, file by file in name order, skipping logs, symlinks and a half-written frame', async () => {
+        const custom = await fixture('custom.lammpstrj');
+        const xyz = await fixture('positions.xyz');
+        const cut = custom.lastIndexOf('\n', custom.length - 2) - 10;
+        await writeFile(path.join(dir, 'wire.lammpstrj'), custom.subarray(0, cut));
+        await writeFile(path.join(dir, 'positions.xyz'), xyz);
+        await writeFile(path.join(dir, 'log.lammps'), 'LAMMPS (22 Jul 2025 - Update 1)\n');
+        await symlink(path.join(dir, 'positions.xyz'), path.join(dir, 'linked.xyz'));
+
+        const frames = await new ChokidarDumpWatcher(silent).scan(dir);
+
+        expect(frames.map(({ path: file, step, index, atoms }) => [path.basename(file), step, index, atoms])).toEqual([
+            ['positions.xyz', 0, 0, FIXTURE_ATOMS],
+            ['positions.xyz', 30, 1, FIXTURE_ATOMS],
+            ['positions.xyz', 60, 2, FIXTURE_ATOMS],
+            ['wire.lammpstrj', 0, 0, FIXTURE_ATOMS],
+            ['wire.lammpstrj', 20, 1, FIXTURE_ATOMS],
+            ['wire.lammpstrj', 40, 2, FIXTURE_ATOMS]
+        ]);
+        expect(frames.slice(3).map((frame) => frame.byteOffset)).toEqual(frameStarts(custom.toString('utf8'), 'ITEM: TIMESTEP').slice(0, 3));
+    });
+
     it('reads frame N back by its byte offset', async () => {
         const bytes = await fixture('custom.lammpstrj');
         const dump = path.join(dir, 'wire.lammpstrj');

@@ -12,5 +12,6 @@ export interface DumpWatch{
 
 export interface DumpWatcherPort{
     watch(runDir: string, handlers: DumpWatchHandlers): Promise<DumpWatch>;
+    scan(runDir: string): Promise<DumpFrame[]>;
     read(filePath: string, byteOffset: number): Promise<string>;
 }

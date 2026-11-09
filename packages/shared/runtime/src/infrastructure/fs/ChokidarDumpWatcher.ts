@@ -1,7 +1,8 @@
 import { open, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { watch } from 'chokidar';
-import DumpFrameScanner, { sniffDumpFormat } from '../../domain/dump/DumpFrameScanner';
+import { DumpFrame } from '../../domain/dump/DumpFrame';
+import DumpFrameScanner, { DumpFormat, sniffDumpFormat } from '../../domain/dump/DumpFrameScanner';
 import { DumpErrors } from '../../domain/shared/errors';
 import { toError } from '../../domain/shared/toError';
 import type { DumpWatch, DumpWatcherPort, DumpWatchHandlers } from '../../ports/DumpWatcherPort';
@@ -10,6 +11,8 @@ import DumpFileTracker from './DumpFileTracker';
 
 const READ_CHUNK_BYTES = 4 * 1024 * 1024;
 const SNIFF_BYTES = 64;
+
+const byName = (a: string, b: string): number => a.localeCompare(b, 'en', { numeric: true });
 
 const readAt = async (filePath: string, position: number, length: number): Promise<Buffer> => {
     const handle = await open(filePath, 'r');
@@ -52,9 +55,23 @@ export default class ChokidarDumpWatcher implements DumpWatcherPort{
         };
     }
 
+    async scan(runDir: string): Promise<DumpFrame[]>{
+        const names = (await readdir(runDir, { withFileTypes: true }))
+            .filter((entry) => entry.isFile())
+            .map((entry) => entry.name)
+            .sort(byName);
+
+        const frames: DumpFrame[] = [];
+        for(const name of names){
+            frames.push(...await this.#scanFile(path.join(runDir, name)));
+        }
+
+        return frames;
+    }
+
     async read(filePath: string, byteOffset: number): Promise<string>{
-        const format = sniffDumpFormat(await readAt(filePath, byteOffset, SNIFF_BYTES), path.basename(filePath));
-        if(format !== 'lammps' && format !== 'xyz'){
+        const format = await this.#formatAt(filePath, byteOffset);
+        if(format === null){
             throw DumpErrors.NotDump(`${filePath}@${byteOffset}`);
         }
 
@@ -71,6 +88,35 @@ export default class ChokidarDumpWatcher implements DumpWatcherPort{
             const [frame] = scanner.push(chunk);
             if(frame){
                 return Buffer.concat(chunks).toString('utf8', 0, frame.byteLength);
+            }
+        }
+    }
+
+    async #formatAt(filePath: string, byteOffset: number): Promise<DumpFormat | null>{
+        const format = sniffDumpFormat(await readAt(filePath, byteOffset, SNIFF_BYTES), path.basename(filePath));
+        if(format !== 'lammps' && format !== 'xyz'){
+            return null;
+        }
+
+        return format;
+    }
+
+    async #scanFile(filePath: string): Promise<DumpFrame[]>{
+        const format = await this.#formatAt(filePath, 0);
+        if(format === null){
+            return [];
+        }
+
+        const scanner = new DumpFrameScanner(format, 0);
+        const frames: DumpFrame[] = [];
+        for(let position = 0; ; position += READ_CHUNK_BYTES){
+            const chunk = await readAt(filePath, position, READ_CHUNK_BYTES);
+            if(chunk.length === 0){
+                return frames;
+            }
+
+            for(const frame of scanner.push(chunk)){
+                frames.push({ path: filePath, step: frame.step, index: frame.index, atoms: frame.atoms, byteOffset: frame.byteOffset });
             }
         }
     }
