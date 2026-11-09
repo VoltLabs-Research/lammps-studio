@@ -47,6 +47,11 @@ export default class SimulationController extends BaseController{
         return this.#service.duplicate(simulationId);
     }
 
+    @Route(simulationRoutes.script)
+    script(@Param('simulationId') simulationId: string){
+        return this.#service.script(simulationId);
+    }
+
     @Route(simulationRoutes.entryCandidates)
     entryCandidates(@Param('simulationId') simulationId: string){
         return this.#service.entryCandidates(simulationId);

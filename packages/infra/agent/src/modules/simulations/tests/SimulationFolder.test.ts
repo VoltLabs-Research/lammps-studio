@@ -123,6 +123,38 @@ describe('a simulation folder', () => {
         ]);
     });
 
+    it('analyses the entry script together with the files it includes', async () => {
+        const simulation = await createSimulation(app, { name: 'Analysed' });
+        await writeTree(folderOf(simulation), {
+            'main.in': 'include setup.lammps\nvariable n index 400\nthermo 50\nrun ${n}\nrun 100\n',
+            'setup.lammps': 'units metal\npair_style eam/alloy\n',
+            'runs/run-1/main.in': 'units real\nrun 7\n'
+        });
+
+        const res = await request(app, simulationRoutes.script, { params: { simulationId: simulation.id } });
+
+        expect(res.status).toBe(200);
+        expect(res.data()).toMatchObject({
+            entry: 'main.in',
+            lines: 5,
+            units: 'metal',
+            thermoEvery: 50,
+            runs: [{ line: 4, steps: 400 }, { line: 5, steps: 100 }],
+            requiredPackages: [{ name: 'MANYBODY', reason: 'pair_style eam/alloy', line: 1 }]
+        });
+    });
+
+    it('analyses the entry the simulation records, and refuses a folder without one', async () => {
+        const source = await scratch();
+        await writeTree(source, { 'water.lmp': 'units real\nrun 1000\n', 'setup.lammps': 'units real\n' });
+        const simulation = await createSimulation(app, { name: 'Undecided', template: 'folder', source });
+        const script = () => request(app, simulationRoutes.script, { params: { simulationId: simulation.id } });
+
+        expectError(await script(), 422, 'Simulation::NoEntryScript');
+        await request(app, simulationRoutes.update, { params: { simulationId: simulation.id }, body: { entry: 'water.lmp' } });
+        expect((await script()).data()).toMatchObject({ entry: 'water.lmp', units: 'real', runs: [{ line: 2, steps: 1000 }] });
+    });
+
     it('reads the last run from the highest numbered run folder', async () => {
         const simulation = await createSimulation(app, { name: 'Ran' });
         await writeTree(folderOf(simulation), {

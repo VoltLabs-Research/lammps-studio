@@ -1,5 +1,6 @@
 import EntryScriptService from './EntryScript';
 import RunHistoryService from './RunHistory';
+import ScriptFilesService from './ScriptFiles';
 import SimulationStoreService from './SimulationStore';
 import SimulationTemplateService from './SimulationTemplate';
 import MachineService from '@/modules/machines/services/Machine';
@@ -10,9 +11,11 @@ import { PREVIEW_FILE, RUNS_DIR, STUDIO_DIR } from '../utils/layout';
 import { LOCAL_MACHINE_ID } from '@/modules/machines/services/LocalMachine';
 import { eventBus } from '@/shared/events/EventBus';
 import { isMissing, statIfExists } from '@/shared/utils/fsErrors';
-import { EntryCandidate } from '@lammps-studio/contracts/script/domain';
+import { EntryCandidate, ScriptInfo } from '@lammps-studio/contracts/script/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
 import { CreateSimulationInput, UpdateSimulationInput } from '@lammps-studio/contracts/simulation/http';
+import { analyseScript } from '@lammps-studio/lammps/script/analyse-script';
+import { defaultEntry } from '@lammps-studio/lammps/script/resolve-entry';
 import { randomUUID } from 'node:crypto';
 import { cp, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -26,6 +29,7 @@ export default class SimulationService{
     #store = new SimulationStoreService();
     #templates = new SimulationTemplateService();
     #entries = new EntryScriptService();
+    #scripts = new ScriptFilesService();
     #runs = new RunHistoryService();
     #machines = new MachineService();
 
@@ -77,6 +81,15 @@ export default class SimulationService{
             filter: (from) => !skipped.includes(from)
         }));
         return this.#publish(stored);
+    }
+
+    async script(simulationId: string): Promise<ScriptInfo>{
+        const stored = await this.#store.find(simulationId);
+        const files = await this.#scripts.read(stored.path);
+        const entry = stored.record.entry ?? defaultEntry(files);
+        if(entry === null) throw SimulationError.NoEntryScript();
+
+        return analyseScript(entry, files);
     }
 
     async entryCandidates(simulationId: string): Promise<EntryCandidate[]>{
