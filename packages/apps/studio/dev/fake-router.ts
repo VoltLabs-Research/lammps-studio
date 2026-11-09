@@ -13,6 +13,14 @@ export class Failure{
     }
 }
 
+export class HtmlPage{
+    readonly html: string;
+
+    constructor(html: string){
+        this.html = html;
+    }
+}
+
 export interface Route{
     method: HttpMethod;
     pattern: RegExp;

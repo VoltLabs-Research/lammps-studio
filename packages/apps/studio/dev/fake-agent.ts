@@ -3,8 +3,9 @@ import { AGENT_READY_PREFIX } from '@lammps-studio/contracts/desktop/bridge';
 import { EVENTS_CHANNEL } from '@lammps-studio/contracts/events/gateway';
 import { RequestErrors } from '@lammps-studio/contracts/shared/errors';
 import { createState } from './fake-state';
+import { editorPagesFor, editorRoutesFor } from './fake-editor';
 import { fileRoutesFor } from './fake-file-routes';
-import { fail, Failure, matchRoute } from './fake-router';
+import { fail, Failure, HtmlPage, matchRoute } from './fake-router';
 import { routesFor } from './fake-routes';
 import { runRoutesFor } from './fake-run-routes';
 import { simulationRoutesFor } from './fake-simulation-routes';
@@ -17,6 +18,7 @@ const TOKEN = 'dev';
 const ORIGIN = `http://${HOST}:${PORT}`;
 const VERSION = '0.0.0-fake';
 const OCTET_STREAM = 'application/octet-stream';
+const HTML = 'text/html; charset=utf-8';
 
 const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
@@ -25,7 +27,14 @@ const CORS_HEADERS = {
 };
 
 const state = createState();
-const routes = [...routesFor(state), ...simulationRoutesFor(state), ...runRoutesFor(state), ...fileRoutesFor(state)];
+const routes = [
+    ...routesFor(state),
+    ...simulationRoutesFor(state),
+    ...runRoutesFor(state),
+    ...fileRoutesFor(state),
+    ...editorRoutesFor(state, ORIGIN)
+];
+const publicRoutes = editorPagesFor(state);
 
 const send = (response: ServerResponse, status: number, body?: object) => {
     if(body === undefined){
@@ -56,6 +65,11 @@ const reply = (response: ServerResponse, result: unknown) => {
         return;
     }
 
+    if(result instanceof HtmlPage){
+        response.writeHead(200, { ...CORS_HEADERS, 'Content-Type': HTML }).end(result.html);
+        return;
+    }
+
     if(result instanceof ArrayBuffer){
         response.writeHead(200, { ...CORS_HEADERS, 'Content-Type': OCTET_STREAM }).end(Buffer.from(result));
         return;
@@ -70,13 +84,15 @@ const handle = async (request: IncomingMessage, response: ServerResponse) => {
         return;
     }
 
-    if(request.headers.authorization !== `Bearer ${TOKEN}`){
+    const url = new URL(request.url ?? '/', ORIGIN);
+    const method = request.method ?? 'GET';
+    const open = matchRoute(publicRoutes, method, url.pathname);
+    if(!open && request.headers.authorization !== `Bearer ${TOKEN}`){
         reply(response, fail(RequestErrors, 'Unauthorized'));
         return;
     }
 
-    const url = new URL(request.url ?? '/', ORIGIN);
-    const match = matchRoute(routes, request.method ?? 'GET', url.pathname);
+    const match = open ?? matchRoute(routes, method, url.pathname);
     if(!match){
         send(response, 404, { error: 'Route::NotFound' });
         return;

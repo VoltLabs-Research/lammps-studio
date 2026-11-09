@@ -6,29 +6,15 @@ import { simulationRoutes } from '@lammps-studio/contracts/simulation/routes';
 import { decimateFrame } from '@lammps-studio/lammps/dump/decimate-frame';
 import { encodeFrame } from '@lammps-studio/lammps/dump/frame-codec';
 import { analyseScript } from '@lammps-studio/lammps/script/analyse-script';
-import { ScriptFile } from '@lammps-studio/lammps/script/domain';
 import { resolveEntry } from '@lammps-studio/lammps/script/resolve-entry';
 import { cuFrame } from './cu/cu-frame';
-import { FakeFile, folderPath, isUnder, RUNS_DIR } from './fake-folders';
-import { withRun } from './fake-helpers';
+import { folderPath, scriptFiles } from './fake-folders';
+import { withRun, withSimulation } from './fake-helpers';
 import { fail, Failure, route, Route } from './fake-router';
 import { broadcast } from './fake-socket';
 import { FakeState, filesOf, latestFrame } from './fake-state';
 
 const PREVIEW_ATOMS = 10_000;
-
-const scriptFiles = (files: FakeFile[]): ScriptFile[] => files.flatMap(({ path, text }) => {
-    if(text === null || isUnder(path, RUNS_DIR)) return [];
-
-    return [{ path, text }];
-});
-
-const withSimulation = <T>(state: FakeState, simulationId: string, read: (simulation: Simulation) => T): T | Failure => {
-    const simulation = state.simulations.find((item) => item.id === simulationId);
-    if(!simulation) return fail(SimulationErrors, 'NotFound');
-
-    return read(simulation);
-};
 
 const scriptOf = (state: FakeState, { id, entry }: Simulation) => {
     const files = scriptFiles(filesOf(state, id));

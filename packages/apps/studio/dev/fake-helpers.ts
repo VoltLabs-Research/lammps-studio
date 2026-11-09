@@ -1,5 +1,7 @@
 import { Run, RunSummary } from '@lammps-studio/contracts/run/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
+import { SimulationErrors } from '@lammps-studio/contracts/simulation/errors';
+import { fail, Failure } from './fake-router';
 import { FakeState, latestFrame, latestRecord } from './fake-state';
 
 const summaryOf = ({ number, state, startedAt, endedAt, progress, error }: Run): RunSummary => ({
@@ -19,6 +21,13 @@ export const withRun = (state: FakeState, simulation: Simulation): Simulation =>
         lastRun: record ? summaryOf(record.run) : null,
         hasPreview: latestFrame(state, simulation.id) !== null
     };
+};
+
+export const withSimulation = <T>(state: FakeState, simulationId: string, read: (simulation: Simulation) => T): T | Failure => {
+    const simulation = state.simulations.find((item) => item.id === simulationId);
+    if(!simulation) return fail(SimulationErrors, 'NotFound');
+
+    return read(simulation);
 };
 
 export const slugOf = (name: string, taken: string[]): string => {

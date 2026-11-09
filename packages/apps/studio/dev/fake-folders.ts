@@ -1,5 +1,6 @@
 import { FileEntry } from '@lammps-studio/contracts/file/domain';
 import { RunProgress } from '@lammps-studio/contracts/run/domain';
+import { ScriptFile } from '@lammps-studio/lammps/script/domain';
 import { RESTART_EVERY } from './cu/cu-model';
 import { CU_README, CU_SCRIPT } from './cu/cu-script';
 import { progressSeconds, tensionSeconds } from './fake-cu-history';
@@ -90,6 +91,12 @@ export const runFiles = ({ run, log, frames }: RunRecord): FakeFile[] => {
 
     return files;
 };
+
+export const scriptFiles = (files: FakeFile[]): ScriptFile[] => files.flatMap(({ path, text }) => {
+    if(text === null || isUnder(path, RUNS_DIR)) return [];
+
+    return [{ path, text }];
+});
 
 export const folderPath = (path: string): string | null => {
     if(path.startsWith(SEPARATOR)) return null;
