@@ -117,7 +117,12 @@ jobs:
           else
             export CSC_IDENTITY_AUTO_DISCOVERY=false
           fi
-          pnpm dist --publish never -c.extraMetadata.version="$VERSION"
+          for attempt in 1 2 3; do
+            pnpm dist --publish never -c.extraMetadata.version="$VERSION" && exit 0
+            echo "::warning::packaging failed on attempt $attempt of 3"
+            sleep 30
+          done
+          exit 1
         env:
           VERSION: ${{ needs.version.outputs.version }}
           MAC_CERTIFICATE: ${{ secrets.MAC_CERTIFICATE }}
