@@ -1,7 +1,9 @@
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { Command } from '@/modules/palette/contracts/command';
 import { useDashboardCommands } from '@/modules/palette/hooks/use-dashboard-commands';
+import { WORKSPACE_COMMANDS } from '@/modules/palette/utils/workspace-commands';
 import { useModal } from '@/shared/hooks/use-modal';
+import { useNavigationStore } from '@/shared/store/navigation';
 
 export interface PaletteState{
     query: string;
@@ -19,7 +21,9 @@ const MOVES: Record<string, number> = {
 
 export const usePalette = (): PaletteState => {
     const { close } = useModal();
-    const commands = useDashboardCommands();
+    const inWorkspace = useNavigationStore((state) => state.view === 'workspace');
+    const dashboard = useDashboardCommands();
+    const commands = inWorkspace ? [...WORKSPACE_COMMANDS, ...dashboard] : dashboard;
     const [query, setQuery] = useState('');
     const [selected, setSelected] = useState(0);
 
