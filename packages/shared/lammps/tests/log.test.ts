@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import meltLog from './fixtures/log.melt.lammps?raw';
 import meltStdout from './fixtures/melt.stdout?raw';
 import minimizeStdout from './fixtures/minimize-run.stdout?raw';
+import minimizeScript from './fixtures/minimize-run.in?raw';
 import overflowStdout from './fixtures/neighbor-overflow.stdout?raw';
 import LogReader from '../src/log/LogReader';
 import { parseLog } from '../src/log/parse-log';
+import { sectionProgress } from '../src/log/section-progress';
 import { META_PREFIX } from '../src/log/domain';
+import { analyseScript } from '../src/script/analyse-script';
 
 const RUN_ONE_COLUMNS = ['Step', 'Temp', 'E_pair', 'E_mol', 'TotEng', 'Press'];
 const RUN_TWO_COLUMNS = ['Step', 'Temp', 'PotEng', 'Press', 'v_msd'];
@@ -166,5 +169,35 @@ describe('LogReader', () => {
         const reader = new LogReader();
 
         expect(reader.read(`${META_PREFIX}run 3 on This computer · build 8ec0c210e389`).line.kind).toBe('meta');
+    });
+});
+
+describe('sectionProgress', () => {
+    const MELT_RUNS = [{ line: 19, steps: 250 }, { line: 24, steps: 100 }];
+
+    const readUpTo = (text: string, lines: number): LogReader => {
+        const reader = new LogReader();
+        text.split('\n').slice(0, lines).forEach((line) => reader.read(line));
+
+        return reader;
+    };
+
+    it('starts on the first planned run before any thermo section opens', () => {
+        expect(sectionProgress(new LogReader(), MELT_RUNS)).toEqual({ step: 0, totalSteps: 250, section: 1, sections: 2 });
+    });
+
+    it('counts the steps a run section has done since its first row, against that run of the script', () => {
+        expect(sectionProgress(readUpTo(meltStdout, 29), MELT_RUNS)).toEqual({ step: 100, totalSteps: 250, section: 1, sections: 2 });
+        expect(sectionProgress(readUpTo(meltStdout, 68), MELT_RUNS)).toEqual({ step: 50, totalSteps: 100, section: 2, sections: 2 });
+    });
+
+    it('takes the run after a minimization as the first section, leaving the minimizer out', () => {
+        const { runs } = analyseScript('main.in', [{ path: 'main.in', text: minimizeScript }]);
+
+        expect(sectionProgress(readUpTo(minimizeStdout, Infinity), runs)).toEqual({ step: 40, totalSteps: 40, section: 1, sections: 1 });
+    });
+
+    it('keeps counting the sections a loop runs past the ones the script lists, with no total for them', () => {
+        expect(sectionProgress(readUpTo(meltStdout, Infinity), [MELT_RUNS[0]])).toEqual({ step: 100, totalSteps: null, section: 2, sections: 2 });
     });
 });

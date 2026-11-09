@@ -1,6 +1,6 @@
 import type { LogLineKind, RunError, ThermoSection } from '@lammps-studio/contracts/run/domain';
 import { isNumeric, parseNumber, splitTokens } from '../shared/text';
-import { LogRead, META_PREFIX, SectionKind, ThermoRow } from './domain';
+import { LogRead, META_PREFIX, SectionKind, STEP_COLUMN, ThermoRow } from './domain';
 
 const BANNER = /^LAMMPS \(.+\)\s*$/;
 const MEMORY = /^\s*(?:Per MPI rank memory allocation|Memory usage per processor)/;
@@ -12,7 +12,6 @@ const RUN_COMMAND = /^\s*run\s+(\d+)(?:\s|$)/;
 const MINIMIZE_COMMAND = /^\s*minimize\s/;
 const SOURCE_LOCATION = /\s*\([^()]*\.(?:cpp|h)(?::\d+)?\)\s*$/;
 const MINIMIZE_SETUP = /^Setting up .*minimization/;
-const STEP_COLUMN = 'Step';
 
 type ReaderState = 'idle' | 'header' | 'rows';
 

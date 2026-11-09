@@ -2,6 +2,8 @@ import type { LogLine, RunError, ThermoSection } from '@lammps-studio/contracts/
 
 export const META_PREFIX = 'studio › ';
 
+export const STEP_COLUMN = 'Step';
+
 export type SectionKind = 'run' | 'minimize';
 
 export interface ThermoRow{
@@ -22,4 +24,11 @@ export interface ParsedLog{
     warnings: number;
     totalSteps: number | null;
     lastStep: number | null;
+}
+
+export interface SectionProgress{
+    step: number;
+    totalSteps: number | null;
+    section: number;
+    sections: number;
 }
