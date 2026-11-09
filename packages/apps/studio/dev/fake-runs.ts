@@ -1,4 +1,4 @@
-import { FrameInfo, LogLine, Run } from '@lammps-studio/contracts/run/domain';
+import { FrameInfo, LogLine, Run, RunConfig, RunProgress, RunState } from '@lammps-studio/contracts/run/domain';
 import { ThermoRow } from '@lammps-studio/lammps/log/domain';
 import LogReader from '@lammps-studio/lammps/log/LogReader';
 
@@ -16,11 +16,32 @@ export interface RunChange{
     frames: FrameInfo[];
 }
 
+export interface RunPlan{
+    simulationId: string;
+    number: number;
+    state: RunState;
+    config: RunConfig;
+    buildHash: string;
+    startedAt: string;
+    progress: RunProgress;
+}
+
 export interface RunBatch{
     lines: LogLine[];
     rows: ThermoRow[];
     frames: FrameInfo[];
 }
+
+export const RUNS_DIR = 'runs';
+
+export const plannedRun = (plan: RunPlan): Run => ({
+    ...plan,
+    endedAt: null,
+    error: null,
+    outputDir: `${RUNS_DIR}/run-${plan.number}`,
+    frames: 0,
+    warnings: 0
+});
 
 export const recordOf = (run: Run): RunRecord => ({
     run,

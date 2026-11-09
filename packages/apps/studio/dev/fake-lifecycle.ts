@@ -9,7 +9,10 @@ import { broadcast } from './fake-socket';
 import { FakeState, latestRecords } from './fake-state';
 
 const STARTING_MS = 1500;
-const STARTING_TICKS = ticksFor(STARTING_MS);
+const STOP_GRACE_MS = 2400;
+
+export const STARTING_TICKS = ticksFor(STARTING_MS);
+export const STOP_GRACE_TICKS = ticksFor(STOP_GRACE_MS);
 
 const countDown = (record: RunRecord): boolean => {
     record.wait = Math.max(0, record.wait - 1);

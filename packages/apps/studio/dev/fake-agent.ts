@@ -118,4 +118,5 @@ server.listen(PORT, HOST, () => {
     console.log(`${AGENT_READY_PREFIX}${JSON.stringify({ url: ORIGIN, token: TOKEN, version: VERSION })}`);
 });
 
-if(process.env.FAKE_AGENT_STILL !== '1') startTicker(state);
+state.live = process.env.FAKE_AGENT_STILL !== '1';
+startTicker(state);

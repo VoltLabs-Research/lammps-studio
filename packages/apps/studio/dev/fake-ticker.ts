@@ -3,6 +3,8 @@ import { tickBuild, tickRecord } from './fake-lifecycle';
 import { FakeState, latestRecords } from './fake-state';
 
 const tick = (state: FakeState) => {
+    if(!state.live) return;
+
     const now = Date.now();
     const at = new Date(now).toISOString();
     latestRecords(state).forEach((record) => tickRecord(state, record, at));

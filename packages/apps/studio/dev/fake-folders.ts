@@ -5,7 +5,7 @@ import { RESTART_EVERY } from './cu/cu-model';
 import { CU_README, CU_SCRIPT } from './cu/cu-script';
 import { progressSeconds, tensionSeconds } from './fake-cu-history';
 import { CU_SIMULATION_ID, TENSION } from './fake-cu-run';
-import { RunRecord } from './fake-runs';
+import { RunRecord, RUNS_DIR } from './fake-runs';
 import { WATER_DATA_HEADER, WATER_README, WATER_SCRIPT, WATER_SETUP, WATER_SIMULATION_ID } from './fake-water';
 
 export interface FakeFile{
@@ -31,8 +31,6 @@ const WATER_SCRIPT_EDITED_AGO = 163 * MINUTE_MS;
 const WATER_FOLDER_CREATED_AGO = 1098 * MINUTE_MS;
 const SEPARATOR = '/';
 const FOLDER = 'Folder';
-
-export const RUNS_DIR = 'runs';
 
 const textFile = (path: string, kind: string, modifiedAt: string, text: string): FakeFile => ({
     path,

@@ -15,6 +15,7 @@ export interface FakeState{
     builds: Build[];
     folders: Map<string, FakeFile[]>;
     removed: Map<string, string[]>;
+    live: boolean;
 }
 
 const CU_LIVE_STEP = 184000;
@@ -31,7 +32,8 @@ export const createState = (): FakeState => {
         runs,
         builds: BUILDS,
         folders: seededFolders(now),
-        removed: new Map()
+        removed: new Map(),
+        live: true
     };
 };
 

@@ -3,7 +3,7 @@ import { Run, RunConfig, RunProgress } from '@lammps-studio/contracts/run/domain
 import { TPS } from './cu/cu-model';
 import { configFor } from './fake-data';
 import { cancelCu, contextOf, CU_SIMULATION_ID, EQUILIBRATION, missingPackageCu, plannedCuProgress, replayCu, RunPosition, stopCu, TENSION } from './fake-cu-run';
-import { applyChange, recordOf, RunRecord } from './fake-runs';
+import { applyChange, plannedRun, recordOf, RunRecord } from './fake-runs';
 
 export const CU_OMP_BUILD = '3f9a0c21b7e4';
 export const CU_LIVE_RUN = 3;
@@ -31,19 +31,14 @@ export const tensionSeconds = (step: number): number => EQUILIBRATION_SECONDS + 
 
 export const progressSeconds = ({ section, step }: RunProgress): number => (section === EQUILIBRATION ? step / TPS : tensionSeconds(step));
 
-export const cuRun = (number: number, config: RunConfig, buildHash: string, startedAt: string): Run => ({
+export const cuRun = (number: number, config: RunConfig, buildHash: string, startedAt: string): Run => plannedRun({
     simulationId: CU_SIMULATION_ID,
     number,
     state: 'starting',
-    startedAt,
-    endedAt: null,
-    progress: plannedCuProgress(),
-    error: null,
     config,
     buildHash,
-    outputDir: `runs/run-${number}`,
-    frames: 0,
-    warnings: 0
+    startedAt,
+    progress: plannedCuProgress()
 });
 
 export const replayedCuRun = (machines: Machine[], startedAt: number, target: RunPosition, at: number): RunRecord => {
