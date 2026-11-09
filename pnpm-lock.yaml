@@ -113,9 +113,6 @@ importers:
       '@lammps-studio/runtime':
         specifier: workspace:*
         version: link:../../shared/runtime
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
       typia:
         specifier: ^12.1.1
         version: 12.2.1(@types/node@26.6.6)(typescript@6.0.3)
@@ -191,9 +188,6 @@ importers:
       oxlint:
         specifier: ^1.71.0
         version: 1.92.0
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
       typescript:
         specifier: ~6.0.2
         version: 6.0.3
@@ -2144,9 +2138,6 @@ packages:
 
   real-require@1.0.0:
     resolution: {integrity: sha512-P4nbQYQfePJxRSmY+v/KINxVucm4NF3p3s7pJveMTtom52FR4YGltUQLB8idDXwDDWW+eYrWDFbuzUnjoWHF7g==}
-
-  reflect-metadata@0.2.2:
-    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -4607,8 +4598,6 @@ snapshots:
   readdirp@4.1.2: {}
 
   real-require@1.0.0: {}
-
-  reflect-metadata@0.2.2: {}
 
   require-directory@2.1.1: {}
 

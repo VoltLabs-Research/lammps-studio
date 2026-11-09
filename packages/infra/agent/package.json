@@ -16,7 +16,6 @@
     "@lammps-studio/lammps": "workspace:*",
     "@lammps-studio/readable": "workspace:*",
     "@lammps-studio/runtime": "workspace:*",
-    "reflect-metadata": "^0.2.2",
     "typia": "^12.1.1"
   },
   "devDependencies": {
