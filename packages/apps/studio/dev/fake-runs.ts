@@ -7,6 +7,7 @@ export interface RunRecord{
     reader: LogReader;
     log: LogLine[];
     frames: FrameInfo[];
+    wait: number;
 }
 
 export interface RunChange{
@@ -25,7 +26,14 @@ export const recordOf = (run: Run): RunRecord => ({
     run,
     reader: new LogReader(),
     log: [],
-    frames: []
+    frames: [],
+    wait: 0
+});
+
+export const mergeChanges = (first: RunChange, second: RunChange): RunChange => ({
+    patch: { ...first.patch, ...second.patch },
+    lines: [...first.lines, ...second.lines],
+    frames: [...first.frames, ...second.frames]
 });
 
 export const applyChange = (record: RunRecord, { patch, lines, frames }: RunChange): RunBatch => {

@@ -37,6 +37,8 @@ export const createState = (): FakeState => {
 
 export const recordsOf = (state: FakeState, simulationId: string): RunRecord[] => state.runs.get(simulationId) ?? [];
 
+export const latestRecords = (state: FakeState): RunRecord[] => [...state.runs.values()].flatMap((records) => records.slice(-1));
+
 export const latestRecord = (state: FakeState, simulationId: string): RunRecord | null => recordsOf(state, simulationId).at(-1) ?? null;
 
 export const findRecord = (state: FakeState, simulationId: string, runNumber: string): RunRecord | null =>

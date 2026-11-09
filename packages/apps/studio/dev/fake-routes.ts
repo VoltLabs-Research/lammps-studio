@@ -1,4 +1,3 @@
-import { Build } from '@lammps-studio/contracts/build/domain';
 import { buildRoutes } from '@lammps-studio/contracts/build/routes';
 import { BuildErrors } from '@lammps-studio/contracts/build/errors';
 import { CreateBuildInput } from '@lammps-studio/contracts/build/http';
@@ -8,6 +7,7 @@ import { SimulationTemplate } from '@lammps-studio/contracts/simulation/domain';
 import { SimulationErrors } from '@lammps-studio/contracts/simulation/errors';
 import { CreateSimulationInput } from '@lammps-studio/contracts/simulation/http';
 import { simulationRoutes } from '@lammps-studio/contracts/simulation/routes';
+import { newBuild } from './fake-builds';
 import { FakeState } from './fake-state';
 import { randomHash, slugOf, withRun } from './fake-helpers';
 import { fail, Failure, route, Route } from './fake-router';
@@ -71,22 +71,15 @@ const createBuild = (state: FakeState, input: CreateBuildInput) => {
     if(!machine) return fail(MachineErrors, 'NotFound');
     if(machine.status === 'offline') return fail(MachineErrors, 'Offline');
 
-    const hash = randomHash();
-    const build: Build = {
-        hash,
-        machineId: machine.id,
+    const build = newBuild({
+        machine,
         version: input.version,
         packages: input.packages,
-        image: `lammps/lammps-runtime:${hash}`,
-        sizeBytes: null,
-        status: 'building',
+        hash: randomHash(),
+        createdAt: new Date().toISOString(),
         progress: 0,
-        steps: [],
-        output: null,
-        buildSeconds: null,
-        usedBy: 0,
-        createdAt: new Date().toISOString()
-    };
+        usedBy: 0
+    });
     state.builds = [...state.builds, build];
     broadcast({ type: 'build:updated', build });
 

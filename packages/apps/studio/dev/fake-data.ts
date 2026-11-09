@@ -2,10 +2,12 @@ import { Build } from '@lammps-studio/contracts/build/domain';
 import { Machine } from '@lammps-studio/contracts/machine/domain';
 import { Run, RunConfig } from '@lammps-studio/contracts/run/domain';
 import { Simulation } from '@lammps-studio/contracts/simulation/domain';
+import { buildAt } from './fake-builds';
 
 const SECOND = 1000;
 const HOUR = 3600 * SECOND;
 const DAY = 24 * HOUR;
+const SIO2_BUILD_PROGRESS = 0.41;
 
 const START = Date.now();
 const at = (offsetMs: number): string => new Date(START - offsetMs).toISOString();
@@ -173,21 +175,13 @@ export const BUILDS: Build[] = [
         usedBy: 2,
         createdAt: at(8 * DAY)
     }),
-    build({
+    buildAt(build({
         hash: 'c47b19d2e530',
         machineId: 'local',
         packages: ['KSPACE', 'MOLECULE', 'RIGID'],
         status: 'building',
-        progress: 0.41,
-        steps: [
-            { name: 'Pull the base image', state: 'done', detail: null },
-            { name: 'Configure with CMake', state: 'done', detail: null },
-            { name: 'Compile LAMMPS', state: 'active', detail: '412 of 1,006 files' },
-            { name: 'Link lmp', state: 'pending', detail: null }
-        ],
-        output: '[ 41%] Building CXX object CMakeFiles/lammps.dir/src/KSPACE/pppm.cpp.o',
         createdAt: at(4 * 60 * SECOND)
-    }),
+    }), SIO2_BUILD_PROGRESS),
     build({ hash: '1e0f7a3c9d82', machineId: 'gpu', packages: ['MANYBODY', 'KOKKOS', 'GPU'], sizeBytes: 3.1e9, buildSeconds: 1120, createdAt: at(15 * DAY) }),
     build({ hash: '5b6e2d81f0c4', machineId: 'local', packages: [], sizeBytes: 1.1e9, buildSeconds: 312, createdAt: at(30 * HOUR) })
 ];
