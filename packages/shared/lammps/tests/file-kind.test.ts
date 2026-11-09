@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fileKindOf } from '../src/files/file-kind';
+import { fileKindOf, isLammpsOutput } from '../src/files/file-kind';
 
 describe('fileKindOf', () => {
     it.each([
@@ -19,5 +19,19 @@ describe('fileKindOf', () => {
         ['notes.txt', 'Document']
     ])('names %s a %s', (name, kind) => {
         expect(fileKindOf(name)).toBe(kind);
+    });
+});
+
+describe('isLammpsOutput', () => {
+    it.each([
+        ['log.lammps', true],
+        ['wire.lammpstrj', true],
+        ['restart.50000.cu', true],
+        ['setup.lammps', false],
+        ['main.in', false],
+        ['final.data', false],
+        ['Cu01.eam.alloy', false]
+    ])('takes %s for output LAMMPS writes: %s', (name, output) => {
+        expect(isLammpsOutput(name)).toBe(output);
     });
 });
